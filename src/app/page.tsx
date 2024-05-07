@@ -1,3 +1,9 @@
+import BusinessHealthSummary from '~/components/BusinessHealthSummary';
+
 export default function Home() {
-  return <main></main>;
+  return (
+    <main>
+      <BusinessHealthSummary />
+    </main>
+  );
 }
