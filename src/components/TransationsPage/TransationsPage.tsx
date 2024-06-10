@@ -28,7 +28,7 @@ function TransationsPage({ type, transations }: TransactionPageProps) {
       <Actions>
         <h3>Transactions</h3>
 
-        <AddTransaction href="/add-transaction/expense">
+        <AddTransaction href={`/add-transaction/${type}`}>
           <AddIconWrapper>
             <AddIcon />
           </AddIconWrapper>{' '}
@@ -108,6 +108,8 @@ const AddTransaction = styled(Link)`
   padding-top: 0px;
 `;
 
-const Wrapper = styled(MaxWidthWrapper)``;
+const Wrapper = styled(MaxWidthWrapper)`
+  padding-bottom: 16px;
+`;
 
 export default TransationsPage;
