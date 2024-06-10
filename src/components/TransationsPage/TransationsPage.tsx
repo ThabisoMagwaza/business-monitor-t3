@@ -75,6 +75,7 @@ const TransactionsWrapper = styled.div``;
 const TransactionsHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-bottom: 10px;
 `;
 
 const Heading = styled.div`
@@ -89,6 +90,8 @@ const Actions = styled.div`
   justify-content: space-between;
   display: flex;
   align-items: center;
+  margin-bottom: 28px;
+  margin-top: 28px;
 `;
 
 const AddTransaction = styled(Link)`
