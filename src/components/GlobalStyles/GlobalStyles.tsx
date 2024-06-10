@@ -29,7 +29,8 @@ const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    --color-gray-86: hsl(0deg,0%,86%);
+    --color-gray-86: hsl(0deg, 0%, 86%);
+    --color-gray-36: hsl(0deg, 0%, 36%);
     --color-green-49: hsl(115deg, 38%, 49%);
     --color-red-47: hsl(0deg, 50%, 47%);
   }
