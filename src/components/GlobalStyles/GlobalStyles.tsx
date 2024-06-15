@@ -16,6 +16,9 @@ const GlobalStyles = createGlobalStyle`
   body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+
+    display: flex;
+    flex-direction: column;
   }
   img, picture, video, canvas, svg {
     display: block;
@@ -26,6 +29,11 @@ const GlobalStyles = createGlobalStyle`
   }
   p, h1, h2, h3, h4, h5, h6 {
     overflow-wrap: break-word;
+  }
+
+  body,
+  html {
+    height: 100%;
   }
 
   html {
