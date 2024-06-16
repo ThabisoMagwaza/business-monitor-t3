@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     connectionString: env.POSTGRES_URL,
   },
-  tablesFilter: ['business-monitor-t3_*'],
+  tablesFilter: ['business-monitor_*'],
 } satisfies Config;

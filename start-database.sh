@@ -9,7 +9,7 @@
 
 # On Linux and macOS you can run this script directly - `./start-database.sh`
 
-DB_CONTAINER_NAME="business-monitor-t3-postgres"
+DB_CONTAINER_NAME="business-monitor-postgres"
 
 if ! [ -x "$(command -v docker)" ]; then
   echo -e "Docker is not installed. Please install docker and try again.\nDocker install guide: https://docs.docker.com/engine/install/"
@@ -48,6 +48,6 @@ fi
 docker run -d \
   --name $DB_CONTAINER_NAME \
   -e POSTGRES_PASSWORD="$DB_PASSWORD" \
-  -e POSTGRES_DB=business-monitor-t3 \
+  -e POSTGRES_DB=business-monitor \
   -p 5432:5432 \
   docker.io/postgres && echo "Database container '$DB_CONTAINER_NAME' was successfully created"
