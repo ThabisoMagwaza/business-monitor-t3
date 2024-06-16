@@ -10,24 +10,39 @@ import LossIcon from '../LossIcon';
 import IncomeIcon from '../IncomeIcon';
 import ExpensesIcon from '../ExpensesIcon';
 import Stack from '../Stack';
+import { formatCurrencyAmount } from '~/lib/helpers';
 
-function BusinessHealthSummary() {
+type BusinessHealthSummaryProps = {
+  name: string;
+  profit: number;
+  loss: number;
+  totalIncome: number;
+  totalExpenses: number;
+};
+
+function BusinessHealthSummary({
+  name,
+  profit,
+  loss,
+  totalExpenses,
+  totalIncome,
+}: BusinessHealthSummaryProps) {
   return (
     <Wrapper as="section">
       <BusinessName>
-        <Heading1>Nambitha 2.0</Heading1>
+        <Heading1>{name}</Heading1>
       </BusinessName>
 
       <OverviewSection>
         <AmountCard
           title="Profit"
-          amount="R 0.00"
+          amount={`R ${formatCurrencyAmount(profit)}`}
           variant="success"
           icon={<ProfitIcon />}
         />
         <AmountCard
           title="Loss"
-          amount="R 376.33"
+          amount={`R ${formatCurrencyAmount(loss)}`}
           variant="danger"
           icon={<LossIcon />}
         />
@@ -39,7 +54,7 @@ function BusinessHealthSummary() {
         <Stack>
           <AmountCard
             title="Income"
-            amount="R 5,389.74"
+            amount={`R ${formatCurrencyAmount(totalIncome)}`}
             variant="default"
             icon={<IncomeIcon />}
             link="/income"
@@ -47,7 +62,7 @@ function BusinessHealthSummary() {
 
           <AmountCard
             title="Expenses"
-            amount="R 5,103.22"
+            amount={`R ${formatCurrencyAmount(totalExpenses)}`}
             variant="default"
             icon={<ExpensesIcon />}
             link="/expenses"
