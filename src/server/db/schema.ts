@@ -8,6 +8,9 @@ import {
   serial,
   timestamp,
   varchar,
+  numeric,
+  pgEnum,
+  date,
 } from 'drizzle-orm/pg-core';
 
 /**
@@ -18,17 +21,15 @@ import {
  */
 export const createTable = pgTableCreator((name) => `business-monitor_${name}`);
 
-export const posts = createTable(
-  'post',
-  {
-    id: serial('id').primaryKey(),
-    name: varchar('name', { length: 256 }),
-    createdAt: timestamp('created_at')
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp('updatedAt'),
-  },
-  (example) => ({
-    nameIndex: index('name_idx').on(example.name),
-  })
-);
+export const transactionTypeEnum = pgEnum('type', ['income', 'expense']);
+
+export const transactions = createTable('transactions', {
+  id: serial('id').primaryKey(),
+  description: varchar('description', { length: 256 }).notNull(),
+  amount: numeric('amount').notNull(),
+  type: transactionTypeEnum('type').notNull(),
+  date: date('date').notNull(),
+  createdAt: timestamp('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});

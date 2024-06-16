@@ -46,8 +46,12 @@ function TransationsPage({ type, transations }: TransactionPageProps) {
           {transations.map((transaction) => (
             <Transaction key={transaction.id}>
               <p>{transaction.description}</p>
-              <p>{transaction.amount}</p>
-              <p>{transaction.date}</p>
+              <p>R{transaction.amount}</p>
+              <p>
+                {new Intl.DateTimeFormat('en-ZA', { dateStyle: 'long' }).format(
+                  new Date(transaction.date)
+                )}
+              </p>
             </Transaction>
           ))}
         </TransactionListWrapper>
