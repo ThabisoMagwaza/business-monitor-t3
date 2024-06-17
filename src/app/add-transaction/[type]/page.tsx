@@ -2,6 +2,7 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { addTransactions } from '~/app/actions';
 import { COLORS } from '~/lib/Colors';
 
 import AddIcon from '~/components/AddIcon';
@@ -10,10 +11,10 @@ import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 
 type AddTransactionParams = {
-  type: 'expense' | 'income';
+  type: 'expenses' | 'income';
 };
 
-type NewTransaction = {
+export type NewTransaction = {
   id: string;
   description: string;
   date: string;
@@ -39,6 +40,8 @@ export default function Page({
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
   >([]);
+
+  const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
 
   const onChangeValue = (
     transactionId: string,
@@ -78,7 +81,7 @@ export default function Page({
         </Heading>
 
         <Actions>
-          <AddTransaction
+          <ActionButton
             onClick={() =>
               setNewTransactions([
                 ...newTransactions,
@@ -90,10 +93,10 @@ export default function Page({
               <AddIcon />
             </AddIconWrapper>
             Add Transaction
-          </AddTransaction>
+          </ActionButton>
         </Actions>
 
-        <TransactionsList>
+        <TransactionsListForm action={saveNewTransactions}>
           {newTransactions.length === 0 && (
             <NoTransactions>No Transactions Added</NoTransactions>
           )}
@@ -131,7 +134,7 @@ export default function Page({
                   } as React.CSSProperties
                 }
               >
-                {(type === 'expense' && 'Expense') || 'Income'}
+                {(type === 'expenses' && 'Expense') || 'Income'}
               </NewExpenseType>
               <IconButton onClick={() => onDeleteTransaction(transaction.id)}>
                 <IconWrapper>
@@ -140,14 +143,25 @@ export default function Page({
               </IconButton>
             </NewTransaction>
           ))}
-        </TransactionsList>
+
+          {newTransactions.length > 0 && (
+            <SaveButtonWrapper>
+              <ActionButton>Save</ActionButton>
+            </SaveButtonWrapper>
+          )}
+        </TransactionsListForm>
       </Wrapper>
     </OuterWrapper>
   );
 }
 
+const SaveButtonWrapper = styled.div`
+  margin-top: 16px;
+  align-self: flex-end;
+`;
+
 const NewAmount = styled.input`
-  width: 80px;
+  width: 60px;
   border: none;
 `;
 
@@ -222,7 +236,7 @@ const OuterWrapper = styled.main`
   flex: 1;
 `;
 
-const TransactionsList = styled.div`
+const TransactionsListForm = styled.form`
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -244,7 +258,7 @@ const Actions = styled.div`
   margin-top: 28px;
 `;
 
-const AddTransaction = styled.button`
+const ActionButton = styled.button`
   border: none;
   background: none;
   display: flex;
@@ -255,8 +269,7 @@ const AddTransaction = styled.button`
   border-bottom: 1px solid;
   border-radius: 16px;
   padding-inline: 16px;
-  padding-bottom: 8px;
-  padding-top: 0px;
+  padding-block: 8px;
 `;
 
 const AddIconWrapper = styled.div`
