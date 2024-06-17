@@ -7,7 +7,8 @@
 - [x] Tidy up build process
 - [x] Actually set up database (w/ vercel postgres)
 - [x] Attach database to the UI
-- [ ] Add Authentication (clerk)
+- [x] Add Authentication (clerk)
+- [ ] Add onboarding flow
 - [ ] Add Transaction Upload
 - [ ] Error management (w/ Sentry)
 - [ ] Routing and Dashboard Page

@@ -3,7 +3,6 @@
 
 import { sql } from 'drizzle-orm';
 import {
-  index,
   pgTableCreator,
   serial,
   timestamp,
@@ -11,6 +10,8 @@ import {
   numeric,
   pgEnum,
   date,
+  integer,
+  boolean,
 } from 'drizzle-orm/pg-core';
 
 /**
@@ -32,4 +33,19 @@ export const transactions = createTable('transactions', {
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+  businessId: integer('business_id').references(() => businesses.id),
+});
+
+export const businesses = createTable('businesses', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 256 }).notNull(),
+});
+
+export const users = createTable('users', {
+  id: varchar('id', { length: 256 }).notNull().primaryKey(),
+  name: varchar('name', { length: 256 }).notNull(),
+  isAdmin: boolean('is_admin').default(false),
+  businessId: integer('business_id')
+    .notNull()
+    .references(() => businesses.id),
 });

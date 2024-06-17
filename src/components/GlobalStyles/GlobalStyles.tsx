@@ -32,7 +32,8 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body,
-  html {
+  html,
+  main {
     height: 100%;
   }
 

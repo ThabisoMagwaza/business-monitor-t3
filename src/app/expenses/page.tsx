@@ -3,13 +3,19 @@ import { db } from '~/server/db';
 
 import TransationsPage from '~/components/TransationsPage';
 import { transactions } from '~/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { getBusinessId } from '../db-helpers';
+
+import { sql } from 'drizzle-orm';
 
 async function Page() {
+  const businessId = await getBusinessId();
+
   const expenses = await db
     .select()
     .from(transactions)
-    .where(eq(transactions.type, 'expense'));
+    .where(
+      sql`${transactions.type} = 'expense' AND ${transactions.businessId} = ${businessId}`
+    );
 
   return (
     <main>

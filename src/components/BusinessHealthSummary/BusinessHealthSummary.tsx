@@ -94,6 +94,7 @@ const BusinessName = styled.div`
 
 const Wrapper = styled(MaxWidthWrapper)`
   margin-bottom: 24px;
+  padding-bottom: 16px;
 `;
 
 export default BusinessHealthSummary;
