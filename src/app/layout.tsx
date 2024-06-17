@@ -1,8 +1,16 @@
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import StyledComponentsRegistry from '~/lib/registry';
 
 import GlobalStyles from '~/components/GlobalStyles';
 import Header from '~/components/Header';
+import SignedOutPage from '~/components/SignedOutPage';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,14 +28,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <StyledComponentsRegistry>
-          <Header />
-          {children}
-        </StyledComponentsRegistry>
-        <GlobalStyles />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={inter.className}>
+          <StyledComponentsRegistry>
+            <Header />
+            <SignedOut>
+              <SignedOutPage />
+            </SignedOut>
+            <SignedIn>{children}</SignedIn>
+          </StyledComponentsRegistry>
+          <GlobalStyles />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
