@@ -78,6 +78,7 @@ export default function Page({
   const [state, formAction] = useFormState(parseImage, initialState);
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const [showImageUploader, setShowImageUploader] = React.useState(false);
 
   React.useEffect(() => {
     if (!state.message) {
@@ -90,7 +91,7 @@ export default function Page({
       imageTransactionNewToTransaction(transaction)
     );
 
-    setNewTransactions((prev) => [...prev, ...imageTransactions]);
+    setNewTransactions((prev) => [...imageTransactions, ...prev]);
   }, [state]);
 
   const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
@@ -167,7 +168,7 @@ export default function Page({
             </AddTransactionButton>
             <MenuItems>
               <MenuItem>
-                <button onClick={() => console.log('from image')}>
+                <button onClick={() => setShowImageUploader(true)}>
                   From Image
                 </button>
               </MenuItem>
@@ -175,8 +176,8 @@ export default function Page({
                 <button
                   onClick={() =>
                     setNewTransactions([
-                      ...newTransactions,
                       createDefaultTransaction(),
+                      ...newTransactions,
                     ])
                   }
                 >
@@ -187,40 +188,40 @@ export default function Page({
           </Menu>
         </Actions>
 
-        <form action={formAction}>
-          <label htmlFor="image">Upload Image</label>
-          <input
-            id="image"
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            name="slip"
-          />
-          <button>Submit</button>
-        </form>
+        {showImageUploader && (
+          <>
+            <form action={formAction}>
+              <ImageUploaderLabelWrapper>
+                <label htmlFor="image">Upload Image</label>
+                <IconButton onClick={() => setShowImageUploader(false)}>
+                  <IconWrapper>
+                    <CancelIcon />
+                  </IconWrapper>
+                </IconButton>
+              </ImageUploaderLabelWrapper>
+              <input
+                id="image"
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                name="slip"
+              />
+              <button>Submit</button>
+            </form>
 
-        <div>
-          {previewSrc && (
-            <PreviewImage
-              src={previewSrc}
-              alt="Preview Image of slip"
-              width={400}
-              height={400}
-            />
-          )}
-        </div>
-
-        {/* <div>
-          <h2>What you bought</h2>
-          {Array.isArray(items) &&
-            items.map(({ name, price }, index) => (
-              <Item key={index}>
-                <span>{name}</span>
-                <span>R{price}</span>
-              </Item>
-            ))}
-        </div> */}
+            <div>
+              {previewSrc && (
+                <PreviewImage
+                  src={previewSrc}
+                  alt="Preview Image of slip"
+                  width={400}
+                  height={400}
+                />
+              )}
+            </div>
+          </>
+        )}
 
         <TransactionsListForm action={saveNewTransactions}>
           {newTransactions.length === 0 && (
@@ -281,7 +282,7 @@ export default function Page({
   );
 }
 
-const Item = styled.div`
+const ImageUploaderLabelWrapper = styled.label`
   display: flex;
   justify-content: space-between;
 `;
