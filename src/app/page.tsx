@@ -1,7 +1,7 @@
 import { eq, sum } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { transactions } from '~/server/db/schema';
-import { getBusinessId } from './db-helpers';
+import { getBusinessId, getBusinessInfo } from './db-helpers';
 
 import BusinessHealthSummary from '~/components/BusinessHealthSummary';
 import NotRegistredUser from '~/components/NotRegistredUser';
@@ -14,6 +14,7 @@ export default async function Home() {
   let totalIncome = null;
   let profit = null;
   let loss = null;
+  let businessInfo = null;
 
   if (businessId) {
     summary = await db
@@ -33,6 +34,8 @@ export default async function Home() {
     profit = (totalIncome > totalExpenses && totalIncome - totalExpenses) || 0;
 
     loss = (totalExpenses > totalIncome && totalExpenses - totalIncome) || 0;
+
+    businessInfo = await getBusinessInfo(businessId);
   }
 
   return (
@@ -44,7 +47,7 @@ export default async function Home() {
         totalIncome !== null &&
         totalExpenses !== null && (
           <BusinessHealthSummary
-            name="Nambitha 2.0"
+            name={businessInfo?.businessName ?? 'No Business Name'}
             profit={profit}
             loss={loss}
             totalIncome={totalIncome}
