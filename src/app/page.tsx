@@ -26,10 +26,11 @@ export default async function Home() {
       .where(eq(transactions.businessId, businessId))
       .groupBy(transactions.type);
 
-    totalExpenses = Number(
-      summary.find((val) => val.type === 'expense')?.total
-    );
-    totalIncome = Number(summary.find((val) => val.type === 'income')?.total);
+    totalExpenses =
+      Number(summary.find((val) => val.type === 'expense')?.total) || 0;
+
+    totalIncome =
+      Number(summary.find((val) => val.type === 'income')?.total) || 0;
 
     profit = (totalIncome > totalExpenses && totalIncome - totalExpenses) || 0;
 
