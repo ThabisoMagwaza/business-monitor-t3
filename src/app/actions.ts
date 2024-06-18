@@ -30,6 +30,7 @@ export async function addTransactions(
 
   await db.insert(transactions).values(newTransactions);
   revalidatePath(`/${type}`);
+  revalidatePath(`/`);
   redirect('/');
 }
 
