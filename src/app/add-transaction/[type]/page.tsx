@@ -1,5 +1,7 @@
 'use client';
 import * as React from 'react';
+import { useFormState } from 'react-dom';
+
 import styled from 'styled-components';
 
 import {
@@ -7,16 +9,16 @@ import {
   MenuButton,
   MenuItem,
   MenuItems as ReachMenuItems,
-  Transition,
 } from '@headlessui/react';
 
-import { addTransactions } from '~/app/actions';
+import { addTransactions, parseImage } from '~/app/actions';
 import { COLORS } from '~/lib/Colors';
 
 import AddIcon from '~/components/AddIcon';
 import CancelIcon from '~/components/CancelIcon';
 import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
+import Image from 'next/image';
 
 type AddTransactionParams = {
   type: 'expenses' | 'income';
@@ -27,6 +29,11 @@ export type NewTransaction = {
   description: string;
   date: string;
   amount: string;
+};
+
+type ImageTransaction = {
+  name: string;
+  price: number;
 };
 
 function createDefaultTransaction(): NewTransaction {
@@ -40,6 +47,25 @@ function createDefaultTransaction(): NewTransaction {
   };
 }
 
+function imageTransactionNewToTransaction(
+  imageTransaction: ImageTransaction
+): NewTransaction {
+  console.log({ imageTransaction });
+
+  return {
+    id: crypto.randomUUID(),
+    description: imageTransaction.name,
+    date: new Intl.DateTimeFormat('en-ZA')
+      .format(new Date())
+      .replaceAll('/', '-'),
+    amount: String(imageTransaction.price),
+  };
+}
+
+const initialState = {
+  message: null,
+};
+
 export default function Page({
   params: { type },
 }: {
@@ -48,6 +74,24 @@ export default function Page({
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
   >([]);
+
+  const [state, formAction] = useFormState(parseImage, initialState);
+  const [previewSrc, setPreviewSrc] = React.useState('');
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  React.useEffect(() => {
+    if (!state.message) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const result = state.message?.items as ImageTransaction[];
+    const imageTransactions = result.map((transaction) =>
+      imageTransactionNewToTransaction(transaction)
+    );
+
+    setNewTransactions((prev) => [...prev, ...imageTransactions]);
+  }, [state]);
 
   const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
 
@@ -77,6 +121,31 @@ export default function Page({
     );
 
     setNewTransactions(transactions);
+  };
+
+  const handleImageUpload = () => {
+    const files = inputRef.current?.files;
+
+    if (!files) {
+      return;
+    }
+
+    const file = files[0]!;
+
+    const reader = new FileReader();
+
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const src = event.target?.result;
+
+      if (!src) {
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      setPreviewSrc(src.toString());
+    };
+
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -117,6 +186,41 @@ export default function Page({
             </MenuItems>
           </Menu>
         </Actions>
+
+        <form action={formAction}>
+          <label htmlFor="image">Upload Image</label>
+          <input
+            id="image"
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            name="slip"
+          />
+          <button>Submit</button>
+        </form>
+
+        <div>
+          {previewSrc && (
+            <PreviewImage
+              src={previewSrc}
+              alt="Preview Image of slip"
+              width={400}
+              height={400}
+            />
+          )}
+        </div>
+
+        {/* <div>
+          <h2>What you bought</h2>
+          {Array.isArray(items) &&
+            items.map(({ name, price }, index) => (
+              <Item key={index}>
+                <span>{name}</span>
+                <span>R{price}</span>
+              </Item>
+            ))}
+        </div> */}
 
         <TransactionsListForm action={saveNewTransactions}>
           {newTransactions.length === 0 && (
@@ -176,6 +280,15 @@ export default function Page({
     </OuterWrapper>
   );
 }
+
+const Item = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const PreviewImage = styled(Image)`
+  height: auto;
+`;
 
 const MenuItems = styled(ReachMenuItems)`
   position: absolute;
