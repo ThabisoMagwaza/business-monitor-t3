@@ -2,6 +2,14 @@
 import * as React from 'react';
 import styled from 'styled-components';
 
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems as ReachMenuItems,
+  Transition,
+} from '@headlessui/react';
+
 import { addTransactions } from '~/app/actions';
 import { COLORS } from '~/lib/Colors';
 
@@ -81,19 +89,33 @@ export default function Page({
         </Heading>
 
         <Actions>
-          <ActionButton
-            onClick={() =>
-              setNewTransactions([
-                ...newTransactions,
-                createDefaultTransaction(),
-              ])
-            }
-          >
-            <AddIconWrapper>
-              <AddIcon />
-            </AddIconWrapper>
-            Add Transaction
-          </ActionButton>
+          <Menu>
+            <AddTransactionButton>
+              <AddIconWrapper>
+                <AddIcon />
+              </AddIconWrapper>
+              Add Transaction
+            </AddTransactionButton>
+            <MenuItems>
+              <MenuItem>
+                <button onClick={() => console.log('from image')}>
+                  From Image
+                </button>
+              </MenuItem>
+              <MenuItem>
+                <button
+                  onClick={() =>
+                    setNewTransactions([
+                      ...newTransactions,
+                      createDefaultTransaction(),
+                    ])
+                  }
+                >
+                  Manual Entry
+                </button>
+              </MenuItem>
+            </MenuItems>
+          </Menu>
         </Actions>
 
         <TransactionsListForm action={saveNewTransactions}>
@@ -154,6 +176,16 @@ export default function Page({
     </OuterWrapper>
   );
 }
+
+const MenuItems = styled(ReachMenuItems)`
+  position: absolute;
+  bottom: 0;
+  right: 24px;
+
+  display: flex;
+  flex-direction: column;
+  transform: translateY(75%);
+`;
 
 const SaveButtonWrapper = styled.div`
   margin-top: 16px;
@@ -256,9 +288,25 @@ const Actions = styled.div`
   justify-content: center;
   margin-bottom: 28px;
   margin-top: 28px;
+
+  position: relative;
 `;
 
 const ActionButton = styled.button`
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: black;
+
+  border-bottom: 1px solid;
+  border-radius: 16px;
+  padding-inline: 16px;
+  padding-block: 8px;
+`;
+
+const AddTransactionButton = styled(MenuButton)`
   border: none;
   background: none;
   display: flex;
