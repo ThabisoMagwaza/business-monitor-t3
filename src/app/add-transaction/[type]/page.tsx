@@ -20,6 +20,8 @@ import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
 
+export const maxDuration = 60;
+
 type AddTransactionParams = {
   type: 'expenses' | 'income';
 };
