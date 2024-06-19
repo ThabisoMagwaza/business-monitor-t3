@@ -77,6 +77,17 @@ function SubmitButton({ children }: { children: React.ReactNode }) {
   );
 }
 
+function SaveButton({ children }: { children: React.ReactNode }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <SaveButtonWrapper>
+      {pending && <span>Saving Transactions...</span>}
+      <ActionButton disabled={pending}>{children}</ActionButton>
+    </SaveButtonWrapper>
+  );
+}
+
 export default function Page({
   params: { type },
 }: {
@@ -278,11 +289,7 @@ export default function Page({
             </NewTransaction>
           ))}
 
-          {newTransactions.length > 0 && (
-            <SaveButtonWrapper>
-              <ActionButton>Save</ActionButton>
-            </SaveButtonWrapper>
-          )}
+          {newTransactions.length > 0 && <SaveButton>Save</SaveButton>}
         </TransactionsListForm>
       </Wrapper>
     </OuterWrapper>
@@ -307,6 +314,10 @@ const MenuItems = styled(ReachMenuItems)`
 const SaveButtonWrapper = styled.div`
   margin-top: 16px;
   align-self: flex-end;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const NewAmount = styled.input`
@@ -421,6 +432,10 @@ const ActionButton = styled.button`
   border-radius: 16px;
   padding-inline: 16px;
   padding-block: 8px;
+
+  &:disabled {
+    opacity: 0.5;
+  }
 `;
 
 const AddTransactionButton = styled(MenuButton)`
