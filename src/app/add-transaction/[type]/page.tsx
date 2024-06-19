@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useFormState } from 'react-dom';
+import { useFormState, useFormStatus } from 'react-dom';
 
 import styled from 'styled-components';
 
@@ -18,7 +18,7 @@ import AddIcon from '~/components/AddIcon';
 import CancelIcon from '~/components/CancelIcon';
 import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
-import Image from 'next/image';
+import PreviewImage from '~/components/PreviewImage';
 
 type AddTransactionParams = {
   type: 'expenses' | 'income';
@@ -50,8 +50,6 @@ function createDefaultTransaction(): NewTransaction {
 function imageTransactionNewToTransaction(
   imageTransaction: ImageTransaction
 ): NewTransaction {
-  console.log({ imageTransaction });
-
   return {
     id: crypto.randomUUID(),
     description: imageTransaction.name,
@@ -65,6 +63,17 @@ function imageTransactionNewToTransaction(
 const initialState = {
   message: null,
 };
+
+function SubmitButton({ children }: { children: React.ReactNode }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <button disabled={pending}>{children}</button>{' '}
+      {pending && <span>Reading image...</span>}
+    </>
+  );
+}
 
 export default function Page({
   params: { type },
@@ -87,6 +96,7 @@ export default function Page({
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const result = state.message?.items as ImageTransaction[];
+
     const imageTransactions = result.map((transaction) =>
       imageTransactionNewToTransaction(transaction)
     );
@@ -207,19 +217,14 @@ export default function Page({
                 onChange={handleImageUpload}
                 name="slip"
               />
-              <button>Submit</button>
-            </form>
+              <SubmitButton>Submit</SubmitButton>
 
-            <div>
-              {previewSrc && (
-                <PreviewImage
-                  src={previewSrc}
-                  alt="Preview Image of slip"
-                  width={400}
-                  height={400}
-                />
-              )}
-            </div>
+              <div>
+                {previewSrc && (
+                  <PreviewImage src={previewSrc} alt="Preview Image of slip" />
+                )}
+              </div>
+            </form>
           </>
         )}
 
@@ -285,10 +290,6 @@ export default function Page({
 const ImageUploaderLabelWrapper = styled.label`
   display: flex;
   justify-content: space-between;
-`;
-
-const PreviewImage = styled(Image)`
-  height: auto;
 `;
 
 const MenuItems = styled(ReachMenuItems)`
