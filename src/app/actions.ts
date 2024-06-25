@@ -1,11 +1,12 @@
 'use server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { transactions, businesses, users } from '~/server/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
 import { revalidatePath } from 'next/cache';
-import { getBusinessId } from './db-helpers';
+import { getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
 import type { NewTransaction } from './add-transaction/[type]/page';
@@ -16,7 +17,11 @@ export async function addTransactions(
   incomingTransactios: NewTransaction[],
   type: 'expenses' | 'income'
 ) {
-  const businessId = await getBusinessId();
+  const user = await getUserInfo();
+
+  if (!user?.businessId) {
+    return;
+  }
 
   const newTransactions: Transaction[] = incomingTransactios.map(
     ({ description, amount, date }) => ({
@@ -24,7 +29,7 @@ export async function addTransactions(
       amount: amount,
       date: new Date(date).toISOString(),
       type: (type === 'expenses' && 'expense') || 'income',
-      businessId,
+      businessId: user.businessId,
     })
   );
 
@@ -72,8 +77,6 @@ export async function addBusiness(data: FormData) {
 
   redirect('/');
 }
-
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const ApiKey = process.env.GEMINI_API_KEY!;
 

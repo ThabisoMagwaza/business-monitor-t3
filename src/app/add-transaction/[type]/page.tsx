@@ -20,6 +20,8 @@ import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
 
+// The AI takes time to respond
+// Extend the timeout for the form action from 10s to 60s
 export const maxDuration = 60;
 
 type AddTransactionParams = {

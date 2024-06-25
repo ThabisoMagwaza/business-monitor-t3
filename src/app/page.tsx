@@ -1,13 +1,13 @@
 import { eq, sum } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { transactions } from '~/server/db/schema';
-import { getBusinessId, getBusinessInfo } from './db-helpers';
+import { getUserInfo, getBusinessInfo } from './db-helpers';
 
 import BusinessHealthSummary from '~/components/BusinessHealthSummary';
 import NotRegistredUser from '~/components/NotRegistredUser';
 
 export default async function Home() {
-  const businessId = await getBusinessId();
+  const user = await getUserInfo();
 
   let summary = null;
   let totalExpenses = null;
@@ -16,14 +16,14 @@ export default async function Home() {
   let loss = null;
   let businessInfo = null;
 
-  if (businessId) {
+  if (user?.businessId) {
     summary = await db
       .select({
         type: transactions.type,
         total: sum(transactions.amount),
       })
       .from(transactions)
-      .where(eq(transactions.businessId, businessId))
+      .where(eq(transactions.businessId, user.businessId))
       .groupBy(transactions.type);
 
     totalExpenses =
@@ -36,12 +36,12 @@ export default async function Home() {
 
     loss = (totalExpenses > totalIncome && totalExpenses - totalIncome) || 0;
 
-    businessInfo = await getBusinessInfo(businessId);
+    businessInfo = await getBusinessInfo(user.businessId);
   }
 
   return (
     <main>
-      {!businessId && <NotRegistredUser />}
+      {!user?.businessId && <NotRegistredUser />}
 
       {profit !== null &&
         loss !== null &&

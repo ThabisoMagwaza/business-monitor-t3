@@ -8,10 +8,13 @@ function NotRegistredUser() {
   return (
     <Wrapper>
       <InnerWrapper>
-        <p>You have not been registred as a user for a business</p>
+        <p>
+          You have not been registred as a user for a business. Please register
+          a new business or request your business mananger to add you to their
+          business.
+        </p>
         <LinksWrapper>
           <Link href="/register-business">Register business</Link>
-          {/* <Link href="/add-user">Add a user</Link> */}
         </LinksWrapper>
       </InnerWrapper>
     </Wrapper>

@@ -3,7 +3,9 @@ import { db } from '~/server/db';
 import { users, businesses } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function getBusinessId() {
+type User = typeof users.$inferSelect;
+
+export async function getUserInfo(): Promise<User | undefined> {
   const { userId } = auth();
 
   const result = await db.select().from(users).where(eq(users.id, userId!));
@@ -15,12 +17,7 @@ export async function getBusinessId() {
 
   const user = result[0];
 
-  if (!user?.businessId) {
-    console.error('User is not part of a business');
-    return;
-  }
-
-  return user.businessId;
+  return user;
 }
 
 export async function getBusinessInfo(id: number) {
