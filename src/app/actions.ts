@@ -10,6 +10,7 @@ import { getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
 import type { NewTransaction } from './add-transaction/[type]/page';
+import type { User } from '~/components/AddUsers';
 
 type Transaction = typeof transactions.$inferInsert;
 
@@ -115,4 +116,21 @@ export async function parseImage(
   const data = await run(slip);
 
   return data;
+}
+
+export async function addUser(newUser: User | null) {
+  const owner = await getUserInfo();
+
+  if (!owner?.businessId || !newUser) {
+    return;
+  }
+
+  await db.insert(users).values({
+    id: newUser.id,
+    name: newUser.username!,
+    isAdmin: false,
+    businessId: owner.businessId,
+  });
+
+  redirect('/');
 }

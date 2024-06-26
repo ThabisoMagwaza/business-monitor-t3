@@ -3,25 +3,47 @@ import * as React from 'react';
 
 import styled from 'styled-components';
 
-import { addBusiness } from '~/app/actions';
+import { addUser } from '~/app/actions';
 
 import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 
+export type User = {
+  id: string;
+  username: string | null;
+};
+
 type AddUsersProps = {
-  users: { id: string; username: string | null }[] | undefined;
+  users: User[] | undefined;
 };
 
 function AddUsers({ users }: AddUsersProps) {
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+
+  const addNewUser = addUser.bind(null, selectedUser);
+
+  const handleUserSelect = (id: string) => {
+    const user = users?.find((user) => user.id === id);
+
+    if (!user) {
+      return;
+    }
+
+    setSelectedUser(user);
+  };
+
   return (
     <Wrapper>
       <HeadingWrapper>
         <Heading1>Add User</Heading1>
       </HeadingWrapper>
 
-      <Form action={addBusiness}>
-        <select>
-          <option disabled selected>
+      <Form action={addNewUser}>
+        <select
+          onChange={(e) => handleUserSelect(e.target.value)}
+          defaultValue=""
+        >
+          <option disabled value="">
             Select a user to add
           </option>
           {Array.isArray(users) &&
