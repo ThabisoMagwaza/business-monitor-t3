@@ -11,6 +11,7 @@ import IncomeIcon from '../IncomeIcon';
 import ExpensesIcon from '../ExpensesIcon';
 import Stack from '../Stack';
 import { formatCurrencyAmount } from '~/lib/helpers';
+import ToastDemo from '../ToastDemo';
 
 type BusinessHealthSummaryProps = {
   name: string;
@@ -29,6 +30,8 @@ function BusinessHealthSummary({
 }: BusinessHealthSummaryProps) {
   return (
     <Wrapper as="section">
+      <ToastDemo />
+
       <BusinessName>
         <Heading1>{name}</Heading1>
       </BusinessName>

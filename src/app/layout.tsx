@@ -5,6 +5,8 @@ import StyledComponentsRegistry from '~/lib/registry';
 import GlobalStyles from '~/components/GlobalStyles';
 import Header from '~/components/Header';
 import SignedOutPage from '~/components/SignedOutPage';
+import ToastContextProvider from './context/ToastProvider';
+import Toast from '~/components/Toast';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,18 +25,21 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
-          <StyledComponentsRegistry>
-            <Header />
-            <SignedOut>
-              <SignedOutPage />
-            </SignedOut>
-            <SignedIn>{children}</SignedIn>
-          </StyledComponentsRegistry>
-          <GlobalStyles />
-        </body>
-      </html>
+      <ToastContextProvider>
+        <html lang="en">
+          <body className={inter.className}>
+            <StyledComponentsRegistry>
+              <Header />
+              <SignedOut>
+                <SignedOutPage />
+              </SignedOut>
+              <SignedIn>{children}</SignedIn>
+            </StyledComponentsRegistry>
+            <GlobalStyles />
+            <Toast />
+          </body>
+        </html>
+      </ToastContextProvider>
     </ClerkProvider>
   );
 }
