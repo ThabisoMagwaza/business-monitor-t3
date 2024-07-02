@@ -8,7 +8,6 @@ type ToastContextType = {
     title: string;
     description: string;
   };
-  setMessage: (message: { title: string; description: string }) => void;
   showToast: (message: { title: string; description: string }) => void;
 };
 
@@ -16,7 +15,7 @@ export const ToastContext = React.createContext<ToastContextType | null>(null);
 
 function ToastContextProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
-  const [message, setMessage] = React.useState({
+  const messageRef = React.useRef({
     title: '',
     description: '',
   });
@@ -33,7 +32,7 @@ function ToastContextProvider({ children }: { children: React.ReactNode }) {
     timerRef.current = window.setTimeout(() => {
       setOpen(true);
 
-      window.setTimeout(() => setOpen(false), 2000);
+      window.setTimeout(() => setOpen(false), 5000);
     }, 100);
   };
 
@@ -41,18 +40,30 @@ function ToastContextProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider
       value={{
         open,
-        message,
-        setMessage,
+        message: messageRef.current,
         setOpen,
-        showToast: (message: { title: string; description: string }) => {
-          setMessage(message);
-          showToast();
-        },
+        showToast: React.useCallback(
+          (message: { title: string; description: string }) => {
+            messageRef.current = message;
+            showToast();
+          },
+          []
+        ),
       }}
     >
       {children}
     </ToastContext.Provider>
   );
+}
+
+export function useToast() {
+  const toastContext = React.useContext(ToastContext);
+
+  if (!toastContext) {
+    throw new Error('useToast must be inside a <ToastContext.Provider>');
+  }
+
+  return toastContext;
 }
 
 export default ToastContextProvider;

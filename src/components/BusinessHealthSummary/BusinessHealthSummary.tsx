@@ -1,6 +1,10 @@
 'use client';
 import * as React from 'react';
 import styled from 'styled-components';
+import { useSearchParams } from 'next/navigation';
+
+import { formatCurrencyAmount } from '~/lib/helpers';
+import { useToast } from '~/app/context/ToastProvider';
 
 import MaxWidthWrapper from '../MaxWidthWrapper';
 import Heading1 from '../Heading1';
@@ -10,8 +14,6 @@ import LossIcon from '../LossIcon';
 import IncomeIcon from '../IncomeIcon';
 import ExpensesIcon from '../ExpensesIcon';
 import Stack from '../Stack';
-import { formatCurrencyAmount } from '~/lib/helpers';
-import ToastDemo from '../ToastDemo';
 
 type BusinessHealthSummaryProps = {
   name: string;
@@ -28,10 +30,26 @@ function BusinessHealthSummary({
   totalExpenses,
   totalIncome,
 }: BusinessHealthSummaryProps) {
+  const params = useSearchParams();
+
+  const { showToast } = useToast();
+
+  React.useEffect(() => {
+    const title = params.get('title');
+    const description = params.get('description');
+    if (description && title) {
+      showToast({
+        title,
+        description,
+      });
+
+      // clean up url
+      window.history.replaceState(null, '', '/');
+    }
+  }, [showToast, params]);
+
   return (
     <Wrapper as="section">
-      <ToastDemo />
-
       <BusinessName>
         <Heading1>{name}</Heading1>
       </BusinessName>

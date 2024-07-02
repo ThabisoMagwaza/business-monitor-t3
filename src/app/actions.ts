@@ -37,7 +37,11 @@ export async function addTransactions(
   await db.insert(transactions).values(newTransactions);
   revalidatePath(`/${type}`);
   revalidatePath(`/`);
-  redirect('/');
+  redirect(
+    `/?title=Transactions Added!&description=Added ${String(
+      incomingTransactios.length
+    )} new transactions`
+  );
 }
 
 export async function addBusiness(data: FormData) {
