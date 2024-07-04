@@ -7,6 +7,7 @@ import { addUser } from '~/app/actions';
 
 import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
+import SubmitButton from '../SubmitButton';
 
 export type User = {
   id: string;
@@ -53,7 +54,9 @@ function AddUsers({ users }: AddUsersProps) {
               </option>
             ))}
         </select>
-        <button>Add</button>
+        <div>
+          <SubmitButton loadingText="Adding User...">Add</SubmitButton>
+        </div>
       </Form>
     </Wrapper>
   );
