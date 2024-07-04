@@ -6,7 +6,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
 import { revalidatePath } from 'next/cache';
-import { getUserInfo } from './db-helpers';
+import { getBusinessInfo, getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
 import type { NewTransaction } from './add-transaction/[type]/page';
@@ -129,6 +129,8 @@ export async function addUser(newUser: User | null) {
     return;
   }
 
+  const businessInfo = await getBusinessInfo(owner?.businessId);
+
   await db.insert(users).values({
     id: newUser.id,
     name: newUser.username!,
@@ -136,5 +138,7 @@ export async function addUser(newUser: User | null) {
     businessId: owner.businessId,
   });
 
-  redirect('/');
+  redirect(
+    `/?title=User added!&description=${newUser.username} has been added to ${businessInfo?.businessName}`
+  );
 }

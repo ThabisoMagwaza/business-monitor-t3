@@ -22,13 +22,15 @@ function HeaderStyled({ isAdmin }: HeaderProps) {
   return (
     <OuterWrapper>
       <Wrapper>
-        <Logo>Business Monitor</Logo>
+        <LogoWrapper href="/">
+          <Logo>Business Monitor</Logo>
+        </LogoWrapper>
 
         <ActionsWrapper>
           <SignedOut>
             <SignInButton>Sign In</SignInButton>
           </SignedOut>
-          {isAdmin && <Link href="add-users">Manage</Link>}
+          {isAdmin && <Link href="/add-users">Manage</Link>}
           <SignedIn>
             <UserButton />
           </SignedIn>
@@ -37,6 +39,11 @@ function HeaderStyled({ isAdmin }: HeaderProps) {
     </OuterWrapper>
   );
 }
+
+const LogoWrapper = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+`;
 
 const ActionsWrapper = styled.div`
   display: flex;
