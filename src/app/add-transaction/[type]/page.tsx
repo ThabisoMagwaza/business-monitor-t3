@@ -193,10 +193,7 @@ export default function Page({
             </AddTransactionButton>
             <MenuItems>
               <MenuItem>
-                <button
-                  onClick={() => setShowImageUploader(true)}
-                  style={{ all: 'revert' }}
-                >
+                <button onClick={() => setShowImageUploader(true)}>
                   From Image
                 </button>
               </MenuItem>
@@ -208,9 +205,6 @@ export default function Page({
                       ...newTransactions,
                     ])
                   }
-                  style={{
-                    all: 'revert',
-                  }}
                 >
                   Manual Entry
                 </button>
