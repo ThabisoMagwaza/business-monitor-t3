@@ -97,9 +97,10 @@ async function fileToGenerativePart(image: File, mimeType: string) {
 }
 
 async function run(image: File) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro-vision' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const prompt = 'what did I buy? Give the answer in JSON.';
+  const prompt =
+    'what did I buy? Give the answer in JSON. Do not include the currency.';
 
   const imageParts = [await fileToGenerativePart(image, 'image/jpeg')];
 
