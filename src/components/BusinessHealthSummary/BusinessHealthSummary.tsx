@@ -34,6 +34,7 @@ function BusinessHealthSummary({
 
   const { showToast } = useToast();
 
+  // this is a hack to show a toast when the page is loaded or when we navigate to the page
   React.useEffect(() => {
     const title = params.get('title');
     const description = params.get('description');
@@ -57,13 +58,13 @@ function BusinessHealthSummary({
       <OverviewSection>
         <AmountCard
           title="Profit"
-          amount={`R ${formatCurrencyAmount(profit)}`}
+          amount={formatCurrencyAmount(profit)}
           variant="success"
           icon={<ProfitIcon />}
         />
         <AmountCard
           title="Loss"
-          amount={`R ${formatCurrencyAmount(loss)}`}
+          amount={formatCurrencyAmount(loss)}
           variant="danger"
           icon={<LossIcon />}
         />
@@ -75,7 +76,7 @@ function BusinessHealthSummary({
         <Stack>
           <AmountCard
             title="Income"
-            amount={`R ${formatCurrencyAmount(totalIncome)}`}
+            amount={formatCurrencyAmount(totalIncome)}
             variant="default"
             icon={<IncomeIcon />}
             link="/income"
@@ -83,7 +84,7 @@ function BusinessHealthSummary({
 
           <AmountCard
             title="Expenses"
-            amount={`R ${formatCurrencyAmount(totalExpenses)}`}
+            amount={formatCurrencyAmount(totalExpenses)}
             variant="default"
             icon={<ExpensesIcon />}
             link="/expenses"
