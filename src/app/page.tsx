@@ -5,7 +5,6 @@ import { getUserInfo, getBusinessInfo } from './db-helpers';
 
 import BusinessHealthSummary from '~/components/BusinessHealthSummary';
 import NotRegistredUser from '~/components/NotRegistredUser';
-import TestComponent from '~/components/TestComponent/TestComponent';
 
 export default async function Home() {
   const user = await getUserInfo();
@@ -43,8 +42,6 @@ export default async function Home() {
   return (
     <main>
       {!user?.businessId && <NotRegistredUser />}
-
-      <TestComponent />
 
       {profit !== null &&
         loss !== null &&
