@@ -51,7 +51,6 @@ function BusinessHealthSummary({
 
   return (
     <Wrapper as="section">
-      <p>This is a test</p>
       <BusinessName>
         <Heading1>{name}</Heading1>
       </BusinessName>
