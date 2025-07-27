@@ -1,6 +1,7 @@
 'use client';
 import * as React from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+
+import { useFormStatus } from 'react-dom';
 
 import styled from 'styled-components';
 
@@ -91,15 +92,17 @@ function SaveButton({ children }: { children: React.ReactNode }) {
 }
 
 export default function Page({
-  params: { type },
+  params,
 }: {
-  params: AddTransactionParams;
+  params: Promise<AddTransactionParams>;
 }) {
+  const { type } = React.use(params);
+
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
   >([]);
 
-  const [state, formAction] = useFormState(parseImage, initialState);
+  const [state, formAction] = React.useActionState(parseImage, initialState);
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [showImageUploader, setShowImageUploader] = React.useState(false);
