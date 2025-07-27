@@ -117,10 +117,15 @@ export async function parseImage(
   currentState: { message: string },
   formData: FormData
 ) {
-  const slip = formData.get('slip') as File;
-  const data = await run(slip);
+  try {
+    const slip = formData.get('slip') as File;
+    const data = await run(slip);
 
-  return data;
+    return data;
+  } catch (error) {
+    console.error(error);
+    return { message: '' };
+  }
 }
 
 export async function addUser(newUser: User | null) {
