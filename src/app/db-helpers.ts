@@ -11,7 +11,7 @@ export async function getUserInfo(): Promise<User | undefined> {
   const result = await db.select().from(users).where(eq(users.id, userId!));
 
   if (result.length === 0) {
-    console.error('User is not registered');
+    console.warn(`User ${userId} is not registered`);
     return;
   }
 
@@ -27,7 +27,7 @@ export async function getBusinessInfo(id: number) {
     .where(eq(businesses.id, id));
 
   if (result.length === 0) {
-    console.error(`No business info for business with userId: ${id}`);
+    console.warn(`No business info for business with userId: ${id}`);
     return;
   }
 
