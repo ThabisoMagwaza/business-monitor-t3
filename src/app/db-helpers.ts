@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 type User = typeof users.$inferSelect;
 
 export async function getUserInfo(): Promise<User | undefined> {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   const result = await db.select().from(users).where(eq(users.id, userId!));
 
