@@ -12,7 +12,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.1.5",
+    "@clerk/nextjs": "^6.27.1",
     "@google/generative-ai": "^0.13.0",
     "@headlessui/react": "^2.0.4",
     "@radix-ui/react-toast": "^1.2.1",
