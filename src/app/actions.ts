@@ -113,19 +113,11 @@ async function run(image: File) {
   };
 }
 
-export async function parseImage(
-  currentState: { message: string },
-  formData: FormData
-) {
-  try {
-    const slip = formData.get('slip') as File;
-    const data = await run(slip);
+export async function parseImage(formData: FormData) {
+  const slip = formData.get('slip') as File;
+  const data = await run(slip);
 
-    return data;
-  } catch (error) {
-    console.error(error);
-    return { message: '' };
-  }
+  return data;
 }
 
 export async function addUser(newUser: User | null) {

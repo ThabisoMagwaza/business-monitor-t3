@@ -20,6 +20,7 @@ import CancelIcon from '~/components/CancelIcon';
 import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
+import { useToast } from '~/app/context/ToastProvider';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -39,6 +40,11 @@ export type NewTransaction = {
 type ImageTransaction = {
   name: string;
   price: number;
+};
+
+export type AiImageState = {
+  message: ImageTransaction[] | null;
+  error?: string;
 };
 
 function createDefaultTransaction(): NewTransaction {
@@ -64,10 +70,6 @@ function imageTransactionNewToTransaction(
     amount: String(imageTransaction.price),
   };
 }
-
-const initialState = {
-  message: null,
-};
 
 function SubmitButton({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
@@ -97,30 +99,18 @@ export default function Page({
   params: Promise<AddTransactionParams>;
 }) {
   const { type } = React.use(params);
+  const { showToast } = useToast();
 
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
   >([]);
 
-  const [state, formAction] = React.useActionState(parseImage, initialState);
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [showImageUploader, setShowImageUploader] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!state.message) {
-      return;
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const result = state.message?.items as ImageTransaction[];
-
-    const imageTransactions = result.map((transaction) =>
-      imageTransactionNewToTransaction(transaction)
-    );
-
-    setNewTransactions((prev) => [...imageTransactions, ...prev]);
-  }, [state]);
+  const [previousImage, setPreviousImage] = React.useState<FormData | null>(
+    null
+  );
 
   const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
 
@@ -177,6 +167,47 @@ export default function Page({
     reader.readAsDataURL(file);
   };
 
+  const handleImageSubmit = async (formData: FormData) => {
+    const handleError = () => {
+      showToast({
+        title: 'Error reading image',
+        description:
+          'Error reading image. Please try again or use manual entry.',
+      });
+    };
+
+    const imageData =
+      inputRef.current?.files?.length === 0 ? previousImage : formData;
+    setPreviousImage(imageData);
+
+    if (!imageData) {
+      handleError();
+      return;
+    }
+
+    try {
+      const result = (await parseImage(imageData)) as {
+        message: {
+          items: ImageTransaction[];
+        };
+      };
+
+      if (!result.message.items) {
+        handleError();
+        return;
+      }
+      const transactionsResult = result.message.items;
+
+      const newTransactions = transactionsResult.map((transaction) =>
+        imageTransactionNewToTransaction(transaction)
+      );
+
+      setNewTransactions((prev) => [...newTransactions, ...prev]);
+    } catch (error) {
+      handleError();
+    }
+  };
+
   return (
     <OuterWrapper>
       <Wrapper>
@@ -218,7 +249,7 @@ export default function Page({
 
         {showImageUploader && (
           <>
-            <form action={formAction}>
+            <form action={handleImageSubmit}>
               <ImageUploaderLabelWrapper>
                 <label htmlFor="image">Upload Image</label>
                 <IconButton onClick={() => setShowImageUploader(false)}>
