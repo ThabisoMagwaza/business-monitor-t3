@@ -1,8 +1,8 @@
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import StyledComponentsRegistry from '~/lib/registry';
+import './globals.css';
 
-import GlobalStyles from '~/components/GlobalStyles';
 import Header from '~/components/Header';
 import SignedOutPage from '~/components/SignedOutPage';
 import ToastContextProvider from './context/ToastProvider';
@@ -36,7 +36,6 @@ export default function RootLayout({
               </SignedOut>
               <SignedIn>{children}</SignedIn>
             </StyledComponentsRegistry>
-            <GlobalStyles />
             <Toast />
           </body>
         </html>
