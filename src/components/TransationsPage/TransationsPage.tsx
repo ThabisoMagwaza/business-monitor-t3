@@ -1,6 +1,5 @@
 'use client';
 import * as React from 'react';
-import Heading1 from '../Heading1';
 import styled from 'styled-components';
 import MaxWidthWrapper from '../MaxWidthWrapper';
 import Link from 'next/link';
@@ -22,7 +21,9 @@ function TransationsPage({ type, transations }: TransactionPageProps) {
   return (
     <Wrapper>
       <Heading>
-        <Heading1>{(type === 'income' && 'Income') || 'Expenses'}</Heading1>
+        <h1 className="text-2xl font-bold">
+          {(type === 'income' && 'Income') || 'Expenses'}
+        </h1>
       </Heading>
 
       <Actions>

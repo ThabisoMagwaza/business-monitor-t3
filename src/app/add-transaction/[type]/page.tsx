@@ -17,7 +17,6 @@ import { COLORS } from '~/lib/Colors';
 
 import AddIcon from '~/components/AddIcon';
 import CancelIcon from '~/components/CancelIcon';
-import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
@@ -212,9 +211,9 @@ export default function Page({
     <OuterWrapper>
       <Wrapper>
         <Heading>
-          <Heading1>
+          <h1 className="text-2xl font-bold">
             {(type === 'income' && 'Add Income') || 'Add Expenses'}
-          </Heading1>
+          </h1>
         </Heading>
 
         <Actions>

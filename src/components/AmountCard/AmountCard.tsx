@@ -1,9 +1,6 @@
-'use client';
 import Link from 'next/link';
 import * as React from 'react';
-import styled from 'styled-components';
-import { COLORS } from '~/lib/Colors';
-import ArrowIcon from '../ArrowIcon';
+import { ArrowRightIcon } from 'lucide-react';
 
 type AmountCardProps = {
   icon?: React.ReactNode;
@@ -15,13 +12,13 @@ type AmountCardProps = {
 
 const variantConfig = {
   default: {
-    amountColor: 'black',
+    amountColor: 'text-black',
   },
   success: {
-    amountColor: COLORS.Green49,
+    amountColor: 'text-green-500',
   },
   danger: {
-    amountColor: COLORS.Red47,
+    amountColor: 'text-red-500',
   },
 };
 
@@ -29,82 +26,26 @@ function AmountCard({ icon, variant, title, amount, link }: AmountCardProps) {
   const variantDetails = variantConfig[variant];
 
   return (
-    <Wrapper>
-      <ImageWrapper>{icon}</ImageWrapper>
+    <div className="flex items-center gap-4 border border-zinc-600 rounded-lg p-4">
+      <div className="w-10 h-10">{icon}</div>
 
-      <InfoWrapper>
+      <div className="flex flex-col gap-4">
         <div>
-          <Heading>{title}</Heading>
-          <Amount
-            style={
-              {
-                '--color': variantDetails.amountColor,
-              } as React.CSSProperties
-            }
-          >
+          <h2 className="text-lg font-bold">{title}</h2>
+          <p className={`text-2xl font-bold ${variantDetails.amountColor}`}>
             {amount}
-          </Amount>
+          </p>
         </div>
 
         {link && (
-          <ViewLink href={link}>
-            view
-            <ArrowWrapper>
-              <ArrowIcon />
-            </ArrowWrapper>
-          </ViewLink>
+          <Link href={link} className="flex gap-2 items-center">
+            <span>view</span>
+            <ArrowRightIcon />
+          </Link>
         )}
-      </InfoWrapper>
-    </Wrapper>
+      </div>
+    </div>
   );
 }
-
-const ViewLink = styled(Link)`
-  text-decoration: none;
-  color: black;
-  border-bottom: 1px solid;
-  font-weight: 700;
-
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`;
-
-const ArrowWrapper = styled.div`
-  width: 24px;
-`;
-
-const Heading = styled.h2`
-  font-weight: 400;
-`;
-
-const Amount = styled.p`
-  font-size: ${32 / 16}rem;
-  font-weight: 700;
-  color: var(--color);
-`;
-
-const Wrapper = styled.article`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-
-  border: 1px solid;
-  border-radius: 10px;
-  padding: 10px;
-`;
-
-const ImageWrapper = styled.div`
-  --size: 100px;
-  width: var(--size);
-  height: var(--size);
-`;
-
-const InfoWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
-`;
 
 export default AmountCard;
