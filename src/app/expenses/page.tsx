@@ -29,7 +29,7 @@ async function ExpensesPage() {
   );
 }
 
-async function Page() {
+function Page() {
   return (
     <React.Suspense fallback={<TransactionsSkeleton count={10} />}>
       <ExpensesPage />
