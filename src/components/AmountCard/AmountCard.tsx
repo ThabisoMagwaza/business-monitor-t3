@@ -48,7 +48,7 @@ function AmountCard({ icon, variant, title, amount, link }: AmountCardProps) {
 
         {link && (
           <CardAction>
-            <Link href={link} className="flex gap-2 items-center">
+            <Link prefetch href={link} className="flex gap-2 items-center">
               <span>view</span>
               <ArrowRightIcon />
             </Link>

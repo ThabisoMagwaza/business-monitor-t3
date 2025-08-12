@@ -13,6 +13,8 @@ import {
   PiggyBankIcon,
   TrendingDown,
 } from 'lucide-react';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 type BusinessHealthSummaryProps = {
   name: string;
@@ -54,40 +56,61 @@ function BusinessHealthSummary({
         <h1 className="text-2xl font-bold">{name}</h1>
       </div>
 
-      <div className="flex flex-col gap-4 mb-4">
-        <AmountCard
-          title="Profit"
-          amount={formatCurrencyAmount(profit)}
-          variant="success"
-          icon={<PiggyBankIcon />}
-        />
-        <AmountCard
-          title="Loss"
-          amount={formatCurrencyAmount(loss)}
-          variant="danger"
-          icon={<TrendingDown />}
-        />
-      </div>
-
       <div className="flex flex-col gap-4">
-        <h3>Details</h3>
+        <div className="flex flex-col gap-4 ">
+          <AmountCard
+            title="Profit"
+            amount={formatCurrencyAmount(profit)}
+            variant="success"
+            icon={<PiggyBankIcon />}
+          />
+          <AmountCard
+            title="Loss"
+            amount={formatCurrencyAmount(loss)}
+            variant="danger"
+            icon={<TrendingDown />}
+          />
+        </div>
+
+        <div>
+          <h2>Quick Actions</h2>
+          <div className="flex gap-2 flex-wrap">
+            <Button asChild>
+              <Link prefetch href="/add-transaction/income">
+                Add Income
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link prefetch href="/add-transaction/expense">
+                Add Expense
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/add-transaction/expense">Scan Receipt</Link>
+            </Button>
+          </div>
+        </div>
 
         <div className="flex flex-col gap-4">
-          <AmountCard
-            title="Income"
-            amount={formatCurrencyAmount(totalIncome)}
-            variant="default"
-            icon={<BanknoteArrowUp />}
-            link="/income"
-          />
+          <h3>Details</h3>
 
-          <AmountCard
-            title="Expenses"
-            amount={formatCurrencyAmount(totalExpenses)}
-            variant="default"
-            icon={<BanknoteArrowDown />}
-            link="/expenses"
-          />
+          <div className="flex flex-col gap-4">
+            <AmountCard
+              title="Income"
+              amount={formatCurrencyAmount(totalIncome)}
+              variant="default"
+              icon={<BanknoteArrowUp />}
+              link="/income"
+            />
+
+            <AmountCard
+              title="Expenses"
+              amount={formatCurrencyAmount(totalExpenses)}
+              variant="default"
+              icon={<BanknoteArrowDown />}
+              link="/expenses"
+            />
+          </div>
         </div>
       </div>
     </main>
