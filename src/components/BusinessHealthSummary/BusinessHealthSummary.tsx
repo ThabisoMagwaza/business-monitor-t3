@@ -50,7 +50,7 @@ function BusinessHealthSummary({
 
   return (
     <main className="max-w-[calc(1000px+1rem)] mx-auto px-4">
-      <div className="text-center mb-4 px-2">
+      <div className="text-center my-4 px-2">
         <h1 className="text-2xl font-bold">{name}</h1>
       </div>
 

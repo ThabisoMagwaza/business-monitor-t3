@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import * as React from 'react';
 import { ArrowRightIcon } from 'lucide-react';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from '../ui/card';
 
 type AmountCardProps = {
   icon?: React.ReactNode;
@@ -26,25 +33,29 @@ function AmountCard({ icon, variant, title, amount, link }: AmountCardProps) {
   const variantDetails = variantConfig[variant];
 
   return (
-    <div className="flex items-center gap-4 border border-zinc-600 rounded-lg p-4">
+    <Card className="flex flex-row items-center gap-4 p-4">
       <div className="w-10 h-10">{icon}</div>
 
-      <div className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-4">
         <div>
-          <h2 className="text-lg font-bold">{title}</h2>
-          <p className={`text-2xl font-bold ${variantDetails.amountColor}`}>
+          <CardTitle className="text-lg font-bold">{title}</CardTitle>
+          <CardDescription
+            className={`text-2xl font-bold ${variantDetails.amountColor}`}
+          >
             {amount}
-          </p>
+          </CardDescription>
         </div>
 
         {link && (
-          <Link href={link} className="flex gap-2 items-center">
-            <span>view</span>
-            <ArrowRightIcon />
-          </Link>
+          <CardAction>
+            <Link href={link} className="flex gap-2 items-center">
+              <span>view</span>
+              <ArrowRightIcon />
+            </Link>
+          </CardAction>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
