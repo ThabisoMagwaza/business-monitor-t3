@@ -12,6 +12,7 @@ import {
   BanknoteArrowDown,
   PiggyBankIcon,
   TrendingDown,
+  Scan,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
@@ -75,18 +76,21 @@ function BusinessHealthSummary({
         <div>
           <h2>Quick Actions</h2>
           <div className="flex gap-2 flex-wrap">
-            <Button asChild>
+            <Button asChild variant="outline" className="flex-1">
               <Link prefetch href="/add-transaction/income">
                 Add Income
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="outline" className="flex-1">
               <Link prefetch href="/add-transaction/expense">
                 Add Expense
               </Link>
             </Button>
-            <Button asChild>
-              <Link href="/add-transaction/expense">Scan Receipt</Link>
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/add-transaction/expense">
+                <Scan />
+                Scan Receipt
+              </Link>
             </Button>
           </div>
         </div>
