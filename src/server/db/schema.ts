@@ -30,6 +30,7 @@ export const transactions = createTable('transactions', {
   amount: numeric('amount').notNull(),
   type: transactionTypeEnum('type').notNull(),
   date: date('date').notNull(),
+
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

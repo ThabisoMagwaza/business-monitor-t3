@@ -6,7 +6,7 @@ import { users } from '~/server/db/schema';
 import AddUsers from '~/components/AddUsers';
 
 async function Page() {
-  const { data } = await clerkClient.users.getUserList();
+  const { data } = await (await clerkClient()).users.getUserList();
 
   const dbUsers = await db
     .select({

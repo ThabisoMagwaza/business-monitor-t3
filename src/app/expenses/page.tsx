@@ -7,10 +7,10 @@ import { getUserInfo } from '../db-helpers';
 
 import { sql } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
+import TransactionsSkeleton from '~/components/TransactionsSkeleton';
 
-async function Page() {
+async function ExpensesPage() {
   const user = await getUserInfo();
-
   if (!user?.businessId) {
     redirect('/');
   }
@@ -26,6 +26,14 @@ async function Page() {
     <main>
       <TransationsPage type="expenses" transations={expenses} />
     </main>
+  );
+}
+
+function Page() {
+  return (
+    <React.Suspense fallback={<TransactionsSkeleton count={10} />}>
+      <ExpensesPage />
+    </React.Suspense>
   );
 }
 

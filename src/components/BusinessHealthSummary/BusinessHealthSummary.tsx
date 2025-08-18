@@ -1,19 +1,21 @@
 'use client';
 import * as React from 'react';
-import styled from 'styled-components';
 import { useSearchParams } from 'next/navigation';
 
 import { formatCurrencyAmount } from '~/lib/helpers';
 import { useToast } from '~/app/context/ToastProvider';
 
-import MaxWidthWrapper from '../MaxWidthWrapper';
-import Heading1 from '../Heading1';
 import AmountCard from '../AmountCard';
-import ProfitIcon from '../ProfitIcon';
-import LossIcon from '../LossIcon';
-import IncomeIcon from '../IncomeIcon';
-import ExpensesIcon from '../ExpensesIcon';
-import Stack from '../Stack';
+
+import {
+  BanknoteArrowUp,
+  BanknoteArrowDown,
+  PiggyBankIcon,
+  TrendingDown,
+  Scan,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 type BusinessHealthSummaryProps = {
   name: string;
@@ -50,73 +52,73 @@ function BusinessHealthSummary({
   }, [showToast, params]);
 
   return (
-    <Wrapper as="section">
-      <BusinessName>
-        <Heading1>{name}</Heading1>
-      </BusinessName>
+    <main className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4">
+      <div className="text-center my-4 px-2">
+        <h1 className="text-2xl font-bold">{name}</h1>
+      </div>
 
-      <OverviewSection>
-        <AmountCard
-          title="Profit"
-          amount={formatCurrencyAmount(profit)}
-          variant="success"
-          icon={<ProfitIcon />}
-        />
-        <AmountCard
-          title="Loss"
-          amount={formatCurrencyAmount(loss)}
-          variant="danger"
-          icon={<LossIcon />}
-        />
-      </OverviewSection>
-
-      <DetailsSection>
-        <h3>Details</h3>
-
-        <Stack>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 ">
           <AmountCard
-            title="Income"
-            amount={formatCurrencyAmount(totalIncome)}
-            variant="default"
-            icon={<IncomeIcon />}
-            link="/income"
+            title="Profit"
+            amount={formatCurrencyAmount(profit)}
+            variant="success"
+            icon={<PiggyBankIcon />}
           />
-
           <AmountCard
-            title="Expenses"
-            amount={formatCurrencyAmount(totalExpenses)}
-            variant="default"
-            icon={<ExpensesIcon />}
-            link="/expenses"
+            title="Loss"
+            amount={formatCurrencyAmount(loss)}
+            variant="danger"
+            icon={<TrendingDown />}
           />
-        </Stack>
-      </DetailsSection>
-    </Wrapper>
+        </div>
+
+        <div>
+          <h2>Quick Actions</h2>
+          <div className="flex gap-2 flex-wrap">
+            <Button asChild variant="outline" className="flex-1">
+              <Link prefetch href="/add-transaction/income">
+                Add Income
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link prefetch href="/add-transaction/expense">
+                Add Expense
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link prefetch href="/add-transaction/expense">
+                <Scan />
+                Scan Receipt
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <h3>Details</h3>
+
+          <div className="flex flex-col gap-4">
+            <AmountCard
+              title="Income"
+              amount={formatCurrencyAmount(totalIncome)}
+              variant="default"
+              icon={<BanknoteArrowUp />}
+              link="/income"
+            />
+
+            <AmountCard
+              title="Expenses"
+              amount={formatCurrencyAmount(totalExpenses)}
+              variant="default"
+              icon={<BanknoteArrowDown />}
+              link="/expenses"
+            />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
-
-const DetailsSection = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  margin-top: 48px;
-`;
-
-const OverviewSection = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const BusinessName = styled.div`
-  text-align: center;
-  margin-block: 16px;
-`;
-
-const Wrapper = styled(MaxWidthWrapper)`
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-`;
 
 export default BusinessHealthSummary;

@@ -1,33 +1,21 @@
 'use client';
 import * as React from 'react';
 
-import { useFormStatus } from 'react-dom';
-
-import styled from 'styled-components';
-
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems as ReachMenuItems,
-} from '@headlessui/react';
-
 import { addTransactions, parseImage } from '~/app/actions';
-import { COLORS } from '~/lib/Colors';
 
-import AddIcon from '~/components/AddIcon';
-import CancelIcon from '~/components/CancelIcon';
-import Heading1 from '~/components/Heading1';
-import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
+import { Button } from '~/components/ui/button';
+import { PlusIcon, Scan, Trash, Upload } from 'lucide-react';
+import clsx from 'clsx';
+import FormSubmitButton from '~/components/FormSubmitButton/FormSubmitButton';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
 export const maxDuration = 60;
 
 type AddTransactionParams = {
-  type: 'expenses' | 'income';
+  type: 'expense' | 'income';
 };
 
 export type NewTransaction = {
@@ -71,28 +59,6 @@ function imageTransactionNewToTransaction(
   };
 }
 
-function SubmitButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <>
-      <button disabled={pending}>{children}</button>{' '}
-      {pending && <span>Reading image...</span>}
-    </>
-  );
-}
-
-function SaveButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <SaveButtonWrapper>
-      {pending && <span>Saving Transactions...</span>}
-      <ActionButton disabled={pending}>{children}</ActionButton>
-    </SaveButtonWrapper>
-  );
-}
-
 export default function Page({
   params,
 }: {
@@ -100,6 +66,7 @@ export default function Page({
 }) {
   const { type } = React.use(params);
   const { showToast } = useToast();
+  const id = React.useId();
 
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
@@ -107,12 +74,16 @@ export default function Page({
 
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [showImageUploader, setShowImageUploader] = React.useState(false);
+
   const [previousImage, setPreviousImage] = React.useState<FormData | null>(
     null
   );
 
-  const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
+  const saveNewTransactions = addTransactions.bind(
+    null,
+    newTransactions,
+    type === 'expense' ? 'expenses' : 'income'
+  );
 
   const onChangeValue = (
     transactionId: string,
@@ -209,289 +180,132 @@ export default function Page({
   };
 
   return (
-    <OuterWrapper>
-      <Wrapper>
-        <Heading>
-          <Heading1>
-            {(type === 'income' && 'Add Income') || 'Add Expenses'}
-          </Heading1>
-        </Heading>
+    <main className="flex-1">
+      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 flex flex-col flex-1 h-full gap-4">
+        <h1 className="text-2xl font-bold text-center mt-4">
+          {(type === 'income' && 'Add Income') || 'Add Expenses'}
+        </h1>
 
-        <Actions>
-          <Menu>
-            <AddTransactionButton>
-              <AddIconWrapper>
-                <AddIcon />
-              </AddIconWrapper>
-              Add Transaction
-            </AddTransactionButton>
-            <MenuItems>
-              <MenuItem>
-                <button onClick={() => setShowImageUploader(true)}>
-                  From Image
-                </button>
-              </MenuItem>
-              <MenuItem>
-                <button
-                  onClick={() =>
-                    setNewTransactions([
-                      createDefaultTransaction(),
-                      ...newTransactions,
-                    ])
-                  }
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" asChild>
+            <label htmlFor={`${id}-image`}>
+              <Scan />
+              <span>Image</span>
+            </label>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() =>
+              setNewTransactions([
+                createDefaultTransaction(),
+                ...newTransactions,
+              ])
+            }
+          >
+            <PlusIcon />
+            <span>Manual</span>
+          </Button>
+        </div>
+
+        <form action={handleImageSubmit}>
+          <input
+            id={`${id}-image`}
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            name="slip"
+            className="hidden"
+          />
+
+          <div>
+            {previewSrc && (
+              <div className="relative">
+                <PreviewImage src={previewSrc} alt="Preview Image of slip" />
+                <Button
+                  variant="outline"
+                  className="flex-1 absolute top-0 left-0"
                 >
-                  Manual Entry
-                </button>
-              </MenuItem>
-            </MenuItems>
-          </Menu>
-        </Actions>
-
-        {showImageUploader && (
-          <>
-            <form action={handleImageSubmit}>
-              <ImageUploaderLabelWrapper>
-                <label htmlFor="image">Upload Image</label>
-                <IconButton onClick={() => setShowImageUploader(false)}>
-                  <IconWrapper>
-                    <CancelIcon />
-                  </IconWrapper>
-                </IconButton>
-              </ImageUploaderLabelWrapper>
-              <input
-                id="image"
-                ref={inputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                name="slip"
-              />
-              <SubmitButton>Submit</SubmitButton>
-
-              <div>
-                {previewSrc && (
-                  <PreviewImage src={previewSrc} alt="Preview Image of slip" />
-                )}
+                  <div className="flex items-center gap-2">
+                    <Upload />
+                    <span>Upload</span>
+                  </div>
+                </Button>
               </div>
-            </form>
-          </>
-        )}
+            )}
+          </div>
+        </form>
 
-        <TransactionsListForm action={saveNewTransactions}>
+        <form
+          className="flex-1 flex flex-col gap-4"
+          action={saveNewTransactions}
+        >
           {newTransactions.length === 0 && (
-            <NoTransactions>No Transactions Added</NoTransactions>
+            <div className="flex-1 flex justify-center items-center text-center">
+              <p>No Transactions Added</p>
+            </div>
           )}
 
           {newTransactions.map((transaction) => (
-            <NewTransaction key={transaction.id}>
-              <NewDescription
+            <div
+              className="grid w-full grid-cols-[1fr_max-content_max-content] gap-2 grid-rows-[min-content_min-content] items-center border-b border-gray-200"
+              key={transaction.id}
+            >
+              <input
                 onChange={(e) =>
                   onChangeValue(transaction.id, 'description', e.target.value)
                 }
                 value={transaction.description}
+                className="border-none"
               />
-              <NewDate
+              <input
                 onChange={(e) =>
                   onChangeValue(transaction.id, 'date', e.target.value)
                 }
                 value={transaction.date}
                 type="date"
+                className="border-none row-2 justify-self-start text-sm"
               />
-              <NewAmountWrapper>
+              <div className="grid-row-1 grid-column-2 flex items-center text-2xl">
                 R
-                <NewAmount
+                <input
                   onChange={(e) =>
                     onChangeValue(transaction.id, 'amount', e.target.value)
                   }
                   value={transaction.amount}
                   type="text"
+                  className="border-none w-16"
                 />
-              </NewAmountWrapper>
-              <NewExpenseType
-                style={
-                  {
-                    '--color':
-                      (type === 'income' && COLORS.Green49) || COLORS.Red47,
-                  } as React.CSSProperties
-                }
+              </div>
+              <p
+                className={clsx(
+                  'row-2 col-2',
+                  type === 'expense' && 'text-red-400',
+                  type === 'income' && 'text-green-400'
+                )}
               >
-                {(type === 'expenses' && 'Expense') || 'Income'}
-              </NewExpenseType>
-              <IconButton onClick={() => onDeleteTransaction(transaction.id)}>
-                <IconWrapper>
-                  <CancelIcon />
-                </IconWrapper>
-              </IconButton>
-            </NewTransaction>
+                {(type === 'expense' && 'Expense') || 'Income'}
+              </p>
+              <Button
+                onClick={() => onDeleteTransaction(transaction.id)}
+                variant="ghost"
+                size="icon"
+                className="size-4"
+              >
+                <Trash />
+              </Button>
+            </div>
           ))}
 
-          {newTransactions.length > 0 && <SaveButton>Save</SaveButton>}
-        </TransactionsListForm>
-      </Wrapper>
-    </OuterWrapper>
+          {newTransactions.length > 0 && (
+            <FormSubmitButton loadingText="Saving Transactions...">
+              Save
+            </FormSubmitButton>
+          )}
+        </form>
+      </div>
+    </main>
   );
 }
-
-const ImageUploaderLabelWrapper = styled.label`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const MenuItems = styled(ReachMenuItems)`
-  position: absolute;
-  bottom: 0;
-  right: 24px;
-
-  display: flex;
-  flex-direction: column;
-  transform: translateY(75%);
-`;
-
-const SaveButtonWrapper = styled.div`
-  margin-top: 16px;
-  align-self: flex-end;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const NewAmount = styled.input`
-  width: 60px;
-  border: none;
-`;
-
-const NewExpenseType = styled.p`
-  grid-row: 2;
-  grid-column: 2;
-
-  font-weight: 700;
-  color: var(--color);
-`;
-
-const NewAmountWrapper = styled.div`
-  grid-row: 1;
-  grid-column: 2;
-
-  display: flex;
-  align-items: center;
-
-  font-size: ${20 / 16}rem;
-`;
-
-const NewTransaction = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1fr repeat(2, max-content);
-  grid-template-rows: repeat(2, min-content);
-  align-items: center;
-  gap: 10px;
-
-  border-bottom: 1px solid;
-  padding: 10px;
-`;
-
-const NewDate = styled.input`
-  grid-row: 2;
-
-  border: none;
-  font-size: ${14 / 16}rem;
-  justify-self: start;
-`;
-
-const NewDescription = styled.input`
-  border: none;
-  font-weight: 450;
-`;
-
-const IconButton = styled.div`
-  border: none;
-  background: none;
-  grid-column: 3;
-  grid-row: 1/ -1;
-
-  align-self: center;
-`;
-
-const IconWrapper = styled.div`
-  --size: 30px;
-  width: var(--size);
-  height: var(--size);
-
-  color: ${COLORS.Red47};
-`;
-
-const NoTransactions = styled.p`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const OuterWrapper = styled.main`
-  flex: 1;
-`;
-
-const TransactionsListForm = styled.form`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const Wrapper = styled(MaxWidthWrapper)`
-  height: 100%;
-  padding-bottom: 16px;
-
-  display: flex;
-  flex-direction: column;
-`;
-
-const Actions = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 28px;
-  margin-top: 28px;
-
-  position: relative;
-`;
-
-const ActionButton = styled.button`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: black;
-
-  border-bottom: 1px solid;
-  border-radius: 16px;
-  padding-inline: 16px;
-  padding-block: 8px;
-
-  &:disabled {
-    opacity: 0.5;
-  }
-`;
-
-const AddTransactionButton = styled(MenuButton)`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: black;
-
-  border-bottom: 1px solid;
-  border-radius: 16px;
-  padding-inline: 16px;
-  padding-block: 8px;
-`;
-
-const AddIconWrapper = styled.div`
-  width: 16px;
-`;
-
-const Heading = styled.div`
-  text-align: center;
-`;

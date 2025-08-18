@@ -5,7 +5,6 @@ import styled from 'styled-components';
 
 import { addUser } from '~/app/actions';
 
-import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import SubmitButton from '../SubmitButton';
 
@@ -36,7 +35,7 @@ function AddUsers({ users }: AddUsersProps) {
   return (
     <Wrapper>
       <HeadingWrapper>
-        <Heading1>Add User</Heading1>
+        <h1 className="text-2xl font-bold">Add User</h1>
       </HeadingWrapper>
 
       <Form action={addNewUser}>

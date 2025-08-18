@@ -1,8 +1,8 @@
 import { ClerkProvider, SignedIn, SignedOut } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import StyledComponentsRegistry from '~/lib/registry';
+import './globals.css';
 
-import GlobalStyles from '~/components/GlobalStyles';
 import Header from '~/components/Header';
 import SignedOutPage from '~/components/SignedOutPage';
 import ToastContextProvider from './context/ToastProvider';
@@ -27,8 +27,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <ToastContextProvider>
-        <html lang="en">
-          <body className={inter.className}>
+        <html lang="en" className="h-full">
+          <body
+            className={`${inter.className} bg-gray-50 flex flex-col flex-1 h-full`}
+          >
             <StyledComponentsRegistry>
               <Header />
               <SignedOut>
@@ -36,7 +38,6 @@ export default function RootLayout({
               </SignedOut>
               <SignedIn>{children}</SignedIn>
             </StyledComponentsRegistry>
-            <GlobalStyles />
             <Toast />
           </body>
         </html>

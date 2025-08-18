@@ -6,8 +6,9 @@ import { getUserInfo } from '../db-helpers';
 
 import TransationsPage from '~/components/TransationsPage';
 import { redirect } from 'next/navigation';
+import TransactionsSkeleton from '~/components/TransactionsSkeleton';
 
-async function Page() {
+async function IncomePage() {
   const user = await getUserInfo();
 
   if (!user?.businessId) {
@@ -25,6 +26,14 @@ async function Page() {
     <main>
       <TransationsPage transations={sales} type="income" />
     </main>
+  );
+}
+
+function Page() {
+  return (
+    <React.Suspense fallback={<TransactionsSkeleton count={10} />}>
+      <IncomePage />
+    </React.Suspense>
   );
 }
 

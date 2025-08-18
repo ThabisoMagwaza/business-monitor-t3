@@ -5,14 +5,13 @@ import styled from 'styled-components';
 
 import { addBusiness } from '~/app/actions';
 
-import Heading1 from '~/components/Heading1';
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 
 export default function Page() {
   return (
     <Wrapper>
       <HeadingWrapper>
-        <Heading1>Register Business</Heading1>
+        <h1 className="text-2xl font-bold">Register Business</h1>
       </HeadingWrapper>
 
       <Form action={addBusiness}>
