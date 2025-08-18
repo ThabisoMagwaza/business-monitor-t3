@@ -27,8 +27,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <ToastContextProvider>
-        <html lang="en">
-          <body className={inter.className}>
+        <html lang="en" className="h-full">
+          <body
+            className={`${inter.className} bg-gray-50 flex flex-col flex-1 h-full`}
+          >
             <StyledComponentsRegistry>
               <Header />
               <SignedOut>

@@ -5,21 +5,14 @@ import { useFormStatus } from 'react-dom';
 
 import styled from 'styled-components';
 
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems as ReachMenuItems,
-} from '@headlessui/react';
-
 import { addTransactions, parseImage } from '~/app/actions';
 import { COLORS } from '~/lib/Colors';
 
-import AddIcon from '~/components/AddIcon';
 import CancelIcon from '~/components/CancelIcon';
-import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
+import { Button } from '~/components/ui/button';
+import { PlusIcon, Scan, Upload } from 'lucide-react';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -99,6 +92,7 @@ export default function Page({
 }) {
   const { type } = React.use(params);
   const { showToast } = useToast();
+  const id = React.useId();
 
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
@@ -106,7 +100,7 @@ export default function Page({
 
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [showImageUploader, setShowImageUploader] = React.useState(false);
+
   const [previousImage, setPreviousImage] = React.useState<FormData | null>(
     null
   );
@@ -208,77 +202,69 @@ export default function Page({
   };
 
   return (
-    <OuterWrapper>
-      <Wrapper>
-        <Heading>
-          <h1 className="text-2xl font-bold">
-            {(type === 'income' && 'Add Income') || 'Add Expenses'}
-          </h1>
-        </Heading>
+    <main className="flex-1">
+      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 flex flex-col flex-1 h-full gap-4">
+        <h1 className="text-2xl font-bold text-center mt-4">
+          {(type === 'income' && 'Add Income') || 'Add Expenses'}
+        </h1>
 
-        <Actions>
-          <Menu>
-            <AddTransactionButton>
-              <AddIconWrapper>
-                <AddIcon />
-              </AddIconWrapper>
-              Add Transaction
-            </AddTransactionButton>
-            <MenuItems>
-              <MenuItem>
-                <button onClick={() => setShowImageUploader(true)}>
-                  From Image
-                </button>
-              </MenuItem>
-              <MenuItem>
-                <button
-                  onClick={() =>
-                    setNewTransactions([
-                      createDefaultTransaction(),
-                      ...newTransactions,
-                    ])
-                  }
+        <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" asChild>
+            <label htmlFor={`${id}-image`}>
+              <Scan />
+              <span>Image</span>
+            </label>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() =>
+              setNewTransactions([
+                createDefaultTransaction(),
+                ...newTransactions,
+              ])
+            }
+          >
+            <PlusIcon />
+            <span>Manual</span>
+          </Button>
+        </div>
+
+        <form action={handleImageSubmit}>
+          <input
+            id={`${id}-image`}
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            name="slip"
+            className="hidden"
+          />
+
+          <div>
+            {previewSrc && (
+              <div className="relative">
+                <PreviewImage src={previewSrc} alt="Preview Image of slip" />
+                <Button
+                  variant="outline"
+                  className="flex-1 absolute top-0 left-0"
                 >
-                  Manual Entry
-                </button>
-              </MenuItem>
-            </MenuItems>
-          </Menu>
-        </Actions>
-
-        {showImageUploader && (
-          <>
-            <form action={handleImageSubmit}>
-              <ImageUploaderLabelWrapper>
-                <label htmlFor="image">Upload Image</label>
-                <IconButton onClick={() => setShowImageUploader(false)}>
-                  <IconWrapper>
-                    <CancelIcon />
-                  </IconWrapper>
-                </IconButton>
-              </ImageUploaderLabelWrapper>
-              <input
-                id="image"
-                ref={inputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                name="slip"
-              />
-              <SubmitButton>Submit</SubmitButton>
-
-              <div>
-                {previewSrc && (
-                  <PreviewImage src={previewSrc} alt="Preview Image of slip" />
-                )}
+                  <div className="flex items-center gap-2">
+                    <Upload />
+                    <span>Upload</span>
+                  </div>
+                </Button>
               </div>
-            </form>
-          </>
-        )}
+            )}
+          </div>
+        </form>
 
         <TransactionsListForm action={saveNewTransactions}>
           {newTransactions.length === 0 && (
-            <NoTransactions>No Transactions Added</NoTransactions>
+            <div className="flex-1 flex justify-center items-center text-center">
+              <p>No Transactions Added</p>
+            </div>
           )}
 
           {newTransactions.map((transaction) => (
@@ -326,25 +312,10 @@ export default function Page({
 
           {newTransactions.length > 0 && <SaveButton>Save</SaveButton>}
         </TransactionsListForm>
-      </Wrapper>
-    </OuterWrapper>
+      </div>
+    </main>
   );
 }
-
-const ImageUploaderLabelWrapper = styled.label`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const MenuItems = styled(ReachMenuItems)`
-  position: absolute;
-  bottom: 0;
-  right: 24px;
-
-  display: flex;
-  flex-direction: column;
-  transform: translateY(75%);
-`;
 
 const SaveButtonWrapper = styled.div`
   margin-top: 16px;
@@ -420,39 +391,11 @@ const IconWrapper = styled.div`
   color: ${COLORS.Red47};
 `;
 
-const NoTransactions = styled.p`
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const OuterWrapper = styled.main`
-  flex: 1;
-`;
-
 const TransactionsListForm = styled.form`
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 10px;
-`;
-
-const Wrapper = styled(MaxWidthWrapper)`
-  height: 100%;
-  padding-bottom: 16px;
-
-  display: flex;
-  flex-direction: column;
-`;
-
-const Actions = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 28px;
-  margin-top: 28px;
-
-  position: relative;
 `;
 
 const ActionButton = styled.button`
@@ -471,26 +414,4 @@ const ActionButton = styled.button`
   &:disabled {
     opacity: 0.5;
   }
-`;
-
-const AddTransactionButton = styled(MenuButton)`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: black;
-
-  border-bottom: 1px solid;
-  border-radius: 16px;
-  padding-inline: 16px;
-  padding-block: 8px;
-`;
-
-const AddIconWrapper = styled.div`
-  width: 16px;
-`;
-
-const Heading = styled.div`
-  text-align: center;
 `;
