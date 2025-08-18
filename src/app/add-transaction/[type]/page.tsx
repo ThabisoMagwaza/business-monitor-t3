@@ -63,17 +63,6 @@ function imageTransactionNewToTransaction(
   };
 }
 
-function SubmitButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <>
-      <button disabled={pending}>{children}</button>{' '}
-      {pending && <span>Reading image...</span>}
-    </>
-  );
-}
-
 function SaveButton({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
 
