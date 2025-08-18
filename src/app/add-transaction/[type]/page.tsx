@@ -3,14 +3,12 @@ import * as React from 'react';
 
 import { addTransactions, parseImage } from '~/app/actions';
 
-import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
 import { Button } from '~/components/ui/button';
-import { FileImage, PlusIcon, Scan, Trash, Upload } from 'lucide-react';
+import { PlusIcon, Scan, Trash } from 'lucide-react';
 import clsx from 'clsx';
 import FormSubmitButton from '~/components/FormSubmitButton/FormSubmitButton';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import Image from 'next/image';
+import ReceiptPreview from '~/components/ReceiptPreview/ReceiptPreview';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -224,49 +222,9 @@ export default function Page({
             className="hidden"
           />
 
-          <div>
-            {/* {previewSrc && (
-              <div className="relative">
-                <PreviewImage src={previewSrc} alt="Preview Image of slip" />
-                <Button
-                  variant="outline"
-                  className="flex-1 absolute top-0 left-0"
-                >
-                  <div className="flex items-center gap-2">
-                    <Upload />
-                    <span>Upload</span>
-                  </div>
-                </Button>
-              </div>
-            )} */}
-
-            {previewSrc && (
-              <Card className="bg-muted/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <FileImage className="h-4 w-4" />
-                    <span>Preview</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="w-full h-48 rounded-lg overflow-hidden bg-white">
-                    <Image
-                      src={previewSrc}
-                      alt="Receipt preview"
-                      className="w-full h-full object-contain"
-                      width={400}
-                      height={400}
-                    />
-                  </div>
-                  {fileName && (
-                    <p className="text-sm text-muted-foreground mt-2 truncate">
-                      {fileName}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          {previewSrc && (
+            <ReceiptPreview previewSrc={previewSrc} fileName={fileName} />
+          )}
         </form>
 
         <form
