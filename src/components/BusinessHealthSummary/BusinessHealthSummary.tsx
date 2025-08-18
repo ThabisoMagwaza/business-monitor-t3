@@ -87,7 +87,7 @@ function BusinessHealthSummary({
               </Link>
             </Button>
             <Button asChild variant="outline" className="flex-1">
-              <Link href="/add-transaction/expense">
+              <Link prefetch href="/add-transaction/expense">
                 <Scan />
                 Scan Receipt
               </Link>
