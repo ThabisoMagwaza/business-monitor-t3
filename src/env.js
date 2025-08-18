@@ -12,6 +12,7 @@ export const env = createEnv({
       .enum(['development', 'test', 'production'])
       .default('development'),
     GEMINI_API_KEY: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
   },
 
   /**
@@ -31,6 +32,7 @@ export const env = createEnv({
     POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
