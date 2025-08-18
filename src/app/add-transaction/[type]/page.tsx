@@ -6,9 +6,11 @@ import { addTransactions, parseImage } from '~/app/actions';
 import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
 import { Button } from '~/components/ui/button';
-import { PlusIcon, Scan, Trash, Upload } from 'lucide-react';
+import { FileImage, PlusIcon, Scan, Trash, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import FormSubmitButton from '~/components/FormSubmitButton/FormSubmitButton';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import Image from 'next/image';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -74,6 +76,7 @@ export default function Page({
 
   const [previewSrc, setPreviewSrc] = React.useState('');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const [fileName, setFileName] = React.useState<string>('');
 
   const [previousImage, setPreviousImage] = React.useState<FormData | null>(
     null
@@ -133,6 +136,7 @@ export default function Page({
 
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       setPreviewSrc(src.toString());
+      setFileName(file.name);
     };
 
     reader.readAsDataURL(file);
@@ -221,7 +225,7 @@ export default function Page({
           />
 
           <div>
-            {previewSrc && (
+            {/* {previewSrc && (
               <div className="relative">
                 <PreviewImage src={previewSrc} alt="Preview Image of slip" />
                 <Button
@@ -234,6 +238,33 @@ export default function Page({
                   </div>
                 </Button>
               </div>
+            )} */}
+
+            {previewSrc && (
+              <Card className="bg-muted/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileImage className="h-4 w-4" />
+                    <span>Preview</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="w-full h-48 rounded-lg overflow-hidden bg-white">
+                    <Image
+                      src={previewSrc}
+                      alt="Receipt preview"
+                      className="w-full h-full object-contain"
+                      width={400}
+                      height={400}
+                    />
+                  </div>
+                  {fileName && (
+                    <p className="text-sm text-muted-foreground mt-2 truncate">
+                      {fileName}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </div>
         </form>
