@@ -1,25 +1,21 @@
 'use client';
 import * as React from 'react';
 
-import { useFormStatus } from 'react-dom';
-
-import styled from 'styled-components';
-
 import { addTransactions, parseImage } from '~/app/actions';
-import { COLORS } from '~/lib/Colors';
 
-import CancelIcon from '~/components/CancelIcon';
 import PreviewImage from '~/components/PreviewImage';
 import { useToast } from '~/app/context/ToastProvider';
 import { Button } from '~/components/ui/button';
-import { PlusIcon, Scan, Upload } from 'lucide-react';
+import { PlusIcon, Scan, Trash, Upload } from 'lucide-react';
+import clsx from 'clsx';
+import FormSubmitButton from '~/components/FormSubmitButton/FormSubmitButton';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
 export const maxDuration = 60;
 
 type AddTransactionParams = {
-  type: 'expenses' | 'income';
+  type: 'expense' | 'income';
 };
 
 export type NewTransaction = {
@@ -63,17 +59,6 @@ function imageTransactionNewToTransaction(
   };
 }
 
-function SaveButton({ children }: { children: React.ReactNode }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <SaveButtonWrapper>
-      {pending && <span>Saving Transactions...</span>}
-      <ActionButton disabled={pending}>{children}</ActionButton>
-    </SaveButtonWrapper>
-  );
-}
-
 export default function Page({
   params,
 }: {
@@ -94,7 +79,11 @@ export default function Page({
     null
   );
 
-  const saveNewTransactions = addTransactions.bind(null, newTransactions, type);
+  const saveNewTransactions = addTransactions.bind(
+    null,
+    newTransactions,
+    type === 'expense' ? 'expenses' : 'income'
+  );
 
   const onChangeValue = (
     transactionId: string,
@@ -249,7 +238,10 @@ export default function Page({
           </div>
         </form>
 
-        <TransactionsListForm action={saveNewTransactions}>
+        <form
+          className="flex-1 flex flex-col gap-4"
+          action={saveNewTransactions}
+        >
           {newTransactions.length === 0 && (
             <div className="flex-1 flex justify-center items-center text-center">
               <p>No Transactions Added</p>
@@ -257,150 +249,63 @@ export default function Page({
           )}
 
           {newTransactions.map((transaction) => (
-            <NewTransaction key={transaction.id}>
-              <NewDescription
+            <div
+              className="grid w-full grid-cols-[1fr_max-content_max-content] gap-2 grid-rows-[min-content_min-content] items-center border-b border-gray-200"
+              key={transaction.id}
+            >
+              <input
                 onChange={(e) =>
                   onChangeValue(transaction.id, 'description', e.target.value)
                 }
                 value={transaction.description}
+                className="border-none"
               />
-              <NewDate
+              <input
                 onChange={(e) =>
                   onChangeValue(transaction.id, 'date', e.target.value)
                 }
                 value={transaction.date}
                 type="date"
+                className="border-none row-2 justify-self-start text-sm"
               />
-              <NewAmountWrapper>
+              <div className="grid-row-1 grid-column-2 flex items-center text-2xl">
                 R
-                <NewAmount
+                <input
                   onChange={(e) =>
                     onChangeValue(transaction.id, 'amount', e.target.value)
                   }
                   value={transaction.amount}
                   type="text"
+                  className="border-none w-16"
                 />
-              </NewAmountWrapper>
-              <NewExpenseType
-                style={
-                  {
-                    '--color':
-                      (type === 'income' && COLORS.Green49) || COLORS.Red47,
-                  } as React.CSSProperties
-                }
+              </div>
+              <p
+                className={clsx(
+                  'row-2 col-2',
+                  type === 'expense' && 'text-red-400',
+                  type === 'income' && 'text-green-400'
+                )}
               >
-                {(type === 'expenses' && 'Expense') || 'Income'}
-              </NewExpenseType>
-              <IconButton onClick={() => onDeleteTransaction(transaction.id)}>
-                <IconWrapper>
-                  <CancelIcon />
-                </IconWrapper>
-              </IconButton>
-            </NewTransaction>
+                {(type === 'expense' && 'Expense') || 'Income'}
+              </p>
+              <Button
+                onClick={() => onDeleteTransaction(transaction.id)}
+                variant="ghost"
+                size="icon"
+                className="size-4"
+              >
+                <Trash />
+              </Button>
+            </div>
           ))}
 
-          {newTransactions.length > 0 && <SaveButton>Save</SaveButton>}
-        </TransactionsListForm>
+          {newTransactions.length > 0 && (
+            <FormSubmitButton loadingText="Saving Transactions...">
+              Save
+            </FormSubmitButton>
+          )}
+        </form>
       </div>
     </main>
   );
 }
-
-const SaveButtonWrapper = styled.div`
-  margin-top: 16px;
-  align-self: flex-end;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const NewAmount = styled.input`
-  width: 60px;
-  border: none;
-`;
-
-const NewExpenseType = styled.p`
-  grid-row: 2;
-  grid-column: 2;
-
-  font-weight: 700;
-  color: var(--color);
-`;
-
-const NewAmountWrapper = styled.div`
-  grid-row: 1;
-  grid-column: 2;
-
-  display: flex;
-  align-items: center;
-
-  font-size: ${20 / 16}rem;
-`;
-
-const NewTransaction = styled.div`
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1fr repeat(2, max-content);
-  grid-template-rows: repeat(2, min-content);
-  align-items: center;
-  gap: 10px;
-
-  border-bottom: 1px solid;
-  padding: 10px;
-`;
-
-const NewDate = styled.input`
-  grid-row: 2;
-
-  border: none;
-  font-size: ${14 / 16}rem;
-  justify-self: start;
-`;
-
-const NewDescription = styled.input`
-  border: none;
-  font-weight: 450;
-`;
-
-const IconButton = styled.div`
-  border: none;
-  background: none;
-  grid-column: 3;
-  grid-row: 1/ -1;
-
-  align-self: center;
-`;
-
-const IconWrapper = styled.div`
-  --size: 30px;
-  width: var(--size);
-  height: var(--size);
-
-  color: ${COLORS.Red47};
-`;
-
-const TransactionsListForm = styled.form`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-`;
-
-const ActionButton = styled.button`
-  border: none;
-  background: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: black;
-
-  border-bottom: 1px solid;
-  border-radius: 16px;
-  padding-inline: 16px;
-  padding-block: 8px;
-
-  &:disabled {
-    opacity: 0.5;
-  }
-`;
