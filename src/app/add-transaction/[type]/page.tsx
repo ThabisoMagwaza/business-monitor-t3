@@ -1,14 +1,14 @@
 'use client';
 import * as React from 'react';
 
-import { addTransactions, parseImage } from '~/app/actions';
+import { type NewTransaction, parseImage } from '~/app/actions';
 
 import { useToast } from '~/app/context/ToastProvider';
 import { Button } from '~/components/ui/button';
-import { PlusIcon, Scan, Trash } from 'lucide-react';
-import clsx from 'clsx';
-import FormSubmitButton from '~/components/FormSubmitButton/FormSubmitButton';
+import { PlusIcon, Scan } from 'lucide-react';
+
 import ReceiptPreview from '~/components/ReceiptPreview/ReceiptPreview';
+import AddTransactionsForm from '~/components/AddTransactionsForm/AddTransactionsForm';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -16,13 +16,6 @@ export const maxDuration = 60;
 
 type AddTransactionParams = {
   type: 'expense' | 'income';
-};
-
-export type NewTransaction = {
-  id: string;
-  description: string;
-  date: string;
-  amount: string;
 };
 
 type ImageTransaction = {
@@ -37,7 +30,7 @@ export type AiImageState = {
 
 function createDefaultTransaction(): NewTransaction {
   return {
-    id: crypto.randomUUID(),
+    id: Math.floor(Math.random() * 1000000),
     description: 'New Transaction',
     date: new Intl.DateTimeFormat('en-ZA')
       .format(new Date())
@@ -50,7 +43,7 @@ function imageTransactionNewToTransaction(
   imageTransaction: ImageTransaction
 ): NewTransaction {
   return {
-    id: crypto.randomUUID(),
+    id: Math.floor(Math.random() * 1000000),
     description: imageTransaction.name,
     date: new Intl.DateTimeFormat('en-ZA')
       .format(new Date())
@@ -80,39 +73,12 @@ export default function Page({
     null
   );
 
-  const saveNewTransactions = addTransactions.bind(
-    null,
-    newTransactions,
-    type === 'expense' ? 'expenses' : 'income'
-  );
+  //   const transactions = newTransactions.filter(
+  //     (transaction) => transaction.id !== id
+  //   );
 
-  const onChangeValue = (
-    transactionId: string,
-    key: keyof NewTransaction,
-    value: string
-  ) => {
-    const index = newTransactions.findIndex(
-      (transaction) => transaction.id === transactionId
-    );
-
-    if (index === -1) {
-      console.error('Invalid key provided');
-      return;
-    }
-
-    const transactions = [...newTransactions];
-    transactions[index]![key] = value;
-
-    setNewTransactions(transactions);
-  };
-
-  const onDeleteTransaction = (id: string) => {
-    const transactions = newTransactions.filter(
-      (transaction) => transaction.id !== id
-    );
-
-    setNewTransactions(transactions);
-  };
+  //   setNewTransactions(transactions);
+  // };
 
   const handleImageUpload = () => {
     const files = inputRef.current?.files;
@@ -227,73 +193,12 @@ export default function Page({
           )}
         </form>
 
-        <form
-          className="flex-1 flex flex-col gap-4"
-          action={saveNewTransactions}
-        >
-          {newTransactions.length === 0 && (
-            <div className="flex-1 flex justify-center items-center text-center">
-              <p>No Transactions Added</p>
-            </div>
-          )}
-
-          {newTransactions.map((transaction) => (
-            <div
-              className="grid w-full grid-cols-[1fr_max-content_max-content] gap-2 grid-rows-[min-content_min-content] items-center border-b border-gray-200"
-              key={transaction.id}
-            >
-              <input
-                onChange={(e) =>
-                  onChangeValue(transaction.id, 'description', e.target.value)
-                }
-                value={transaction.description}
-                className="border-none"
-              />
-              <input
-                onChange={(e) =>
-                  onChangeValue(transaction.id, 'date', e.target.value)
-                }
-                value={transaction.date}
-                type="date"
-                className="border-none row-2 justify-self-start text-sm"
-              />
-              <div className="grid-row-1 grid-column-2 flex items-center text-2xl">
-                R
-                <input
-                  onChange={(e) =>
-                    onChangeValue(transaction.id, 'amount', e.target.value)
-                  }
-                  value={transaction.amount}
-                  type="text"
-                  className="border-none w-16"
-                />
-              </div>
-              <p
-                className={clsx(
-                  'row-2 col-2',
-                  type === 'expense' && 'text-red-400',
-                  type === 'income' && 'text-green-400'
-                )}
-              >
-                {(type === 'expense' && 'Expense') || 'Income'}
-              </p>
-              <Button
-                onClick={() => onDeleteTransaction(transaction.id)}
-                variant="ghost"
-                size="icon"
-                className="size-4"
-              >
-                <Trash />
-              </Button>
-            </div>
-          ))}
-
-          {newTransactions.length > 0 && (
-            <FormSubmitButton loadingText="Saving Transactions...">
-              Save
-            </FormSubmitButton>
-          )}
-        </form>
+        {newTransactions.length > 0 && (
+          <AddTransactionsForm
+            type={type}
+            initialTransactions={newTransactions}
+          />
+        )}
       </div>
     </main>
   );

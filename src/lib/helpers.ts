@@ -7,3 +7,7 @@ export function formatCurrencyAmount(value: number) {
     }).format(value)
   );
 }
+
+export function formatDate(date: Date) {
+  return new Intl.DateTimeFormat('en-ZA').format(date).replaceAll('/', '-');
+}

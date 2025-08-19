@@ -9,14 +9,19 @@ import { revalidatePath } from 'next/cache';
 import { getBusinessInfo, getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
-import type { NewTransaction } from './add-transaction/[type]/page';
 import type { User } from '~/components/AddUsers';
 
 type Transaction = typeof transactions.$inferInsert;
+export type NewTransaction = Omit<
+  Transaction,
+  'type' | 'businessId' | 'createdAt'
+> & {
+  id: number;
+};
 
 export async function addTransactions(
   incomingTransactios: NewTransaction[],
-  type: 'expenses' | 'income'
+  type: 'expense' | 'income'
 ) {
   const user = await getUserInfo();
 
@@ -29,7 +34,7 @@ export async function addTransactions(
       description,
       amount: amount,
       date: new Date(date).toISOString(),
-      type: (type === 'expenses' && 'expense') || 'income',
+      type,
       businessId: user.businessId,
     })
   );
