@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Plus, Edit3, Trash2, Check } from 'lucide-react';
+import { Edit3, Trash2, Check, X } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import {
@@ -101,40 +101,28 @@ function AddTransactionsForm({
       .toFixed(2);
   };
 
-  const handleAddTransaction = () => {
-    const newTransaction: NewTransaction = {
-      id: transactions?.length ?? 0 + 1,
-      description: '',
-      amount: '0.00',
-      date: new Date().toISOString(),
-    };
-    setTransactions((prev) => {
-      if (!prev) {
-        return [];
-      }
-
-      return [...prev, newTransaction];
-    });
-    setEditingTransaction(newTransaction);
-    setIsEditDialogOpen(true);
-  };
-
   return (
     <>
       <form action={saveNewTransactions} className="flex flex-col gap-4">
         <Card className="bg-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle>Transactions</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddTransaction}
-              className="h-8"
-              type="button"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Add
-            </Button>
+            <CardTitle>Transactions ({transactions.length})</CardTitle>
+
+            {transactions.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => {
+                  setTransactions([]);
+                  setIsEditDialogOpen(false);
+                  setEditingTransaction(null);
+                }}
+              >
+                <X className="h-3 w-3" />
+                <span className="sr-only">Clear</span>
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             {transactions?.map((transaction, index) => (
@@ -186,14 +174,6 @@ function AddTransactionsForm({
                 <p className="text-muted-foreground mb-3">
                   No transactions found
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={handleAddTransaction}
-                  className="mx-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Transaction
-                </Button>
               </div>
             )}
 

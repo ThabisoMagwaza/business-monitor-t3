@@ -118,9 +118,8 @@ async function run(image: File) {
   };
 }
 
-export async function parseImage(formData: FormData) {
-  const slip = formData.get('slip') as File;
-  const data = await run(slip);
+export async function parseImage(receipt: File) {
+  const data = await run(receipt);
 
   return data;
 }
