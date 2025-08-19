@@ -10,6 +10,7 @@ import { getBusinessInfo, getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
 import type { User } from '~/components/AddUsers';
+import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
 
 type Transaction = typeof transactions.$inferInsert;
 export type NewTransaction = Omit<
@@ -119,9 +120,28 @@ async function run(image: File) {
 }
 
 export async function parseImage(receipt: File) {
-  const data = await run(receipt);
+  const user = await getUserInfo();
 
-  return data;
+  if (!user?.businessId) {
+    return;
+  }
+
+  const businessId = user.businessId;
+
+  // 1. upload the image to the cloud (uploadThing)
+  const imageUrl = await uploadImageToCloud(receipt);
+
+  if (!imageUrl) {
+    return;
+  }
+  console.log({ imageUrl });
+
+  // 2. create a receipt in the db (draft)
+  // 3. create a scan in the db (draft)
+
+  // const data = await run(receipt);
+
+  // return data;
 }
 
 export async function addUser(newUser: User | null) {

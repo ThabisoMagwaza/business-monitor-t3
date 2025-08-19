@@ -41,10 +41,6 @@ export default function Page() {
   const [previewSrc, setPreviewSrc] = React.useState('');
   const [receipt, setReceipt] = React.useState<File | null>(null);
 
-  const [previousImage, setPreviousImage] = React.useState<FormData | null>(
-    null
-  );
-
   const [newTransactions, setNewTransactions] = React.useState<
     NewTransaction[]
   >([]);
