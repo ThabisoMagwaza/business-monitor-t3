@@ -1,5 +1,11 @@
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { Plus, Edit3, Trash2, Check } from 'lucide-react';
 import { Input } from '~/components/ui/input';
@@ -21,13 +27,17 @@ import type { NewTransaction } from '~/app/actions';
 
 function AddTransactionsForm({
   type,
-  initialTransactions,
+  transactions,
+  setTransactions,
 }: {
   type: 'expense' | 'income';
-  initialTransactions: NewTransaction[];
+  transactions: NewTransaction[];
+  setTransactions: (
+    transactions:
+      | NewTransaction[]
+      | ((prev: NewTransaction[]) => NewTransaction[])
+  ) => void;
 }) {
-  const [transactions, setTransactions] =
-    React.useState<NewTransaction[]>(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [editingTransaction, setEditingTransaction] =
     React.useState<NewTransaction | null>(null);
@@ -44,7 +54,7 @@ function AddTransactionsForm({
 
   const handleSaveEdit = () => {
     if (editingTransaction) {
-      setTransactions((prev) =>
+      setTransactions((prev: NewTransaction[]) =>
         prev.map((transaction) =>
           transaction.id === editingTransaction.id
             ? editingTransaction
@@ -74,7 +84,7 @@ function AddTransactionsForm({
   };
 
   const handleDeleteTransaction = (id: number) => {
-    setTransactions((prev) => {
+    setTransactions((prev: NewTransaction[]) => {
       if (!prev) {
         return [];
       }
@@ -199,13 +209,14 @@ function AddTransactionsForm({
               </>
             )}
           </CardContent>
+          <CardFooter>
+            {transactions.length > 0 && (
+              <FormSubmitButton loadingText="Saving Transactions...">
+                Save
+              </FormSubmitButton>
+            )}
+          </CardFooter>
         </Card>
-
-        <div className="mt-4 mb-4 flex-end flex flex-col gap-2">
-          <FormSubmitButton loadingText="Saving Transactions...">
-            Save
-          </FormSubmitButton>
-        </div>
       </form>
 
       {/* Edit Transaction Dialog */}

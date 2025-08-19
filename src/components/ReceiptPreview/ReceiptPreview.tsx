@@ -10,7 +10,7 @@ function UploadButton() {
 
   return (
     <Button type="submit" variant="outline" disabled={pending}>
-      {pending ? <Loader /> : <Upload />}
+      {pending ? <Loader className="animate-spin" /> : <Upload />}
       <span>Upload</span>
     </Button>
   );

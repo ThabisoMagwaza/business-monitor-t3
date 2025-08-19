@@ -149,7 +149,7 @@ export default function Page({
 
   return (
     <main className="flex-1">
-      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 flex flex-col flex-1 h-full gap-4">
+      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4 flex flex-col flex-1 h-full gap-4">
         <h1 className="text-2xl font-bold text-center mt-4">
           {(type === 'income' && 'Add Income') || 'Add Expenses'}
         </h1>
@@ -193,12 +193,11 @@ export default function Page({
           )}
         </form>
 
-        {newTransactions.length > 0 && (
-          <AddTransactionsForm
-            type={type}
-            initialTransactions={newTransactions}
-          />
-        )}
+        <AddTransactionsForm
+          type={type}
+          transactions={newTransactions}
+          setTransactions={setNewTransactions}
+        />
       </div>
     </main>
   );
