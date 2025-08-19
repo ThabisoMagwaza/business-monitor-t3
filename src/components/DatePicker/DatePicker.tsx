@@ -29,7 +29,7 @@ export default function DatePicker({
         <Button
           type="button"
           variant="outline"
-          className="w-48 justify-between font-normal"
+          className="justify-between font-normal w-full"
         >
           {date ? formatDate(date) : 'Select date'}
           <ChevronDownIcon />
