@@ -13,6 +13,7 @@ import {
   PiggyBankIcon,
   TrendingDown,
   Scan,
+  FileText,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
@@ -90,6 +91,12 @@ function BusinessHealthSummary({
               <Link prefetch href="/receipts/create">
                 <Scan />
                 Scan Receipt
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link prefetch href="/receipts">
+                <FileText className="mr-2" />
+                Receipts
               </Link>
             </Button>
           </div>

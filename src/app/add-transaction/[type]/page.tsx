@@ -59,8 +59,8 @@ export default function Page({
 
         <AddTransactionsForm
           type={type}
-          transactions={newTransactions}
-          setTransactions={setNewTransactions}
+          initialTransactions={newTransactions}
+          saveTransactions={(transactions) => setNewTransactions(transactions)}
         />
       </div>
     </main>
