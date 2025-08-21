@@ -1,3 +1,4 @@
+'use client';
 import * as React from 'react';
 import {
   Card,
@@ -21,28 +22,28 @@ import { Separator } from '~/components/ui/separator';
 import DatePicker from '../DatePicker/DatePicker';
 import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
-import { addTransactions } from '~/app/actions';
 
 import type { NewTransaction } from '~/app/actions';
 
 function AddTransactionsForm({
   type,
-  transactions,
-  setTransactions,
+  initialTransactions,
+  saveTransactions,
 }: {
   type: 'expense' | 'income';
-  transactions: NewTransaction[];
-  setTransactions: (
-    transactions:
-      | NewTransaction[]
-      | ((prev: NewTransaction[]) => NewTransaction[])
+  initialTransactions: NewTransaction[];
+  saveTransactions: (
+    transactions: NewTransaction[],
+    type: 'expense' | 'income'
   ) => void;
 }) {
+  const [transactions, setTransactions] =
+    React.useState<NewTransaction[]>(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [editingTransaction, setEditingTransaction] =
     React.useState<NewTransaction | null>(null);
 
-  const saveNewTransactions = addTransactions.bind(null, transactions, type);
+  const saveNewTransactions = saveTransactions.bind(null, transactions, type);
 
   const handleEdit = (id: number) => {
     const transaction = transactions.find((t) => t.id === id);
@@ -201,9 +202,12 @@ function AddTransactionsForm({
 
       {/* Edit Transaction Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          aria-describedby="transaction-description"
+        >
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle id="transaction-description">
               {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
             </DialogTitle>
           </DialogHeader>

@@ -1,27 +1,45 @@
-import { desc, eq } from 'drizzle-orm';
-import { db } from '~/server/db';
+import Page from '~/components/Page/Page';
 import { receiptScans, receipts } from '~/server/db/schema';
+import { eq, desc } from 'drizzle-orm';
+import { db } from '~/server/db';
+import { redirect } from 'next/navigation';
 
-export default async function Page({
+import type { ScanResult } from '~/lib/types/ScanResult';
+
+export default async function ReceiptPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
 
-  // 1. get the receipt and scan
   const receipt = await db.query.receipts.findFirst({
     where: eq(receipts.id, Number(id)),
     with: {
       scans: {
         orderBy: [desc(receiptScans.createdAt)],
         where: eq(receiptScans.status, 'success'),
+        limit: 1,
       },
     },
   });
 
-  console.log({ receipt });
-  console.log(typeof receipt?.scans);
+  if (!receipt) {
+    return <div>Receipt not found</div>;
+  }
 
-  return <div>Receipt {id}</div>;
+  const scan = {
+    ...receipt.scans[0],
+    scanResult: receipt.scans[0]?.scanResult as ScanResult,
+  };
+
+  if (!scan.accepted) {
+    redirect(`/receipts/${id}/review`);
+  }
+
+  return (
+    <Page>
+      <h1 className="text-2xl font-bold text-center mt-4">Receipts</h1>
+    </Page>
+  );
 }

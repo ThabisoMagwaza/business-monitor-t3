@@ -1,3 +1,4 @@
+'use client';
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { FileImage, Loader, Upload } from 'lucide-react';
@@ -19,9 +20,11 @@ function UploadButton() {
 function ReceiptPreview({
   previewSrc,
   fileName,
+  canUpload = true,
 }: {
   previewSrc: string;
-  fileName: string;
+  fileName?: string;
+  canUpload?: boolean;
 }) {
   return (
     <Card className="bg-muted/50">
@@ -32,12 +35,13 @@ function ReceiptPreview({
             <span>Preview</span>
           </CardTitle>
 
-          <UploadButton />
+          {canUpload && <UploadButton />}
         </div>
       </CardHeader>
       <CardContent>
         <div className="w-full h-48 rounded-lg overflow-hidden bg-white">
           <Image
+            priority
             src={previewSrc}
             alt="Receipt preview"
             className="w-full h-full object-contain"

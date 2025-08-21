@@ -10,7 +10,6 @@ import {
 } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -20,15 +19,7 @@ import { db } from '~/server/db';
 
 import type { User } from '~/components/AddUsers';
 import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
-
-const scanResultSchema = z.object({
-  items: z.array(
-    z.object({
-      name: z.string(),
-      price: z.number(),
-    })
-  ),
-});
+import { scanResultSchema, type ScanResult } from '~/lib/types/ScanResult';
 
 type Transaction = typeof transactions.$inferInsert;
 export type NewTransaction = Omit<
@@ -121,7 +112,7 @@ async function fileToGenerativePart(image: File, mimeType: string) {
 }
 
 async function run(image: File): Promise<{
-  message: z.infer<typeof scanResultSchema> | string;
+  message: ScanResult | string;
   rawResult: string;
   status: 'success' | 'error';
 }> {
@@ -241,8 +232,8 @@ export async function parseImage(receipt: File) {
     })
     .where(eq(receiptScans.id, scanId));
 
-  // 6. redirect to the receipt page
-  redirect(`/receipts/${receiptId}`);
+  // 6. redirect to the receipt review page
+  redirect(`/receipts/${receiptId}/review`);
 }
 
 export async function addUser(newUser: User | null) {

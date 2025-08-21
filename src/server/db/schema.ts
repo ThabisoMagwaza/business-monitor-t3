@@ -36,11 +36,11 @@ export const transactions = createTable('transactions', {
   amount: numeric('amount').notNull(),
   type: transactionTypeEnum('type').notNull(),
   date: date('date').notNull(),
-
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   businessId: integer('business_id').references(() => businesses.id),
+  receiptId: integer('receipt_id').references(() => receipts.id),
 });
 
 export const businesses = createTable('businesses', {
