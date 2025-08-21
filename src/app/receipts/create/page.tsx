@@ -75,39 +75,18 @@ export default function Page() {
   };
 
   const handleImageSubmit = async () => {
-    const handleError = () => {
+    if (!receipt) {
+      return;
+    }
+
+    try {
+      await parseImage(receipt);
+    } catch (error) {
       showToast({
         title: 'Error reading image',
         description:
           'Error reading image. Please try again or use manual entry.',
       });
-    };
-
-    if (!receipt) {
-      handleError();
-      return;
-    }
-
-    try {
-      const result = (await parseImage(receipt)) as {
-        message: {
-          items: ImageTransaction[];
-        };
-      };
-
-      if (!result.message.items) {
-        handleError();
-        return;
-      }
-      const transactionsResult = result.message.items;
-
-      const newTransactions = transactionsResult.map((transaction) =>
-        imageTransactionNewToTransaction(transaction)
-      );
-
-      setNewTransactions((prev) => [...newTransactions, ...prev]);
-    } catch (error) {
-      handleError();
     }
   };
 
@@ -152,7 +131,7 @@ export default function Page() {
             className="hidden"
           />
 
-          {previewSrc && (
+          {receipt && previewSrc && (
             <ReceiptPreview previewSrc={previewSrc} fileName={fileName} />
           )}
         </form>

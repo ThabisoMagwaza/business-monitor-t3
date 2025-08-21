@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTableCreator,
   serial,
@@ -24,7 +24,11 @@ import {
 export const createTable = pgTableCreator((name) => `business-monitor_${name}`);
 
 export const transactionTypeEnum = pgEnum('type', ['income', 'expense']);
-export const receiptStatusEnum = pgEnum('status', ['success', 'error']);
+export const receiptStatusEnum = pgEnum('status', [
+  'success',
+  'error',
+  'created',
+]);
 
 export const transactions = createTable('transactions', {
   id: serial('id').primaryKey(),
@@ -57,7 +61,6 @@ export const receipts = createTable('receipts', {
   id: serial('id').primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   url: varchar('url', { length: 256 }).notNull(),
-  scanId: integer('scan_id').references(() => receiptScans.id),
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -81,4 +84,18 @@ export const receiptScans = createTable('receipt_scans', {
   businessId: integer('business_id')
     .notNull()
     .references(() => businesses.id),
+  receiptId: integer('receipt_id')
+    .notNull()
+    .references(() => receipts.id),
 });
+
+export const receiptsRelations = relations(receipts, ({ many }) => ({
+  scans: many(receiptScans),
+}));
+
+export const receiptScansRelations = relations(receiptScans, ({ one }) => ({
+  receipt: one(receipts, {
+    fields: [receiptScans.receiptId],
+    references: [receipts.id],
+  }),
+}));
