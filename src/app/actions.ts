@@ -315,7 +315,7 @@ export async function rescanReceipt(receiptId: number, imageUrl: string) {
     .where(eq(receiptScans.id, scanId));
 
   revalidatePath(`/receipts/${receiptId}/review`);
-  // redirect(`/receipts/${receiptId}/review`);
+  redirect(`/receipts/${receiptId}/review`);
 }
 
 export async function addUser(newUser: User | null) {
