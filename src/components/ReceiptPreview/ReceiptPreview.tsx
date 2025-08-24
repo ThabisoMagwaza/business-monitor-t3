@@ -1,14 +1,7 @@
 'use client';
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import {
-  FileImage,
-  Loader,
-  Upload,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-} from 'lucide-react';
+import { Loader, Upload, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { Button } from '../ui/button';
@@ -26,7 +19,6 @@ function UploadButton({ children }: { children: React.ReactNode }) {
 
 function ReceiptPreview({
   previewSrc,
-  fileName,
   rescan = false,
 }: {
   previewSrc: string;
@@ -41,7 +33,6 @@ function ReceiptPreview({
   const imageRef = React.useRef<HTMLImageElement>(null);
 
   const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     const newScale = Math.max(1, Math.min(5, scale * delta));
     setScale(newScale);
@@ -96,7 +87,8 @@ function ReceiptPreview({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // Don't prevent default to avoid passive event listener issues
+    // The container's overflow hidden will prevent unwanted scrolling
 
     if (e.touches.length === 2) {
       // Pinch to zoom
@@ -233,12 +225,6 @@ function ReceiptPreview({
             )}
           </div>
         </div>
-
-        {fileName && (
-          <p className="text-sm text-muted-foreground mt-2 truncate">
-            {fileName}
-          </p>
-        )}
       </CardContent>
     </Card>
   );

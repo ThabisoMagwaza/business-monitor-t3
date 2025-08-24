@@ -94,11 +94,7 @@ export default async function ReceiptPage({
     <Page>
       <h1 className="text-2xl font-bold text-center mt-4">Receipt {id}</h1>
       <form action={handleRescan}>
-        <ReceiptPreview
-          previewSrc={receipt.url}
-          fileName={receipt.name}
-          rescan
-        />
+        <ReceiptPreview previewSrc={receipt.url} rescan />
       </form>
 
       <div className="flex flex-col gap-4">

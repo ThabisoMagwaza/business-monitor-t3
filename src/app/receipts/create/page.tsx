@@ -13,7 +13,6 @@ export const maxDuration = 60;
 export default function CreateReceiptPage() {
   const id = React.useId();
 
-  const [fileName, setFileName] = React.useState<string>('');
   const [previewSrc, setPreviewSrc] = React.useState('');
   const [receipt, setReceipt] = React.useState<File | null>(null);
 
@@ -37,7 +36,6 @@ export default function CreateReceiptPage() {
 
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       setPreviewSrc(src.toString());
-      setFileName(file.name);
       setReceipt(file);
     };
 
@@ -90,9 +88,7 @@ export default function CreateReceiptPage() {
           className="hidden"
         />
 
-        {receipt && previewSrc && (
-          <ReceiptPreview previewSrc={previewSrc} fileName={fileName} />
-        )}
+        {receipt && previewSrc && <ReceiptPreview previewSrc={previewSrc} />}
       </form>
     </Page>
   );
