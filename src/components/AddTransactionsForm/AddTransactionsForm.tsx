@@ -19,6 +19,7 @@ import {
   DialogFooter,
 } from '~/components/ui/dialog';
 import { Separator } from '~/components/ui/separator';
+import { Badge } from '~/components/ui/badge';
 import DatePicker from '../DatePicker/DatePicker';
 import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
@@ -133,9 +134,25 @@ function AddTransactionsForm({
                     <p className="font-medium text-foreground">
                       {transaction.description}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(new Date(transaction.date))}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(new Date(transaction.date))}
+                      </p>
+                      {(transaction.category ?? transaction.subCategory) && (
+                        <div className="flex items-center gap-1">
+                          {transaction.category && (
+                            <Badge variant="secondary" className="text-xs">
+                              {transaction.category}
+                            </Badge>
+                          )}
+                          {transaction.subCategory && (
+                            <Badge variant="outline" className="text-xs">
+                              {transaction.subCategory}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center space-x-3 ml-3">
                     <p className="font-semibold text-foreground">
@@ -254,6 +271,35 @@ function AddTransactionsForm({
                     onDateChangeAction={(date) =>
                       handleUpdateEditingTransaction('date', date)
                     }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    value={editingTransaction.category ?? ''}
+                    onChange={(e) =>
+                      handleUpdateEditingTransaction('category', e.target.value)
+                    }
+                    placeholder="e.g., Stock"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="subCategory">Sub Category</Label>
+                  <Input
+                    id="subCategory"
+                    value={editingTransaction.subCategory ?? ''}
+                    onChange={(e) =>
+                      handleUpdateEditingTransaction(
+                        'subCategory',
+                        e.target.value
+                      )
+                    }
+                    placeholder="e.g., Fuel"
                   />
                 </div>
               </div>
