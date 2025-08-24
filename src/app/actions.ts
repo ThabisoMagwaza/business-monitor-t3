@@ -125,13 +125,15 @@ async function urlToGenerativePart(imageUrl: string, mimeType: string) {
   };
 }
 
+const modelName = 'gemini-2.5-flash';
+
 async function run(image: string): Promise<{
   message: ScanResult | string;
   rawResult: string;
   status: 'success' | 'error';
 }> {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const categories = await db.query.transactionCategories.findMany();
     const subCategories = await db.query.itemSubCategories.findMany();
@@ -228,7 +230,7 @@ export async function parseImage(receipt: File) {
     .values({
       status: 'created',
       businessId,
-      model: 'gemini-1.5-flash',
+      model: modelName,
       provider: 'google',
       processTime: 0,
       scanResult: {},
@@ -280,7 +282,7 @@ export async function rescanReceipt(receiptId: number, imageUrl: string) {
     .values({
       status: 'created',
       businessId,
-      model: 'gemini-1.5-flash',
+      model: modelName,
       provider: 'google',
       processTime: 0,
       scanResult: {},
