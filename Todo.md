@@ -4,8 +4,11 @@
 [x] extrat more data from AI
 [x] dynamically tell AI what categories and tags are available, so that it try and classify the data for me
 
-[] Link scan transaction to slip
+[x] Link scan transaction to slip
+[] zoom picture
+
 [] filter transactions on page
+[] add receipt popup to transaction
 
 [] hide profit/loss stuff from non-admins (and more sensitive info)
 

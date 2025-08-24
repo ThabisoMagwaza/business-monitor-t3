@@ -141,7 +141,7 @@ async function run(image: string): Promise<{
       The categories are: ${categories.map((c) => c.name).join(', ')}. 
       The subCategories are: ${subCategories.map((c) => c.name).join(', ')}
 
-      Please suggest a category and subCategory for each item. If you are not sure, leave it blank.
+      Please suggest a category and subCategory for each item. If you are not sure, use the category "Other" and/or the subCategory "Other".
 
       The JSON should be in the following format:
       {
