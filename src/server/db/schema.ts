@@ -36,11 +36,32 @@ export const transactions = createTable('transactions', {
   amount: numeric('amount').notNull(),
   type: transactionTypeEnum('type').notNull(),
   date: date('date').notNull(),
+  categoryId: integer('category_id').references(() => transactionCategories.id),
+  storeName: varchar('store_name', { length: 256 }),
+  subCategoryId: integer('sub_category_id').references(
+    () => itemSubCategories.id
+  ),
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   businessId: integer('business_id').references(() => businesses.id),
   receiptId: integer('receipt_id').references(() => receipts.id),
+});
+
+export const transactionCategories = createTable('transaction_categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 256 }).notNull(),
+  createdAt: timestamp('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
+export const itemSubCategories = createTable('item_sub_categories', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 256 }).notNull(),
+  createdAt: timestamp('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
 });
 
 export const businesses = createTable('businesses', {

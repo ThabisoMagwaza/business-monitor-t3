@@ -18,8 +18,6 @@ export default function CreateReceiptPage() {
   const [previewSrc, setPreviewSrc] = React.useState('');
   const [receipt, setReceipt] = React.useState<File | null>(null);
 
-  const { showToast } = useToast();
-
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
 
@@ -52,15 +50,7 @@ export default function CreateReceiptPage() {
       return;
     }
 
-    try {
-      await parseImage(receipt);
-    } catch (error) {
-      showToast({
-        title: 'Error reading image',
-        description:
-          'Error reading image. Please try again or use manual entry.',
-      });
-    }
+    await parseImage(receipt);
   };
 
   return (

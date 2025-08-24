@@ -102,16 +102,26 @@ const ApiKey = process.env.GEMINI_API_KEY!;
 
 const genAI = new GoogleGenerativeAI(ApiKey);
 
-async function fileToGenerativePart(image: File, mimeType: string) {
+async function urlToGenerativePart(imageUrl: string, mimeType: string) {
+  // Fetch the image from the URL
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+  }
+
+  // Get the image as an array buffer
+  const arrayBuffer = await response.arrayBuffer();
+
   return {
     inlineData: {
-      data: Buffer.from(await image.arrayBuffer()).toString('base64'),
+      data: Buffer.from(arrayBuffer).toString('base64'),
       mimeType,
     },
   };
 }
 
-async function run(image: File): Promise<{
+async function run(image: string): Promise<{
   message: ScanResult | string;
   rawResult: string;
   status: 'success' | 'error';
@@ -119,22 +129,37 @@ async function run(image: File): Promise<{
   try {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
+    const categories = await db.query.transactionCategories.findMany();
+    const subCategories = await db.query.itemSubCategories.findMany();
+
     const prompt = `what did I buy? Give the answer in JSON. Do not include the currency.
+
+      The categories are: ${categories.map((c) => c.name).join(', ')}. 
+      The subCategories are: ${subCategories.map((c) => c.name).join(', ')}
+
+      Please suggest a category and subCategory for each item. If you are not sure, leave it blank.
+
       The JSON should be in the following format:
       {
+        "storeName": "string",
+        "date": "string (YYYY-MM-DD)",
         "items": [
           {
             "name": "string",
-            "price": "number (in cents)"
+            "price": "number (in cents)",
+            "category": "string",
+            "subCategory": "string"
           }
         ]
       }`;
 
-    const imageParts = [await fileToGenerativePart(image, 'image/jpeg')];
+    const imageParts = [await urlToGenerativePart(image, 'image/jpeg')];
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = result.response;
     const text = response.text();
+
+    console.log(text);
 
     const parsed = scanResultSchema.safeParse(
       JSON.parse(text.replaceAll('```', '').replace('json', ''))
@@ -217,7 +242,7 @@ export async function parseImage(receipt: File) {
   // 4. run the model
   const startTime = Date.now();
 
-  const scanResult = await run(receipt);
+  const scanResult = await run(imageUrl);
 
   const endTime = Date.now();
   const processTime = endTime - startTime;
@@ -233,6 +258,57 @@ export async function parseImage(receipt: File) {
     .where(eq(receiptScans.id, scanId));
 
   // 6. redirect to the receipt review page
+  redirect(`/receipts/${receiptId}/review`);
+}
+
+export async function rescanReceipt(receiptId: number, imageUrl: string) {
+  const user = await getUserInfo();
+
+  if (!user?.businessId) {
+    throw new Error('User not found');
+  }
+
+  const businessId = user.businessId;
+
+  // 3. create a scan in the db (draft)
+  const newScanResult = await db
+    .insert(receiptScans)
+    .values({
+      status: 'created',
+      businessId,
+      model: 'gemini-1.5-flash',
+      provider: 'google',
+      processTime: 0,
+      scanResult: {},
+      receiptId,
+    })
+    .returning({ id: receiptScans.id });
+
+  const scanId = newScanResult[0]?.id;
+
+  if (!scanId) {
+    throw new Error('Error creating scan');
+  }
+
+  // 4. run the model
+  const startTime = Date.now();
+
+  const scanResult = await run(imageUrl);
+
+  const endTime = Date.now();
+  const processTime = endTime - startTime;
+
+  // 5. update the scan with the result
+  await db
+    .update(receiptScans)
+    .set({
+      scanResult: scanResult.rawResult,
+      status: scanResult.status,
+      processTime,
+    })
+    .where(eq(receiptScans.id, scanId));
+
+  revalidatePath(`/receipts/${receiptId}/review`);
   redirect(`/receipts/${receiptId}/review`);
 }
 

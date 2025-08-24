@@ -6,13 +6,13 @@ import Image from 'next/image';
 import { useFormStatus } from 'react-dom';
 import { Button } from '../ui/button';
 
-function UploadButton() {
+function UploadButton({ children }: { children: React.ReactNode }) {
   const { pending } = useFormStatus();
 
   return (
     <Button type="submit" variant="outline" disabled={pending}>
       {pending ? <Loader className="animate-spin" /> : <Upload />}
-      <span>Upload</span>
+      <span>{children}</span>
     </Button>
   );
 }
@@ -20,11 +20,11 @@ function UploadButton() {
 function ReceiptPreview({
   previewSrc,
   fileName,
-  canUpload = true,
+  rescan = false,
 }: {
   previewSrc: string;
   fileName?: string;
-  canUpload?: boolean;
+  rescan?: boolean;
 }) {
   return (
     <Card className="bg-muted/50">
@@ -35,7 +35,7 @@ function ReceiptPreview({
             <span>Preview</span>
           </CardTitle>
 
-          {canUpload && <UploadButton />}
+          <UploadButton>{rescan ? 'Rescan' : 'Upload'}</UploadButton>
         </div>
       </CardHeader>
       <CardContent>

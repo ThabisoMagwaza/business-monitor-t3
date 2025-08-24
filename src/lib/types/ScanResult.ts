@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const scanResultSchema = z.object({
+  storeName: z.string(),
+  date: z.string(),
   items: z.array(
     z.object({
       name: z.string(),

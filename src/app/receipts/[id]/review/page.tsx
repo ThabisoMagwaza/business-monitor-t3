@@ -10,7 +10,7 @@ import AddTransactionsForm from '~/components/AddTransactionsForm';
 import { formatDate } from '~/lib/helpers';
 import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
-import { type NewTransaction } from '~/app/actions';
+import { rescanReceipt, type NewTransaction } from '~/app/actions';
 import { redirect } from 'next/navigation';
 import { getUserInfo } from '~/app/db-helpers';
 
@@ -81,10 +81,25 @@ export default async function ReceiptPage({
     redirect(`/receipts/${id}`);
   };
 
+  const handleRescan = async () => {
+    'use server';
+    if (!receipt.url) {
+      return;
+    }
+
+    await rescanReceipt(Number(id), receipt.url);
+  };
+
   return (
     <Page>
       <h1 className="text-2xl font-bold text-center mt-4">Receipt {id}</h1>
-      <ReceiptPreview previewSrc={receipt.url} canUpload={false} />
+      <form action={handleRescan}>
+        <ReceiptPreview
+          previewSrc={receipt.url}
+          fileName={receipt.name}
+          rescan
+        />
+      </form>
 
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-bold">Transactions</h2>

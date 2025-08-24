@@ -9,15 +9,7 @@ import { formatDate, formatCurrencyAmount } from '~/lib/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import {
-  Clock,
-  CheckCircle,
-  FileText,
-  DollarSign,
-  Calendar,
-  Zap,
-  Image as ImageIcon,
-} from 'lucide-react';
+import { Clock, CheckCircle, FileText, Calendar, Zap } from 'lucide-react';
 
 export default async function ReceiptPage({
   params,
