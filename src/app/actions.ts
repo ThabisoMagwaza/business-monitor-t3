@@ -27,6 +27,8 @@ export type NewTransaction = Omit<
   'type' | 'businessId' | 'createdAt'
 > & {
   id: number;
+  category?: string;
+  subCategory?: string;
 };
 
 export async function addTransactions(
@@ -40,12 +42,14 @@ export async function addTransactions(
   }
 
   const newTransactions: Transaction[] = incomingTransactios.map(
-    ({ description, amount, date }) => ({
+    ({ description, amount, date, subCategoryId, categoryId }) => ({
       description,
       amount: amount,
       date: new Date(date).toISOString(),
       type,
       businessId: user.businessId,
+      subCategoryId,
+      categoryId,
     })
   );
 
@@ -148,7 +152,9 @@ async function run(image: string): Promise<{
             "name": "string",
             "price": "number (in cents)",
             "category": "string",
-            "subCategory": "string"
+            "categoryId": "number",
+            "subCategory": "string",
+            "subCategoryId": "number"
           }
         ]
       }`;
@@ -158,8 +164,6 @@ async function run(image: string): Promise<{
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = result.response;
     const text = response.text();
-
-    console.log(text);
 
     const parsed = scanResultSchema.safeParse(
       JSON.parse(text.replaceAll('```', '').replace('json', ''))

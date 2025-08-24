@@ -1,11 +1,10 @@
 [x] update db structure
 
-[] add rescan button
+[x] add rescan button
+[x] extrat more data from AI
+[x] dynamically tell AI what categories and tags are available, so that it try and classify the data for me
 
 [] Link scan transaction to slip
-[] extrat more data from AI
-[] dynamically tell AI what categories and tags are available, so that it try and classify the data for me
-
 [] filter transactions on page
 
 [] hide profit/loss stuff from non-admins (and more sensitive info)

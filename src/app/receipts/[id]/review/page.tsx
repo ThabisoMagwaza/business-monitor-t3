@@ -113,6 +113,10 @@ export default async function ReceiptPage({
           date: formatDate(scan.createdAt ?? new Date()),
           description: item.name,
           amount: String(item.price / 100),
+          categoryId: item.categoryId,
+          subCategoryId: item.subCategoryId,
+          category: item.category,
+          subCategory: item.subCategory,
         }))}
         saveTransactions={saveTransactions}
       />

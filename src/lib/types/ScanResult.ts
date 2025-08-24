@@ -7,6 +7,10 @@ export const scanResultSchema = z.object({
     z.object({
       name: z.string(),
       price: z.number(),
+      category: z.string(),
+      categoryId: z.number(),
+      subCategory: z.string(),
+      subCategoryId: z.number(),
     })
   ),
 });

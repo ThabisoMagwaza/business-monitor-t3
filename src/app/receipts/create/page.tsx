@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Camera } from 'lucide-react';
-import { useToast } from '~/app/context/ToastProvider';
 import ReceiptPreview from '~/components/ReceiptPreview';
 import { parseImage } from '~/app/actions';
 import Page from '~/components/Page/Page';
