@@ -8,20 +8,20 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Edit3, Trash2, Check, X } from 'lucide-react';
+import { Edit3, Trash2, Check, X, Calendar } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '~/components/ui/dialog';
 import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
 import DatePicker from '../DatePicker/DatePicker';
-import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
+import { formatCurrencyAmount } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
 
 import type { NewTransaction } from '~/app/actions';
@@ -130,13 +130,23 @@ function AddTransactionsForm({
             {transactions?.map((transaction, index) => (
               <div key={transaction.id}>
                 <div className="flex justify-between items-start">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground">
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground truncate">
                       {transaction.description}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-sm text-muted-foreground">
-                        {formatDate(new Date(transaction.date))}
+                    <div className="flex items-start gap-2 mt-1 flex-wrap">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span className="truncate">
+                          {new Date(transaction.date).toLocaleDateString(
+                            'en-ZA',
+                            {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            }
+                          )}
+                        </span>
                       </p>
                       {(transaction.category ?? transaction.subCategory) && (
                         <div className="flex items-center gap-1">
@@ -154,7 +164,7 @@ function AddTransactionsForm({
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3 ml-3">
+                  <div className="flex items-start space-x-3 ml-3">
                     <p className="font-semibold text-foreground">
                       {formatCurrencyAmount(Number(transaction.amount))}
                     </p>
@@ -219,15 +229,14 @@ function AddTransactionsForm({
 
       {/* Edit Transaction Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent
-          className="sm:max-w-md"
-          aria-describedby="transaction-description"
-        >
-          <DialogHeader>
-            <DialogTitle id="transaction-description">
-              {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle>
+            {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
+          </DialogTitle>
+
+          <DialogDescription className="sr-only">
+            {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
+          </DialogDescription>
 
           {editingTransaction && (
             <div className="space-y-4">

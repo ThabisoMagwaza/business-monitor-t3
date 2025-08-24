@@ -6,6 +6,8 @@
 
 [x] Link scan transaction to slip
 [x] zoom picture
+[] error handling
+[] Fix manual add
 [] figure out save/backround process
 [] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
 
