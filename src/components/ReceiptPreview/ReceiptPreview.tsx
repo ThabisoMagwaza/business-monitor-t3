@@ -193,6 +193,7 @@ function ReceiptPreview({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            onClick={zoomIn}
             style={{ cursor: scale > 1 ? 'grab' : 'default' }}
           >
             <div
