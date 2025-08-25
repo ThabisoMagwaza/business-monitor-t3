@@ -130,7 +130,7 @@ function AddTransactionsForm({
             {transactions?.map((transaction, index) => (
               <div key={transaction.id}>
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
+                  <div className="flex-1 overflow-hidden">
                     <p className="font-medium text-foreground truncate">
                       {transaction.description}
                     </p>
