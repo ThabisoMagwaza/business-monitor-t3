@@ -3,18 +3,30 @@
 import * as React from 'react';
 import { Camera } from 'lucide-react';
 import ReceiptPreview from '~/components/ReceiptPreview';
-import { parseImage } from '~/app/actions';
+import { saveReceipt } from '~/app/actions';
 import Page from '~/components/Page/Page';
-
-// The AI takes time to respond
-// Extend the timeout for the form action from 10s to 60s
-export const maxDuration = 60;
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '~/components/ui/alert-dialog';
+import Link from 'next/link';
 
 export default function CreateReceiptPage() {
   const id = React.useId();
 
   const [previewSrc, setPreviewSrc] = React.useState('');
   const [receipt, setReceipt] = React.useState<File | null>(null);
+  const [saveDialogOpen, setSaveDialogOpen] = React.useState(false);
+
+  const [receiptId, setReceiptId] = React.useState<number | null>(null);
+  const [receiptName, setReceiptName] = React.useState<string | null>(null);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -47,7 +59,15 @@ export default function CreateReceiptPage() {
       return;
     }
 
-    await parseImage(receipt);
+    try {
+      const { name, id } = await saveReceipt(receipt);
+      setReceiptId(id);
+      setReceiptName(name);
+      setSaveDialogOpen(true);
+    } catch (error) {
+      console.error(error);
+      toast('Error saving receipt');
+    }
   };
 
   return (
@@ -90,6 +110,33 @@ export default function CreateReceiptPage() {
 
         {receipt && previewSrc && <ReceiptPreview previewSrc={previewSrc} />}
       </form>
+      <AlertDialog open={saveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Receipt Saved</AlertDialogTitle>
+            <AlertDialogDescription>
+              {receiptName} has been saved to your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel asChild>
+              <Link href={`/`}>Dashboard</Link>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setSaveDialogOpen(false);
+                setReceipt(null);
+                setPreviewSrc('');
+              }}
+            >
+              Upload Another
+            </AlertDialogAction>
+            <AlertDialogAction asChild>
+              <Link href={`/receipts/${receiptId}/review`}>Review Receipt</Link>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Page>
   );
 }

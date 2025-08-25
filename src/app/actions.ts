@@ -193,6 +193,42 @@ async function run(image: string): Promise<{
   }
 }
 
+export async function saveReceipt(receipt: File) {
+  const user = await getUserInfo();
+
+  if (!user?.businessId) {
+    throw new Error('User not found');
+  }
+
+  const imageUrl = await uploadImageToCloud(receipt);
+
+  if (!imageUrl) {
+    throw new Error('Error uploading image to cloud');
+  }
+
+  // 2. create a receipt in the db (draft)
+  const addReceiptResult = await db
+    .insert(receipts)
+    .values({
+      name: receipt.name,
+      url: imageUrl,
+      businessId: user.businessId,
+    })
+    .returning({ id: receipts.id });
+
+  const receiptId = addReceiptResult[0]?.id;
+
+  if (typeof receiptId !== 'number') {
+    throw new Error('Error creating receipt');
+  }
+
+  return {
+    id: receiptId,
+    name: receipt.name,
+    imageUrl,
+  };
+}
+
 export async function parseImage(receipt: File) {
   const user = await getUserInfo();
 

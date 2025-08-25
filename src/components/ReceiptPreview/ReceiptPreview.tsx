@@ -19,11 +19,11 @@ function UploadButton({ children }: { children: React.ReactNode }) {
 
 function ReceiptPreview({
   previewSrc,
-  rescan = false,
+  canUpload = true,
 }: {
   previewSrc: string;
   fileName?: string;
-  rescan?: boolean;
+  canUpload?: boolean;
 }) {
   const [scale, setScale] = React.useState(1);
   const [position, setPosition] = React.useState({ x: 0, y: 0 });
@@ -176,7 +176,7 @@ function ReceiptPreview({
             </div>
           </CardTitle>
 
-          <UploadButton>{rescan ? 'Rescan' : 'Upload'}</UploadButton>
+          {canUpload && <UploadButton>Save</UploadButton>}
         </div>
       </CardHeader>
       <CardContent>

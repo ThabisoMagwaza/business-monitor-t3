@@ -13,6 +13,12 @@ import ReceiptPreview from '~/components/ReceiptPreview';
 import { rescanReceipt, type NewTransaction } from '~/app/actions';
 import { redirect } from 'next/navigation';
 import { getUserInfo } from '~/app/db-helpers';
+import { revalidatePath } from 'next/cache';
+import SubmitButton from '~/components/SubmitButton';
+
+// The AI takes time to respond
+// Extend the timeout for the form action from 10s to 60s
+export const maxDuration = 60;
 
 export default async function ReceiptPage({
   params,
@@ -88,34 +94,56 @@ export default async function ReceiptPage({
     }
 
     await rescanReceipt(Number(id), receipt.url);
+    revalidatePath(`/receipts/${id}/review`);
+    redirect(`/receipts/${id}/review`);
   };
 
   return (
     <Page>
       <h1 className="text-2xl font-bold text-center mt-4">Receipt {id}</h1>
       <form action={handleRescan}>
-        <ReceiptPreview previewSrc={receipt.url} rescan />
+        <ReceiptPreview previewSrc={receipt.url} canUpload={false} />
       </form>
 
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold">Transactions</h2>
-      </div>
+      {!scan.scanResult && (
+        <form action={handleRescan}>
+          <div className="flex justify-center">
+            <SubmitButton loadingText="Scanning...">Scan Receipt</SubmitButton>
+          </div>
+        </form>
+      )}
 
-      <AddTransactionsForm
-        type="expense"
-        initialTransactions={scan.scanResult.items.map((item) => ({
-          id: Math.floor(Math.random() * 1000000),
-          type: 'expense',
-          date: formatDate(scan.createdAt ?? new Date()),
-          description: item.name,
-          amount: String(item.price / 100),
-          categoryId: item.categoryId,
-          subCategoryId: item.subCategoryId,
-          category: item.category,
-          subCategory: item.subCategory,
-        }))}
-        saveTransactions={saveTransactions}
-      />
+      {scan.scanResult && scan.scanResult?.items.length > 0 && (
+        <>
+          <form action={handleRescan}>
+            <div className="flex justify-center">
+              <SubmitButton loadingText="Scanning...">
+                Rescan Receipt
+              </SubmitButton>
+            </div>
+          </form>
+
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-bold">Transactions</h2>
+          </div>
+
+          <AddTransactionsForm
+            type="expense"
+            initialTransactions={scan.scanResult.items.map((item) => ({
+              id: Math.floor(Math.random() * 1000000),
+              type: 'expense',
+              date: formatDate(scan.createdAt ?? new Date()),
+              description: item.name,
+              amount: String(item.price / 100),
+              categoryId: item.categoryId,
+              subCategoryId: item.subCategoryId,
+              category: item.category,
+              subCategory: item.subCategory,
+            }))}
+            saveTransactions={saveTransactions}
+          />
+        </>
+      )}
     </Page>
   );
 }
