@@ -108,7 +108,7 @@ export default async function ReceiptPage({
       {!scan.scanResult && (
         <form action={handleRescan}>
           <div className="flex justify-center">
-            <SubmitButton loadingText="Scanning...">Scan Receipt</SubmitButton>
+            <SubmitButton>Scan Receipt</SubmitButton>
           </div>
         </form>
       )}
@@ -117,9 +117,7 @@ export default async function ReceiptPage({
         <>
           <form action={handleRescan}>
             <div className="flex justify-center">
-              <SubmitButton loadingText="Scanning...">
-                Rescan Receipt
-              </SubmitButton>
+              <SubmitButton>Rescan Receipt</SubmitButton>
             </div>
           </form>
 

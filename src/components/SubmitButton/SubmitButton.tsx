@@ -6,7 +6,6 @@ import { Loader, Upload } from 'lucide-react';
 
 function SubmitButton({
   children,
-  loadingText,
 }: {
   children: React.ReactNode;
   loadingText?: string;
