@@ -1,38 +1,24 @@
-'use client';
-import * as React from 'react';
-
-import { type NewTransaction } from '~/app/actions';
-
-import { Button } from '~/components/ui/button';
-import { PlusIcon } from 'lucide-react';
-
+import { addTransactions, type NewTransaction } from '~/app/actions';
 import AddTransactionsForm from '~/components/AddTransactionsForm/AddTransactionsForm';
 
 type AddTransactionParams = {
   type: 'expense' | 'income';
 };
 
-function createDefaultTransaction(): NewTransaction {
-  return {
-    id: Math.floor(Math.random() * 1000000),
-    description: 'New Transaction',
-    date: new Intl.DateTimeFormat('en-ZA')
-      .format(new Date())
-      .replaceAll('/', '-'),
-    amount: '0',
-  };
-}
-
-export default function Page({
+export default async function Page({
   params,
 }: {
   params: Promise<AddTransactionParams>;
 }) {
-  const { type } = React.use(params);
+  const { type } = await params;
 
-  const [newTransactions, setNewTransactions] = React.useState<
-    NewTransaction[]
-  >([]);
+  const saveTransactions = async (
+    transactions: NewTransaction[],
+    type: 'expense' | 'income'
+  ) => {
+    'use server';
+    await addTransactions(transactions, type);
+  };
 
   return (
     <main className="flex-1">
@@ -41,26 +27,10 @@ export default function Page({
           {(type === 'income' && 'Add Income') || 'Add Expenses'}
         </h1>
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() =>
-              setNewTransactions([
-                createDefaultTransaction(),
-                ...newTransactions,
-              ])
-            }
-          >
-            <PlusIcon />
-            <span>New Transaction</span>
-          </Button>
-        </div>
-
         <AddTransactionsForm
           type={type}
-          initialTransactions={newTransactions}
-          saveTransactions={(transactions) => setNewTransactions(transactions)}
+          initialTransactions={[]}
+          saveTransactions={saveTransactions}
         />
       </div>
     </main>

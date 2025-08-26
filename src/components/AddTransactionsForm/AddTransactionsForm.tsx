@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Edit3, Trash2, Check, X, Calendar } from 'lucide-react';
+import { Edit3, Trash2, Check, X, Calendar, Plus } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import {
@@ -25,6 +25,17 @@ import { formatCurrencyAmount } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
 
 import type { NewTransaction } from '~/app/actions';
+
+function createDefaultTransaction(): NewTransaction {
+  return {
+    id: Math.floor(Math.random() * 1000000),
+    description: '',
+    date: new Intl.DateTimeFormat('en-ZA')
+      .format(new Date())
+      .replaceAll('/', '-'),
+    amount: '0',
+  };
+}
 
 function AddTransactionsForm({
   type,
@@ -110,21 +121,35 @@ function AddTransactionsForm({
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle>Transactions ({transactions.length})</CardTitle>
 
-            {transactions.length > 0 && (
+            <div className="flex gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 type="button"
-                onClick={() => {
-                  setTransactions([]);
-                  setIsEditDialogOpen(false);
-                  setEditingTransaction(null);
-                }}
+                onClick={() =>
+                  setTransactions([createDefaultTransaction(), ...transactions])
+                }
               >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Clear</span>
+                <Plus className="h-3 w-3" />
+                <span className="sr-only">Add Transaction</span>
               </Button>
-            )}
+
+              {transactions.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    setTransactions([]);
+                    setIsEditDialogOpen(false);
+                    setEditingTransaction(null);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Clear</span>
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {transactions?.map((transaction, index) => (

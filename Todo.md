@@ -1,10 +1,13 @@
 - [x] zoom picture
 - [x] tap to zoom (pinch to zoom doesn't work well on mobile)
 
-- [ ] separate save logic from scan logic
+- [x] separate save logic from scan logic
+- [x] Fix manual add
 
+- [ ] seameless continuous review
+- [ ] add the "pending receipts" quick action (banner?)
+- [ ] filtering by status on receipts page
 - [ ] error handling
-- [ ] Fix manual add
 
 - [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
 - [ ] improve page load speed (suspense, skeletons e.t.c)
