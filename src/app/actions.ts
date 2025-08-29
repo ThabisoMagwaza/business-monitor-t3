@@ -1,22 +1,39 @@
 'use server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-import { transactions, businesses, users } from '~/server/db/schema';
+import {
+  transactions,
+  businesses,
+  users,
+  receipts,
+  receiptScans,
+} from '~/server/db/schema';
+import { eq } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
+
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
-import { revalidatePath } from 'next/cache';
 import { getBusinessInfo, getUserInfo } from './db-helpers';
 import { db } from '~/server/db';
 
-import type { NewTransaction } from './add-transaction/[type]/page';
 import type { User } from '~/components/AddUsers';
+import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
+import { scanResultSchema, type ScanResult } from '~/lib/types/ScanResult';
 
 type Transaction = typeof transactions.$inferInsert;
+export type NewTransaction = Omit<
+  Transaction,
+  'type' | 'businessId' | 'createdAt'
+> & {
+  id: number;
+  category?: string;
+  subCategory?: string;
+};
 
 export async function addTransactions(
   incomingTransactios: NewTransaction[],
-  type: 'expenses' | 'income'
+  type: 'expense' | 'income'
 ) {
   const user = await getUserInfo();
 
@@ -25,12 +42,14 @@ export async function addTransactions(
   }
 
   const newTransactions: Transaction[] = incomingTransactios.map(
-    ({ description, amount, date }) => ({
+    ({ description, amount, date, subCategoryId, categoryId }) => ({
       description,
       amount: amount,
       date: new Date(date).toISOString(),
-      type: (type === 'expenses' && 'expense') || 'income',
+      type,
       businessId: user.businessId,
+      subCategoryId,
+      categoryId,
     })
   );
 
@@ -87,37 +106,252 @@ const ApiKey = process.env.GEMINI_API_KEY!;
 
 const genAI = new GoogleGenerativeAI(ApiKey);
 
-async function fileToGenerativePart(image: File, mimeType: string) {
+async function urlToGenerativePart(imageUrl: string, mimeType: string) {
+  // Fetch the image from the URL
+  const response = await fetch(imageUrl);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+  }
+
+  // Get the image as an array buffer
+  const arrayBuffer = await response.arrayBuffer();
+
   return {
     inlineData: {
-      data: Buffer.from(await image.arrayBuffer()).toString('base64'),
+      data: Buffer.from(arrayBuffer).toString('base64'),
       mimeType,
     },
   };
 }
 
-async function run(image: File) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const modelName = 'gemini-2.5-flash';
 
-  const prompt =
-    'what did I buy? Give the answer in JSON. Do not include the currency.';
+async function run(image: string): Promise<{
+  message: ScanResult | string;
+  rawResult: string;
+  status: 'success' | 'error';
+}> {
+  try {
+    const model = genAI.getGenerativeModel({ model: modelName });
 
-  const imageParts = [await fileToGenerativePart(image, 'image/jpeg')];
+    const categories = await db.query.transactionCategories.findMany();
+    const subCategories = await db.query.itemSubCategories.findMany();
 
-  const result = await model.generateContent([prompt, ...imageParts]);
-  const response = result.response;
-  const text = response.text();
+    const prompt = `what did I buy? Give the answer in JSON. Do not include the currency.
+
+      The categories are: ${categories.map((c) => c.name).join(', ')}. 
+      The subCategories are: ${subCategories.map((c) => c.name).join(', ')}
+
+      Please suggest a category and subCategory for each item. If you are not sure, use the category "Other" and/or the subCategory "Other".
+
+      The JSON should be in the following format:
+      {
+        "storeName": "string",
+        "date": "string (YYYY-MM-DD)",
+        "items": [
+          {
+            "name": "string",
+            "price": "number (in cents)",
+            "category": "string",
+            "categoryId": "number",
+            "subCategory": "string",
+            "subCategoryId": "number"
+          }
+        ]
+      }`;
+
+    const imageParts = [await urlToGenerativePart(image, 'image/jpeg')];
+
+    const result = await model.generateContent([prompt, ...imageParts]);
+    const response = result.response;
+    const text = response.text();
+
+    const parsed = scanResultSchema.safeParse(
+      JSON.parse(text.replaceAll('```', '').replace('json', ''))
+    );
+
+    if (!parsed.success) {
+      return {
+        message: 'Error parsing model result',
+        rawResult: text,
+        status: 'error',
+      };
+    }
+
+    return {
+      message: parsed.data,
+      rawResult: JSON.stringify(parsed.data),
+      status: 'success',
+    };
+  } catch (error) {
+    return {
+      message: 'Error running model',
+      rawResult: JSON.stringify(error),
+      status: 'error',
+    };
+  }
+}
+
+export async function saveReceipt(receipt: File) {
+  const user = await getUserInfo();
+
+  if (!user?.businessId) {
+    throw new Error('User not found');
+  }
+
+  const imageUrl = await uploadImageToCloud(receipt);
+
+  if (!imageUrl) {
+    throw new Error('Error uploading image to cloud');
+  }
+
+  // 2. create a receipt in the db (draft)
+  const addReceiptResult = await db
+    .insert(receipts)
+    .values({
+      name: receipt.name,
+      url: imageUrl,
+      businessId: user.businessId,
+    })
+    .returning({ id: receipts.id });
+
+  const receiptId = addReceiptResult[0]?.id;
+
+  if (typeof receiptId !== 'number') {
+    throw new Error('Error creating receipt');
+  }
+
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    message: JSON.parse(text.replaceAll('```', '').replace('json', '')),
+    id: receiptId,
+    name: receipt.name,
+    imageUrl,
   };
 }
 
-export async function parseImage(formData: FormData) {
-  const slip = formData.get('slip') as File;
-  const data = await run(slip);
+export async function parseImage(receipt: File) {
+  const user = await getUserInfo();
 
-  return data;
+  if (!user?.businessId) {
+    throw new Error('User not found');
+  }
+
+  const businessId = user.businessId;
+
+  // 1. upload the image to the cloud (uploadThing)
+  const imageUrl = await uploadImageToCloud(receipt);
+
+  if (!imageUrl) {
+    throw new Error('Error uploading image to cloud');
+  }
+  // 2. create a receipt in the db (draft)
+  const addReceiptResult = await db
+    .insert(receipts)
+    .values({
+      name: receipt.name,
+      url: imageUrl,
+      businessId,
+    })
+    .returning({ id: receipts.id });
+
+  const receiptId = addReceiptResult[0]?.id;
+
+  if (typeof receiptId !== 'number') {
+    throw new Error('Error creating receipt');
+  }
+
+  // 3. create a scan in the db (draft)
+  const newScanResult = await db
+    .insert(receiptScans)
+    .values({
+      status: 'created',
+      businessId,
+      model: modelName,
+      provider: 'google',
+      processTime: 0,
+      scanResult: {},
+      receiptId,
+    })
+    .returning({ id: receiptScans.id });
+
+  const scanId = newScanResult[0]?.id;
+
+  if (!scanId) {
+    await db.delete(receipts).where(eq(receipts.id, receiptId));
+    throw new Error('Error creating scan');
+  }
+
+  // 4. run the model
+  const startTime = Date.now();
+
+  const scanResult = await run(imageUrl);
+
+  const endTime = Date.now();
+  const processTime = endTime - startTime;
+
+  // 5. update the scan with the result
+  await db
+    .update(receiptScans)
+    .set({
+      scanResult: scanResult.rawResult,
+      status: scanResult.status,
+      processTime,
+    })
+    .where(eq(receiptScans.id, scanId));
+
+  // 6. redirect to the receipt review page
+  redirect(`/receipts/${receiptId}/review`);
+}
+
+export async function rescanReceipt(receiptId: number, imageUrl: string) {
+  const user = await getUserInfo();
+
+  if (!user?.businessId) {
+    throw new Error('User not found');
+  }
+
+  const businessId = user.businessId;
+
+  // 3. create a scan in the db (draft)
+  const newScanResult = await db
+    .insert(receiptScans)
+    .values({
+      status: 'created',
+      businessId,
+      model: modelName,
+      provider: 'google',
+      processTime: 0,
+      scanResult: {},
+      receiptId,
+    })
+    .returning({ id: receiptScans.id });
+
+  const scanId = newScanResult[0]?.id;
+
+  if (!scanId) {
+    throw new Error('Error creating scan');
+  }
+
+  // 4. run the model
+  const startTime = Date.now();
+
+  const scanResult = await run(imageUrl);
+
+  const endTime = Date.now();
+  const processTime = endTime - startTime;
+
+  // 5. update the scan with the result
+  await db
+    .update(receiptScans)
+    .set({
+      scanResult: scanResult.rawResult,
+      status: scanResult.status,
+      processTime,
+    })
+    .where(eq(receiptScans.id, scanId));
+
+  revalidatePath(`/receipts/${receiptId}/review`);
+  redirect(`/receipts/${receiptId}/review`);
 }
 
 export async function addUser(newUser: User | null) {
