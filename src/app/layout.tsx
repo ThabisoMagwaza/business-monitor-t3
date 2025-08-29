@@ -6,8 +6,8 @@ import './globals.css';
 import Header from '~/components/Header';
 import SignedOutPage from '~/components/SignedOutPage';
 import ToastContextProvider from './context/ToastProvider';
-import Toast from '~/components/Toast';
 import type { Metadata } from 'next';
+import { Toaster } from '~/components/ui/sonner';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -38,7 +38,7 @@ export default function RootLayout({
               </SignedOut>
               <SignedIn>{children}</SignedIn>
             </StyledComponentsRegistry>
-            <Toast />
+            <Toaster />
           </body>
         </html>
       </ToastContextProvider>
