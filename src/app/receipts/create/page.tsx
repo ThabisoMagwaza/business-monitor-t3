@@ -77,7 +77,7 @@ export default function CreateReceiptPage() {
       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
         <input
           type="file"
-          accept="image/*, application/pdf"
+          accept="image/*"
           onChange={handleImageUpload}
           className="hidden"
           id="receipt-upload"
@@ -102,7 +102,7 @@ export default function CreateReceiptPage() {
         <input
           id={`${id}-image`}
           type="file"
-          accept="image/*, application/pdf"
+          accept="image/*"
           onChange={handleImageUpload}
           name="receipt"
           className="hidden"
