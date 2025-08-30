@@ -12,7 +12,7 @@ import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
 import { rescanReceipt, type NewTransaction } from '~/app/actions';
 import { redirect } from 'next/navigation';
-import { getUserInfo } from '~/app/db-helpers';
+import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
 import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
 
@@ -26,6 +26,8 @@ export default async function ReceiptPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const categories = await getCategories();
+  const subCategories = await getSubCategories();
 
   // 1. get the receipt and scan
   const receipt = await db.query.receipts.findFirst({
@@ -127,6 +129,8 @@ export default async function ReceiptPage({
 
           <AddTransactionsForm
             type="expense"
+            categories={categories}
+            subCategories={subCategories}
             initialTransactions={scan.scanResult.items.map((item) => ({
               id: Math.floor(Math.random() * 1000000),
               type: 'expense',

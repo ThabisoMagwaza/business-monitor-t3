@@ -25,6 +25,13 @@ import { formatCurrencyAmount } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
 
 import type { NewTransaction } from '~/app/actions';
+import type {
+  ItemSubCategory,
+  TransactionCategory,
+} from '~/lib/types/Transaction';
+import { Select, SelectTrigger, SelectValue } from '../ui/select';
+import { SelectContent } from '../ui/select';
+import { SelectItem } from '../ui/select';
 
 function createDefaultTransaction(): NewTransaction {
   return {
@@ -34,19 +41,19 @@ function createDefaultTransaction(): NewTransaction {
       .format(new Date())
       .replaceAll('/', '-'),
     amount: '0',
+    category: '',
+    subCategory: '',
   };
 }
 
 function validateTransaction(transaction: NewTransaction): boolean {
-  if (!transaction) {
-    return false;
-  }
-
-  if (!transaction.description) {
-    return false;
-  }
-
-  if (!transaction.amount) {
+  if (
+    !transaction ||
+    !transaction.description ||
+    !transaction.amount ||
+    !transaction.category ||
+    !transaction.subCategory
+  ) {
     return false;
   }
 
@@ -57,9 +64,13 @@ function AddTransactionsForm({
   type,
   initialTransactions,
   saveTransactions,
+  categories,
+  subCategories,
 }: {
   type: 'expense' | 'income';
   initialTransactions: NewTransaction[];
+  categories: TransactionCategory[];
+  subCategories: ItemSubCategory[];
   saveTransactions: (
     transactions: NewTransaction[],
     type: 'expense' | 'income'
@@ -83,17 +94,28 @@ function AddTransactionsForm({
 
   const handleSaveEdit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('handleSaveEdit');
 
-    if (editingTransaction) {
-      setTransactions((prev: NewTransaction[]) =>
-        prev.map((transaction) =>
-          transaction.id === editingTransaction.id
-            ? editingTransaction
-            : transaction
-        )
-      );
+    if (!editingTransaction) {
+      return;
     }
+
+    if (!validateTransaction(editingTransaction)) {
+      setTransactions((prev) =>
+        prev.filter((transaction) => transaction.id !== editingTransaction?.id)
+      );
+      setIsEditDialogOpen(false);
+      setEditingTransaction(null);
+      return;
+    }
+
+    setTransactions((prev: NewTransaction[]) =>
+      prev.map((transaction) =>
+        transaction.id === editingTransaction.id
+          ? editingTransaction
+          : transaction
+      )
+    );
+
     setIsEditDialogOpen(false);
     setEditingTransaction(null);
   };
@@ -147,9 +169,9 @@ function AddTransactionsForm({
                 type="button"
                 onClick={() => {
                   const newTransaction = createDefaultTransaction();
-                  setTransactions([newTransaction, ...transactions]);
-                  setIsEditDialogOpen(true);
+                  setTransactions((prev) => [newTransaction, ...prev]);
                   setEditingTransaction(newTransaction);
+                  setIsEditDialogOpen(true);
                 }}
               >
                 <Plus className="h-3 w-3" />
@@ -350,35 +372,57 @@ function AddTransactionsForm({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
+                <div className="flex gap-3">
+                  <div className="space-y-2 flex-1">
                     <Label htmlFor="category">Category</Label>
-                    <Input
-                      id="category"
+                    <Select
                       value={editingTransaction.category ?? ''}
-                      onChange={(e) =>
-                        handleUpdateEditingTransaction(
-                          'category',
-                          e.target.value
-                        )
+                      onValueChange={(value) =>
+                        handleUpdateEditingTransaction('category', value)
                       }
-                      placeholder="e.g., Stock"
-                    />
+                      defaultValue={editingTransaction.category ?? ''}
+                      required
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue id="category" placeholder="e.g., Stock" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.name}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex-1">
                     <Label htmlFor="subCategory">Sub Category</Label>
-                    <Input
-                      id="subCategory"
+                    <Select
                       value={editingTransaction.subCategory ?? ''}
-                      onChange={(e) =>
-                        handleUpdateEditingTransaction(
-                          'subCategory',
-                          e.target.value
-                        )
+                      onValueChange={(value) =>
+                        handleUpdateEditingTransaction('subCategory', value)
                       }
-                      placeholder="e.g., Fuel"
-                    />
+                      defaultValue={editingTransaction.subCategory ?? ''}
+                      required
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue
+                          id="subCategory"
+                          placeholder="e.g., Fuel"
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {subCategories?.map((subCategory) => (
+                          <SelectItem
+                            key={subCategory.id}
+                            value={subCategory.name}
+                          >
+                            {subCategory.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
