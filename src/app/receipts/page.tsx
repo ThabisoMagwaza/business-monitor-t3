@@ -9,6 +9,7 @@ import { desc, eq } from 'drizzle-orm';
 import type { ScanResult } from '~/lib/types/ScanResult';
 import { Calendar, FileText, Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import ReceiptFilterTabs from '~/components/ReceiptFilterTabs';
 
 type ReceiptScan = typeof receiptScans.$inferSelect;
 
@@ -26,7 +27,11 @@ function getTotalAmount(scanResult: ScanResult | null): number {
   return scanResult.items.reduce((sum, item) => sum + item.price, 0) / 100;
 }
 
-export default async function ReceiptsPage() {
+export default async function ReceiptsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
   const receipts = await db.query.receipts.findMany({
     with: {
       scans: {
@@ -37,11 +42,37 @@ export default async function ReceiptsPage() {
     },
   });
 
+  // Calculate status counts
+  const statusCounts = {
+    all: receipts.length,
+    pending: 0,
+    processed: 0,
+    failed: 0,
+  };
+
+  receipts.forEach((receipt) => {
+    const latestScan = receipt.scans[0];
+    const status = getReceiptStatus(latestScan);
+    statusCounts[status as keyof typeof statusCounts]++;
+  });
+
+  const currentStatus = (await searchParams).status ?? 'all';
+
+  // Filter receipts by status
+  const filteredReceipts =
+    currentStatus === 'all'
+      ? receipts
+      : receipts.filter((receipt) => {
+          const latestScan = receipt.scans[0];
+          const receiptStatus = getReceiptStatus(latestScan);
+          return receiptStatus === currentStatus;
+        });
+
   return (
     <Page>
       <h1 className="text-2xl font-bold text-center mt-4">Receipts</h1>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mb-6">
         <Button variant="outline" asChild>
           <Link prefetch href="/receipts/create">
             <Scan className="w-4 h-4" />
@@ -50,9 +81,15 @@ export default async function ReceiptsPage() {
         </Button>
       </div>
 
+      {/* Filter Tabs */}
+      <ReceiptFilterTabs
+        currentStatus={currentStatus}
+        statusCounts={statusCounts}
+      />
+
       {/* Receipts List */}
-      <div className="space-y-3">
-        {receipts.map((receipt) => {
+      <div className="space-y-3 mt-6">
+        {filteredReceipts.map((receipt) => {
           const latestScan = receipt.scans[0];
           const scanResult = latestScan?.scanResult as ScanResult;
           const transactionCount = scanResult?.items?.length ?? 0;
@@ -146,13 +183,19 @@ export default async function ReceiptsPage() {
         })}
       </div>
 
-      {receipts.length === 0 && (
+      {filteredReceipts.length === 0 && (
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No receipts yet
+            {currentStatus === 'all'
+              ? 'No receipts yet'
+              : `No ${currentStatus} receipts`}
           </h3>
-          <p className="text-gray-500">Start by scanning your first receipt</p>
+          <p className="text-gray-500">
+            {currentStatus === 'all'
+              ? 'Start by scanning your first receipt'
+              : `No receipts with ${currentStatus} status found`}
+          </p>
         </div>
       )}
     </Page>
