@@ -10,6 +10,8 @@ import type { ScanResult } from '~/lib/types/ScanResult';
 import { Calendar, FileText, Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import ReceiptFilterTabs from '~/components/ReceiptFilterTabs';
+import { receipts as receiptsDb } from '~/server/db/schema';
+import { getUserInfo } from '../db-helpers';
 
 type ReceiptScan = typeof receiptScans.$inferSelect;
 
@@ -34,7 +36,10 @@ export default async function ReceiptsPage({
 }) {
   const currentStatus = (await searchParams).status ?? 'all';
 
+  const user = await getUserInfo();
+
   const receipts = await db.query.receipts.findMany({
+    where: eq(receiptsDb.businessId, user?.businessId ?? 0),
     with: {
       scans: {
         orderBy: [desc(receiptScans.createdAt)],

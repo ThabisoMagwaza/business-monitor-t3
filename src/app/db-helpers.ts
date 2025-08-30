@@ -46,7 +46,7 @@ export async function countPendingReceipts() {
     SELECT COUNT(*) as pending_count
     FROM ${receipts} r
     LEFT JOIN (
-      SELECT DISTINCT ON (receipt_id) 
+      SELECT DISTINCT ON (receipt_id)
         receipt_id,
         status,
         accepted

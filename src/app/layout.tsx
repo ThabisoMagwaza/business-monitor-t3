@@ -4,6 +4,7 @@ import StyledComponentsRegistry from '~/lib/registry';
 import './globals.css';
 
 import Header from '~/components/Header';
+import Breadcrumbs from '~/components/Breadcrumbs';
 import SignedOutPage from '~/components/SignedOutPage';
 import ToastContextProvider from './context/ToastProvider';
 import type { Metadata } from 'next';
@@ -36,7 +37,10 @@ export default function RootLayout({
               <SignedOut>
                 <SignedOutPage />
               </SignedOut>
-              <SignedIn>{children}</SignedIn>
+              <SignedIn>
+                <Breadcrumbs />
+                {children}
+              </SignedIn>
             </StyledComponentsRegistry>
             <Toaster />
           </body>
