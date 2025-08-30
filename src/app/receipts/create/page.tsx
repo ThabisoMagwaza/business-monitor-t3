@@ -77,7 +77,7 @@ export default function CreateReceiptPage() {
       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
         <input
           type="file"
-          accept="image/*"
+          accept="image/*, application/pdf"
           onChange={handleImageUpload}
           className="hidden"
           id="receipt-upload"
@@ -102,7 +102,7 @@ export default function CreateReceiptPage() {
         <input
           id={`${id}-image`}
           type="file"
-          accept="image/*"
+          accept="image/*, application/pdf"
           onChange={handleImageUpload}
           name="receipt"
           className="hidden"
@@ -112,9 +112,9 @@ export default function CreateReceiptPage() {
       </form>
       <AlertDialog open={saveDialogOpen}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogHeader className="overflow-hidden">
             <AlertDialogTitle>Receipt Saved</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="overflow-hidden truncate">
               {receiptName} has been saved to your account.
             </AlertDialogDescription>
           </AlertDialogHeader>

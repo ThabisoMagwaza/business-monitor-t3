@@ -6,6 +6,9 @@
 
 - [x] fix signup flow
 - [x] fix receips count
+- [ ] fix manual add
+- [ ] autoscan catergory
+- [ ] accept pdf
 
 - [ ] add breadcrums
 - [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
