@@ -10,28 +10,25 @@ import AmountCard from '../AmountCard';
 import {
   BanknoteArrowUp,
   BanknoteArrowDown,
-  PiggyBankIcon,
-  TrendingDown,
   Scan,
   FileText,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 
 type BusinessHealthSummaryProps = {
   name: string;
-  profit: number;
-  loss: number;
   totalIncome: number;
   totalExpenses: number;
+  pendingReceipts: number;
 };
 
 function BusinessHealthSummary({
   name,
-  profit,
-  loss,
   totalExpenses,
   totalIncome,
+  pendingReceipts,
 }: BusinessHealthSummaryProps) {
   const params = useSearchParams();
 
@@ -59,22 +56,22 @@ function BusinessHealthSummary({
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 ">
-          <AmountCard
-            title="Profit"
-            amount={formatCurrencyAmount(profit)}
-            variant="success"
-            icon={<PiggyBankIcon />}
-          />
-          <AmountCard
-            title="Loss"
-            amount={formatCurrencyAmount(loss)}
-            variant="danger"
-            icon={<TrendingDown />}
-          />
-        </div>
+        {pendingReceipts > 0 && (
+          <div className="flex flex-col gap-4">
+            <Link href="/receipts?status=pending" prefetch className="block">
+              <div className="flex items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-yellow-900 shadow-sm transition hover:bg-yellow-100">
+                <FileText className="mr-2 h-5 w-5 text-yellow-600" />
+                <span className="font-medium">
+                  You have {pendingReceipts} receipt
+                  {pendingReceipts > 1 ? 's' : ''} waiting for review
+                </span>
+                <ChevronRight className="h-4 w-4" />
+              </div>
+            </Link>
+          </div>
+        )}
 
-        <div>
+        <div className="flex flex-col gap-4">
           <h2>Quick Actions</h2>
           <div className="flex gap-2 flex-wrap">
             <Button asChild variant="outline" className="flex-1">
