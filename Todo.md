@@ -5,6 +5,7 @@
 - [x] Fix manual add
 
 - [x] fix signup flow
+- [ ] fix receips count
 
 - [ ] seameless continuous review
 - [ ] add the "pending receipts" quick action (banner?)

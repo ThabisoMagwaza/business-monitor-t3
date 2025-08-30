@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '~/server/db';
 import { users, businesses, receiptScans, receipts } from '~/server/db/schema';
-import { count, eq, and, desc, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 type User = typeof users.$inferSelect;
 

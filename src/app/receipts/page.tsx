@@ -32,6 +32,8 @@ export default async function ReceiptsPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  const currentStatus = (await searchParams).status ?? 'all';
+
   const receipts = await db.query.receipts.findMany({
     with: {
       scans: {
@@ -55,8 +57,6 @@ export default async function ReceiptsPage({
     const status = getReceiptStatus(latestScan);
     statusCounts[status as keyof typeof statusCounts]++;
   });
-
-  const currentStatus = (await searchParams).status ?? 'all';
 
   // Filter receipts by status
   const filteredReceipts =
