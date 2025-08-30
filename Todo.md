@@ -4,6 +4,9 @@
 - [x] separate save logic from scan logic
 - [x] Fix manual add
 
+- [x] fix signup flow
+- [ ] fix receips count
+
 - [ ] seameless continuous review
 - [ ] add the "pending receipts" quick action (banner?)
 - [ ] filtering by status on receipts page
