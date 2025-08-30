@@ -154,7 +154,7 @@ function AddTransactionsForm({
           <CardContent className="space-y-4">
             {transactions?.map((transaction, index) => (
               <div key={transaction.id}>
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-2">
                   <div className="flex-1 overflow-hidden">
                     <p className="font-medium text-foreground truncate">
                       {transaction.description}
@@ -189,11 +189,11 @@ function AddTransactionsForm({
                       )}
                     </div>
                   </div>
-                  <div className="flex items-start space-x-3 ml-3">
+                  <div className="flex items-start gap-2">
                     <p className="font-semibold text-foreground">
                       {formatCurrencyAmount(Number(transaction.amount))}
                     </p>
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-1 items-start">
                       <Button
                         variant="ghost"
                         size="sm"

@@ -4,12 +4,19 @@ import { eq, desc } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { redirect } from 'next/navigation';
 import type { ScanResult } from '~/lib/types/ScanResult';
-import Image from 'next/image';
-import { formatDate, formatCurrencyAmount } from '~/lib/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { Badge } from '~/components/ui/badge';
 import { Separator } from '~/components/ui/separator';
-import { Clock, CheckCircle, FileText, Calendar, Zap } from 'lucide-react';
+import { Badge } from '~/components/ui/badge';
+import {
+  Brain,
+  Building2,
+  Calendar,
+  Clock,
+  FileText,
+  Scan,
+} from 'lucide-react';
+import ReceiptPreview from '~/components/ReceiptPreview';
+import { formatCurrencyAmount } from '~/lib/helpers';
 
 export default async function ReceiptPage({
   params,
@@ -56,135 +63,124 @@ export default async function ReceiptPage({
     redirect(`/receipts/${id}/review`);
   }
 
+  const processingTimeStr = `${(scan.processTime! / 1000).toFixed(1)}s`;
   const totalAmount =
     scan.scanResult.items.reduce((sum, item) => sum + item.price, 0) / 100;
 
   return (
     <Page>
       {/* Header */}
-      <div className="text-center space-y-3 mt-4">
-        <h1 className="text-l font-bold tracking-tight text-gray-900">
+      <div className="text-center space-y-2 mt-2">
+        <h1 className="text-xl font-semibold tracking-tight text-gray-900">
           {receipt.name}
         </h1>
       </div>
 
-      {/* Receipt Image - Full Width */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <div className="relative w-full h-[300px] bg-white">
-            <Image
-              src={receipt.url}
-              alt="Receipt"
-              fill
-              className="object-contain rounded-sm"
-              sizes="(max-width: 768px) 100vw, 1200px"
-              priority
-            />
+      {/* Receipt Image */}
+      <ReceiptPreview previewSrc={receipt.url} canUpload={false} />
+
+      {/* Scan Metadata */}
+      <Card className="rounded-2xl border border-gray-200 shadow-sm p-0 gap-0">
+        <CardTitle className="flex items-center gap-3 font-semibold p-4 border-b text-sm ">
+          <Scan className="h-5 w-5 text-gray-600" />
+          Scan Metadata
+        </CardTitle>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+            <div>
+              <p className="text-sm text-muted-foreground">Scan Date</p>
+              <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span className="truncate">
+                  {new Date(scan.createdAt!).toLocaleDateString('en-ZA', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Model Used</p>
+              <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                <Brain className="h-3 w-3" />
+                {scan.model}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Provider</p>
+              <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                <Building2 className="h-3 w-3" />
+                {scan.provider}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Processing Time</p>
+              <p className="mt-1 text-sm text-gray-900 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {processingTimeStr}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Scan Metadata */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="bg-gray-50 border-b">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <Zap className="h-5 w-5 text-gray-600" />
-              Scan Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                  Model
-                </p>
-                <p className="text-base font-medium text-gray-900">
-                  {scan.model}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                  Provider
-                </p>
-                <p className="text-base font-medium text-gray-900">
-                  {scan.provider}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                  Status
-                </p>
-                <Badge variant="default" className="w-fit px-3 py-1">
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Accepted
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                  Processing Time
-                </p>
-                <p className="text-base font-medium text-gray-900 flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {scan.processTime}ms
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                Scanned On
-              </p>
-              <p className="text-base font-medium text-gray-900 flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                {formatDate(scan.createdAt!)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Transactions */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="bg-gray-50 border-b">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              Transactions
-              <Badge variant="secondary" className="ml-auto px-3 py-1">
-                {scan.scanResult.items.length} items
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {scan.scanResult.items.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="text-base font-semibold text-gray-900">
-                      {item.name}
-                    </p>
+      {/* Transactions (read-only, styled like AddTransactionsForm) */}
+      <Card className="bg-white">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Transactions ({scan.scanResult.items.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {scan.scanResult.items.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between items-start">
+                <div className="flex-1 overflow-hidden gap-2 flex flex-col">
+                  <p className="text-sm text-foreground truncate">
+                    {item.name}
+                  </p>
+                  <div className="flex items-start gap-2 mt-1 flex-wrap">
+                    {(item.category ?? item.subCategory) && (
+                      <div className="flex items-center gap-1">
+                        {item.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {item.category}
+                          </Badge>
+                        )}
+                        {item.subCategory && (
+                          <Badge variant="outline" className="text-xs">
+                            {item.subCategory}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-lg font-bold text-gray-900">
+                </div>
+                <div className="flex items-start space-x-3 ml-3">
+                  <p className="text-sm font-semibold text-foreground">
                     {formatCurrencyAmount(item.price / 100)}
                   </p>
                 </div>
-              ))}
+              </div>
 
-              <Separator className="my-6" />
+              {index < scan.scanResult.items.length - 1 && (
+                <Separator className="mt-4" />
+              )}
+            </div>
+          ))}
 
-              <div className="flex items-center justify-between py-4 px-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-xl font-bold text-gray-900">Total</p>
-                <p className="text-2xl font-bold text-blue-600">
+          {scan.scanResult.items.length > 0 && (
+            <>
+              <Separator className="my-4" />
+              <div className="flex justify-between items-center pt-2">
+                <p className="text-sm font-semibold">Total Amount</p>
+                <p className="text-sm font-bold">
                   {formatCurrencyAmount(totalAmount)}
                 </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </Page>
   );
 }
