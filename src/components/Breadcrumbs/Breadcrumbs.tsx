@@ -88,7 +88,7 @@ export default function Breadcrumbs() {
     <nav className="flex items-center space-x-1 text-sm text-muted-foreground mt-4 px-4 max-w-[calc(1000px+1rem)] mx-auto w-full">
       <Link
         href="/"
-        className="flex items-center hover:text-foreground transition-colors"
+        className="inline-flex items-center rounded-md px-2 py-1 hover:bg-gray-100 hover:text-foreground transition-colors -mx-1"
         prefetch
         title="Home"
       >
@@ -99,13 +99,13 @@ export default function Breadcrumbs() {
         <div key={breadcrumb.href} className="flex items-center">
           <ChevronRight className="h-4 w-4 mx-1" />
           {breadcrumb.isCurrent ? (
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-foreground px-2 py-1">
               {breadcrumb.label}
             </span>
           ) : (
             <Link
               href={breadcrumb.href}
-              className="hover:text-foreground transition-colors"
+              className="inline-flex items-center rounded-md px-2 py-1 hover:bg-gray-100 hover:text-foreground transition-colors -mx-1"
             >
               {breadcrumb.label}
             </Link>
