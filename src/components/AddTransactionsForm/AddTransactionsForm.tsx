@@ -37,6 +37,22 @@ function createDefaultTransaction(): NewTransaction {
   };
 }
 
+function validateTransaction(transaction: NewTransaction): boolean {
+  if (!transaction) {
+    return false;
+  }
+
+  if (!transaction.description) {
+    return false;
+  }
+
+  if (!transaction.amount) {
+    return false;
+  }
+
+  return true;
+}
+
 function AddTransactionsForm({
   type,
   initialTransactions,
@@ -65,7 +81,10 @@ function AddTransactionsForm({
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log('handleSaveEdit');
+
     if (editingTransaction) {
       setTransactions((prev: NewTransaction[]) =>
         prev.map((transaction) =>
@@ -126,9 +145,12 @@ function AddTransactionsForm({
                 variant="outline"
                 size="sm"
                 type="button"
-                onClick={() =>
-                  setTransactions([createDefaultTransaction(), ...transactions])
-                }
+                onClick={() => {
+                  const newTransaction = createDefaultTransaction();
+                  setTransactions([newTransaction, ...transactions]);
+                  setIsEditDialogOpen(true);
+                  setEditingTransaction(newTransaction);
+                }}
               >
                 <Plus className="h-3 w-3" />
                 <span className="sr-only">Add Transaction</span>
@@ -253,102 +275,129 @@ function AddTransactionsForm({
       </form>
 
       {/* Edit Transaction Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          // remove transaction if it is not valid
+          if (
+            !open &&
+            editingTransaction &&
+            !validateTransaction(editingTransaction)
+          ) {
+            setTransactions((prev) =>
+              prev.filter(
+                (transaction) => transaction.id !== editingTransaction.id
+              )
+            );
+          }
+
+          setIsEditDialogOpen(open);
+        }}
+      >
         <DialogContent className="sm:max-w-md">
-          <DialogTitle>
-            {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
-          </DialogTitle>
+          <form onSubmit={handleSaveEdit} className="space-y-4">
+            <DialogTitle>
+              {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
+            </DialogTitle>
 
-          <DialogDescription className="sr-only">
-            {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
-          </DialogDescription>
+            <DialogDescription className="sr-only">
+              {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
+            </DialogDescription>
 
-          {editingTransaction && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  value={editingTransaction.description}
-                  onChange={(e) => {
-                    if (!e.target.value) {
-                      return;
-                    }
-                    handleUpdateEditingTransaction(
-                      'description',
-                      e.target.value
-                    );
-                  }}
-                  placeholder="Transaction description"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            {editingTransaction && (
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (R)</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    value={editingTransaction.amount}
-                    onChange={(e) =>
-                      handleUpdateEditingTransaction('amount', e.target.value)
-                    }
-                    placeholder="0.00"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Date</Label>
-                  <DatePicker
-                    initialDate={new Date(editingTransaction.date)}
-                    onDateChangeAction={(date) =>
-                      handleUpdateEditingTransaction('date', date)
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Input
-                    id="category"
-                    value={editingTransaction.category ?? ''}
-                    onChange={(e) =>
-                      handleUpdateEditingTransaction('category', e.target.value)
-                    }
-                    placeholder="e.g., Stock"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subCategory">Sub Category</Label>
-                  <Input
-                    id="subCategory"
-                    value={editingTransaction.subCategory ?? ''}
-                    onChange={(e) =>
+                    id="description"
+                    required
+                    value={editingTransaction.description}
+                    onChange={(e) => {
                       handleUpdateEditingTransaction(
-                        'subCategory',
+                        'description',
                         e.target.value
-                      )
-                    }
-                    placeholder="e.g., Fuel"
+                      );
+                    }}
+                    placeholder="Transaction description"
                   />
                 </div>
-              </div>
-            </div>
-          )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCancelEdit} type="button">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} type="button">
-              <Check className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-          </DialogFooter>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">Amount (R)</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      required
+                      min={0.01}
+                      value={editingTransaction.amount}
+                      onChange={(e) =>
+                        handleUpdateEditingTransaction('amount', e.target.value)
+                      }
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Date</Label>
+                    <DatePicker
+                      initialDate={new Date(editingTransaction.date)}
+                      onDateChangeAction={(date) =>
+                        handleUpdateEditingTransaction('date', date)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <Input
+                      id="category"
+                      value={editingTransaction.category ?? ''}
+                      onChange={(e) =>
+                        handleUpdateEditingTransaction(
+                          'category',
+                          e.target.value
+                        )
+                      }
+                      placeholder="e.g., Stock"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="subCategory">Sub Category</Label>
+                    <Input
+                      id="subCategory"
+                      value={editingTransaction.subCategory ?? ''}
+                      onChange={(e) =>
+                        handleUpdateEditingTransaction(
+                          'subCategory',
+                          e.target.value
+                        )
+                      }
+                      placeholder="e.g., Fuel"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={handleCancelEdit}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                <Check className="h-3 w-3 mr-1" />
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </>
