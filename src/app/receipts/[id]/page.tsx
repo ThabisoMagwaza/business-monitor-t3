@@ -4,8 +4,8 @@ import { eq, desc } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { redirect } from 'next/navigation';
 import type { ScanResult } from '~/lib/types/ScanResult';
-import { formatCurrencyAmount } from '~/lib/helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
 import {
   Brain,
@@ -16,6 +16,7 @@ import {
   Scan,
 } from 'lucide-react';
 import ReceiptPreview from '~/components/ReceiptPreview';
+import { formatCurrencyAmount } from '~/lib/helpers';
 
 export default async function ReceiptPage({
   params,
@@ -62,10 +63,9 @@ export default async function ReceiptPage({
     redirect(`/receipts/${id}/review`);
   }
 
+  const processingTimeStr = `${(scan.processTime! / 1000).toFixed(1)}s`;
   const totalAmount =
     scan.scanResult.items.reduce((sum, item) => sum + item.price, 0) / 100;
-
-  const processingTimeStr = `${(scan.processTime! / 1000).toFixed(1)}s`;
 
   return (
     <Page>
@@ -125,46 +125,60 @@ export default async function ReceiptPage({
         </CardContent>
       </Card>
 
-      {/* Extracted Transactions */}
-      <Card className="rounded-2xl border border-gray-200 shadow-sm">
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-3 text-base font-semibold">
-            Extracted Transactions
-            <Badge variant="secondary" className="ml-auto px-3 py-0.5">
-              {scan.scanResult.items.length} items
-            </Badge>
-          </CardTitle>
+      {/* Transactions (read-only, styled like AddTransactionsForm) */}
+      <Card className="bg-white">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>Transactions ({scan.scanResult.items.length})</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y">
-            {scan.scanResult.items.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-start justify-between py-4 px-5"
-              >
-                <div className="pr-4">
-                  <p className="text-sm font-medium text-gray-900">
+        <CardContent className="space-y-4">
+          {scan.scanResult.items.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between items-start">
+                <div className="flex-1 overflow-hidden gap-2 flex flex-col">
+                  <p className="text-sm text-foreground truncate">
                     {item.name}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    {item.subCategory || item.category}
+                  <div className="flex items-start gap-2 mt-1 flex-wrap">
+                    {(item.category ?? item.subCategory) && (
+                      <div className="flex items-center gap-1">
+                        {item.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {item.category}
+                          </Badge>
+                        )}
+                        {item.subCategory && (
+                          <Badge variant="outline" className="text-xs">
+                            {item.subCategory}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 ml-3">
+                  <p className="text-sm font-semibold text-foreground">
+                    {formatCurrencyAmount(item.price / 100)}
                   </p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {formatCurrencyAmount(item.price / 100)}
+              </div>
+
+              {index < scan.scanResult.items.length - 1 && (
+                <Separator className="mt-4" />
+              )}
+            </div>
+          ))}
+
+          {scan.scanResult.items.length > 0 && (
+            <>
+              <Separator className="my-4" />
+              <div className="flex justify-between items-center pt-2">
+                <p className="text-sm font-semibold">Total Amount</p>
+                <p className="text-sm font-bold">
+                  {formatCurrencyAmount(totalAmount)}
                 </p>
               </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between py-5 px-5">
-            <p className="text-base font-semibold text-gray-900">
-              Total Amount
-            </p>
-            <p className="text-base font-semibold text-gray-900">
-              {formatCurrencyAmount(totalAmount)}
-            </p>
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </Page>
