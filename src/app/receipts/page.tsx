@@ -40,6 +40,7 @@ export default async function ReceiptsPage({
 
   const receipts = await db.query.receipts.findMany({
     where: eq(receiptsDb.businessId, user?.businessId ?? 0),
+    orderBy: [desc(receiptsDb.createdAt)],
     with: {
       scans: {
         orderBy: [desc(receiptScans.createdAt)],
@@ -75,15 +76,17 @@ export default async function ReceiptsPage({
 
   return (
     <Page>
-      <h1 className="text-2xl font-bold text-center mt-4">Receipts</h1>
+      <div className="flex items-center justify-between gap-4 my-4">
+        <h1 className="text-2xl font-bold text-center">Receipts</h1>
 
-      <div className="flex justify-end mb-6">
-        <Button variant="outline" asChild>
-          <Link prefetch href="/receipts/create">
-            <Scan className="w-4 h-4" />
-            Scan Receipt
-          </Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button variant="outline" asChild>
+            <Link prefetch href="/receipts/create">
+              <Scan className="w-4 h-4" />
+              Scan Receipt
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filter Tabs */}
@@ -93,7 +96,7 @@ export default async function ReceiptsPage({
       />
 
       {/* Receipts List */}
-      <div className="space-y-3 mt-6">
+      <div className="space-y-3 mt-2">
         {filteredReceipts.map((receipt) => {
           const latestScan = receipt.scans[0];
           const scanResult = latestScan?.scanResult as ScanResult;
