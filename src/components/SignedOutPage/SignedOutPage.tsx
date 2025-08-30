@@ -1,4 +1,3 @@
-'use client';
 import * as React from 'react';
 import {
   TrendingUp,
@@ -11,7 +10,6 @@ import {
   Users,
 } from 'lucide-react';
 
-import MaxWidthWrapper from '../MaxWidthWrapper';
 import { Button } from '../ui/button';
 import {
   Card,
@@ -26,7 +24,7 @@ import { SignUpButton } from '@clerk/nextjs';
 function SignedOutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <MaxWidthWrapper>
+      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4 flex flex-col flex-1 h-full gap-4">
         {/* Hero Section */}
         <section className="py-20 text-center">
           <Badge variant="secondary" className="mb-4">
@@ -209,7 +207,7 @@ function SignedOutPage() {
         <footer className="py-8 text-center text-muted-foreground">
           <p>&copy; 2024 BusinessMonitor. All rights reserved.</p>
         </footer>
-      </MaxWidthWrapper>
+      </div>
     </div>
   );
 }

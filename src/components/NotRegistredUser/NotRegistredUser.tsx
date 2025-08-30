@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Building2, Users, ArrowRight, CheckCircle } from 'lucide-react';
 
-import MaxWidthWrapper from '../MaxWidthWrapper';
 import { Button } from '../ui/button';
 import {
   Card,
@@ -14,8 +13,8 @@ import Link from 'next/link';
 
 function NotRegistredUser() {
   return (
-    <MaxWidthWrapper className="min-h-screen flex items-center justify-center py-12">
-      <div className="w-full max-w-2xl space-y-8">
+    <div className="min-h-screen flex items-center justify-center py-12">
+      <div className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4 flex flex-col flex-1 h-full gap-4">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
@@ -113,7 +112,7 @@ function NotRegistredUser() {
           </p>
         </div>
       </div>
-    </MaxWidthWrapper>
+    </div>
   );
 }
 
