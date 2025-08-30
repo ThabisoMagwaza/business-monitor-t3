@@ -135,14 +135,15 @@ export default async function ReceiptsPage({
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-4">
                     {/* Receipt Image/Icon - Left Side */}
-                    <div className="h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {receipt.url ? (
                         <Image
+                          priority
                           src={receipt.url}
                           alt={receipt.name}
                           width={48}
                           height={48}
-                          className="w-full h-full object-cover rounded-lg"
+                          className="min-w-full w-12 h-auto object-cover rounded-lg"
                         />
                       ) : (
                         <FileText className="h-6 text-gray-400" />
