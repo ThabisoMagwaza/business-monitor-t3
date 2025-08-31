@@ -6,11 +6,13 @@
 
 - [x] fix signup flow
 - [x] fix receips count
-- [ ] fix manual add
-- [ ] autoscan catergory
-- [ ] accept pdf
+- [x] fix manual add
 
-- [ ] add breadcrums
+- [x] add breadcrums
+
+- [x] fix ai slip date
+- [x] use slip date for ai scan transactions and store date
+
 - [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
 - [ ] improve page load speed (suspense, skeletons e.t.c)
 
