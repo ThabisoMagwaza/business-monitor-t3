@@ -15,7 +15,7 @@ import { redirect } from 'next/navigation';
 import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
 import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
-import { Upload } from 'lucide-react';
+import { ListIcon, StoreIcon, Upload } from 'lucide-react';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -134,7 +134,17 @@ export default async function ReceiptPage({
 
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-bold">
-              Transactions {scan.scanResult.storeName}
+              {scan.scanResult.storeName ? (
+                <span className="flex items-center gap-2">
+                  <StoreIcon className="h-5 w-5" />
+                  {scan.scanResult.storeName}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <ListIcon className="h-5 w-5" />
+                  Transactions
+                </span>
+              )}
             </h2>
           </div>
 
