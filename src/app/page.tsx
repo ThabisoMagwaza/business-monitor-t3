@@ -1,7 +1,11 @@
 import { eq, sum } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { transactions } from '~/server/db/schema';
-import { getUserInfo, getBusinessInfo } from './db-helpers';
+import {
+  getUserInfo,
+  getBusinessInfo,
+  countPendingReceipts,
+} from './db-helpers';
 
 import BusinessHealthSummary from '~/components/BusinessHealthSummary';
 import NotRegistredUser from '~/components/NotRegistredUser';
@@ -9,11 +13,12 @@ import NotRegistredUser from '~/components/NotRegistredUser';
 export default async function Home() {
   const user = await getUserInfo();
 
+  const pendingReceipts = await countPendingReceipts();
+
   let summary = null;
   let totalExpenses = null;
   let totalIncome = null;
-  let profit = null;
-  let loss = null;
+
   let businessInfo = null;
 
   if (user?.businessId) {
@@ -32,10 +37,6 @@ export default async function Home() {
     totalIncome =
       Number(summary.find((val) => val.type === 'income')?.total) || 0;
 
-    profit = (totalIncome > totalExpenses && totalIncome - totalExpenses) || 0;
-
-    loss = (totalExpenses > totalIncome && totalExpenses - totalIncome) || 0;
-
     businessInfo = await getBusinessInfo(user.businessId);
   }
 
@@ -43,18 +44,14 @@ export default async function Home() {
     <main>
       {!user?.businessId && <NotRegistredUser />}
 
-      {profit !== null &&
-        loss !== null &&
-        totalIncome !== null &&
-        totalExpenses !== null && (
-          <BusinessHealthSummary
-            name={businessInfo?.businessName ?? 'No Business Name'}
-            profit={profit}
-            loss={loss}
-            totalIncome={totalIncome}
-            totalExpenses={totalExpenses}
-          />
-        )}
+      {totalIncome !== null && totalExpenses !== null && (
+        <BusinessHealthSummary
+          name={businessInfo?.businessName ?? 'No Business Name'}
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+          pendingReceipts={pendingReceipts}
+        />
+      )}
     </main>
   );
 }

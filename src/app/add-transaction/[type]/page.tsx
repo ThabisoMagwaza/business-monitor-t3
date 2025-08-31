@@ -1,5 +1,6 @@
 import { addTransactions, type NewTransaction } from '~/app/actions';
 import AddTransactionsForm from '~/components/AddTransactionsForm/AddTransactionsForm';
+import { getCategories, getSubCategories } from '~/app/db-helpers';
 
 type AddTransactionParams = {
   type: 'expense' | 'income';
@@ -11,6 +12,9 @@ export default async function Page({
   params: Promise<AddTransactionParams>;
 }) {
   const { type } = await params;
+
+  const categories = await getCategories();
+  const subCategories = await getSubCategories();
 
   const saveTransactions = async (
     transactions: NewTransaction[],
@@ -29,6 +33,8 @@ export default async function Page({
 
         <AddTransactionsForm
           type={type}
+          categories={categories}
+          subCategories={subCategories}
           initialTransactions={[]}
           saveTransactions={saveTransactions}
         />

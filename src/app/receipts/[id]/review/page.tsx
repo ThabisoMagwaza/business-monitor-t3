@@ -12,9 +12,10 @@ import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
 import { rescanReceipt, type NewTransaction } from '~/app/actions';
 import { redirect } from 'next/navigation';
-import { getUserInfo } from '~/app/db-helpers';
+import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
 import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
+import { Upload } from 'lucide-react';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -26,6 +27,8 @@ export default async function ReceiptPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const categories = await getCategories();
+  const subCategories = await getSubCategories();
 
   // 1. get the receipt and scan
   const receipt = await db.query.receipts.findFirst({
@@ -108,7 +111,7 @@ export default async function ReceiptPage({
       {!scan.scanResult && (
         <form action={handleRescan}>
           <div className="flex justify-center">
-            <SubmitButton>Scan Receipt</SubmitButton>
+            <SubmitButton icon={<Upload />}>Scan Receipt</SubmitButton>
           </div>
         </form>
       )}
@@ -117,7 +120,7 @@ export default async function ReceiptPage({
         <>
           <form action={handleRescan}>
             <div className="flex justify-center">
-              <SubmitButton>Rescan Receipt</SubmitButton>
+              <SubmitButton icon={<Upload />}>Rescan Receipt</SubmitButton>
             </div>
           </form>
 
@@ -127,6 +130,8 @@ export default async function ReceiptPage({
 
           <AddTransactionsForm
             type="expense"
+            categories={categories}
+            subCategories={subCategories}
             initialTransactions={scan.scanResult.items.map((item) => ({
               id: Math.floor(Math.random() * 1000000),
               type: 'expense',

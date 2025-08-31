@@ -4,13 +4,20 @@
 - [x] separate save logic from scan logic
 - [x] Fix manual add
 
+- [x] fix signup flow
+- [x] fix receips count
+- [ ] fix manual add
+- [ ] autoscan catergory
+- [ ] accept pdf
+
+- [ ] add breadcrums
+- [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
+- [ ] improve page load speed (suspense, skeletons e.t.c)
+
 - [ ] seameless continuous review
 - [ ] add the "pending receipts" quick action (banner?)
 - [ ] filtering by status on receipts page
 - [ ] error handling
-
-- [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
-- [ ] improve page load speed (suspense, skeletons e.t.c)
 
 - [ ] filter transactions on page
 - [ ] add receipt popup to transaction

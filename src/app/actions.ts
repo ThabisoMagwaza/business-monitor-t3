@@ -106,7 +106,7 @@ const ApiKey = process.env.GEMINI_API_KEY!;
 
 const genAI = new GoogleGenerativeAI(ApiKey);
 
-async function urlToGenerativePart(imageUrl: string, mimeType: string) {
+async function urlToGenerativePart(imageUrl: string) {
   // Fetch the image from the URL
   const response = await fetch(imageUrl);
 
@@ -114,13 +114,15 @@ async function urlToGenerativePart(imageUrl: string, mimeType: string) {
     throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
   }
 
+  const mimeType = response.headers.get('content-type');
+
   // Get the image as an array buffer
   const arrayBuffer = await response.arrayBuffer();
 
   return {
     inlineData: {
       data: Buffer.from(arrayBuffer).toString('base64'),
-      mimeType,
+      mimeType: mimeType ?? 'application/octet-stream',
     },
   };
 }
@@ -161,7 +163,7 @@ async function run(image: string): Promise<{
         ]
       }`;
 
-    const imageParts = [await urlToGenerativePart(image, 'image/jpeg')];
+    const imageParts = [await urlToGenerativePart(image)];
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = result.response;

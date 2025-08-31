@@ -112,9 +112,9 @@ export default function CreateReceiptPage() {
       </form>
       <AlertDialog open={saveDialogOpen}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogHeader className="overflow-hidden">
             <AlertDialogTitle>Receipt Saved</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="overflow-hidden truncate">
               {receiptName} has been saved to your account.
             </AlertDialogDescription>
           </AlertDialogHeader>
