@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { format } from 'date-fns';
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
   Plus,
   CalendarIcon,
   ArrowUpFromLine,
+  ArrowDownWideNarrow,
 } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import {
@@ -58,6 +60,17 @@ import { PopoverTrigger } from '../ui/popover';
 import { cn } from '~/lib/utils';
 import { Calendar } from '../ui/calendar';
 import SubmitButton from '../SubmitButton/SubmitButton';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogFooter,
+} from '../ui/alert-dialog';
 
 const createTransactionSchema = z.object({
   id: z.string(),
@@ -114,6 +127,9 @@ function AddTransactionsForm({
   const [transactions, setTransactions] =
     React.useState<NewTransaction[]>(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [allTransactionsDate, setAllTransactionsDate] = React.useState(
+    new Date(initialTransactions[0]?.date ?? new Date())
+  );
 
   const saveNewTransactions = saveTransactions.bind(
     null,
@@ -239,6 +255,72 @@ function AddTransactionsForm({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 justify-between">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={'outline'}
+                    className={cn('pl-3 text-left font-normal')}
+                  >
+                    {allTransactionsDate ? (
+                      formatDate(allTransactionsDate)
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={allTransactionsDate}
+                    onSelect={(date: Date | undefined) => {
+                      setAllTransactionsDate(date ?? new Date());
+                    }}
+                    captionLayout="dropdown"
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" type="button">
+                    <ArrowDownWideNarrow className="h-3 w-3" />
+                    <span className="sr-only">Set all transactions date</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Set all transactions date?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently set
+                      all transactions dates to{' '}
+                      <span className="font-bold text-primary">
+                        {format(allTransactionsDate, 'dd MMMM yyyy')}
+                      </span>
+                      ?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        setTransactions((prev: NewTransaction[]) =>
+                          prev.map((transaction) => ({
+                            ...transaction,
+                            date: allTransactionsDate?.toISOString(),
+                          }))
+                        );
+                      }}
+                    >
+                      <Check className="h-3 w-3 mr-1" /> Set
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
             {transactions?.map((transaction, index) => (
               <div key={transaction.id}>
                 <div className="flex justify-between items-start gap-2">
