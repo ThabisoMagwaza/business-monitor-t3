@@ -8,9 +8,8 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Edit3, Trash2, Check, X, Calendar, Plus } from 'lucide-react';
+import { Edit3, Trash2, Check, X, Plus, CalendarIcon } from 'lucide-react';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -20,8 +19,7 @@ import {
 } from '~/components/ui/dialog';
 import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
-import DatePicker from '../DatePicker/DatePicker';
-import { formatCurrencyAmount } from '~/lib/helpers';
+import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
 import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
 
 import type { NewTransaction } from '~/app/actions';
@@ -29,36 +27,39 @@ import type {
   ItemSubCategory,
   TransactionCategory,
 } from '~/lib/types/Transaction';
-import { Select, SelectTrigger, SelectValue } from '../ui/select';
-import { SelectContent } from '../ui/select';
-import { SelectItem } from '../ui/select';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '../ui/select';
 
-function createDefaultTransaction(): NewTransaction {
-  return {
-    id: Math.floor(Math.random() * 1000000),
-    description: '',
-    date: new Intl.DateTimeFormat('en-ZA')
-      .format(new Date())
-      .replaceAll('/', '-'),
-    amount: '0',
-    category: '',
-    subCategory: '',
-  };
-}
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import {
+  Form,
+  FormMessage,
+  FormControl,
+  FormLabel,
+  FormItem,
+  FormField,
+} from '../ui/form';
+import { toast } from 'sonner';
+import { Popover, PopoverContent } from '../ui/popover';
+import { PopoverTrigger } from '../ui/popover';
+import { cn } from '~/lib/utils';
+import { Calendar } from '../ui/calendar';
 
-function validateTransaction(transaction: NewTransaction): boolean {
-  if (
-    !transaction ||
-    !transaction.description ||
-    !transaction.amount ||
-    !transaction.category ||
-    !transaction.subCategory
-  ) {
-    return false;
-  }
-
-  return true;
-}
+const createTransactionSchema = z.object({
+  id: z.string(),
+  description: z.string().min(1),
+  amount: z.string(),
+  date: z.date(),
+  category: z.string().min(1),
+  subCategory: z.string().min(1),
+});
 
 function AddTransactionsForm({
   type,
@@ -79,62 +80,67 @@ function AddTransactionsForm({
   const [transactions, setTransactions] =
     React.useState<NewTransaction[]>(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-  const [editingTransaction, setEditingTransaction] =
-    React.useState<NewTransaction | null>(null);
 
   const saveNewTransactions = saveTransactions.bind(null, transactions, type);
 
   const handleEdit = (id: number) => {
     const transaction = transactions.find((t) => t.id === id);
     if (transaction) {
-      setEditingTransaction(transaction);
+      form.setValue('description', transaction.description);
+      form.setValue('amount', transaction.amount);
+      form.setValue('date', new Date(transaction.date));
+      form.setValue('category', transaction.category ?? '');
+      form.setValue('subCategory', transaction.subCategory ?? '');
+      form.setValue('id', transaction.id.toString());
+
       setIsEditDialogOpen(true);
     }
   };
 
-  const handleSaveEdit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // 1. Define your form.
+  const form = useForm<z.infer<typeof createTransactionSchema>>({
+    resolver: zodResolver(createTransactionSchema),
+    defaultValues: {
+      id: '',
+      description: '',
+      amount: '0',
+      date: new Date(),
+      category: '',
+      subCategory: '',
+    },
+  });
 
-    if (!editingTransaction) {
-      return;
+  const handleSaveEdit = (data: z.infer<typeof createTransactionSchema>) => {
+    if (!form.getValues('id')) {
+      setTransactions((prev: NewTransaction[]) => [
+        {
+          ...data,
+          id: Math.floor(Math.random() * 1000000),
+          date: data.date.toISOString(),
+        },
+        ...prev,
+      ]);
     }
 
-    if (!validateTransaction(editingTransaction)) {
-      setTransactions((prev) =>
-        prev.filter((transaction) => transaction.id !== editingTransaction?.id)
+    if (form.getValues('id')) {
+      setTransactions((prev: NewTransaction[]) =>
+        prev.map((transaction) =>
+          transaction.id === Number(form.getValues('id'))
+            ? {
+                ...data,
+                id: Number(form.getValues('id')),
+                date: data.date.toISOString(),
+              }
+            : transaction
+        )
       );
-      setIsEditDialogOpen(false);
-      setEditingTransaction(null);
-      return;
     }
-
-    setTransactions((prev: NewTransaction[]) =>
-      prev.map((transaction) =>
-        transaction.id === editingTransaction.id
-          ? editingTransaction
-          : transaction
-      )
-    );
-
+    form.reset();
     setIsEditDialogOpen(false);
-    setEditingTransaction(null);
   };
 
   const handleCancelEdit = () => {
     setIsEditDialogOpen(false);
-    setEditingTransaction(null);
-  };
-
-  const handleUpdateEditingTransaction = (
-    field: keyof NewTransaction,
-    value: string
-  ) => {
-    if (editingTransaction) {
-      setEditingTransaction({
-        ...editingTransaction,
-        [field]: value,
-      });
-    }
   };
 
   const handleDeleteTransaction = (id: number) => {
@@ -168,10 +174,8 @@ function AddTransactionsForm({
                 size="sm"
                 type="button"
                 onClick={() => {
-                  const newTransaction = createDefaultTransaction();
-                  setTransactions((prev) => [newTransaction, ...prev]);
-                  setEditingTransaction(newTransaction);
                   setIsEditDialogOpen(true);
+                  form.reset();
                 }}
               >
                 <Plus className="h-3 w-3" />
@@ -186,7 +190,7 @@ function AddTransactionsForm({
                   onClick={() => {
                     setTransactions([]);
                     setIsEditDialogOpen(false);
-                    setEditingTransaction(null);
+                    form.reset();
                   }}
                 >
                   <X className="h-3 w-3" />
@@ -205,16 +209,9 @@ function AddTransactionsForm({
                     </p>
                     <div className="flex items-start gap-2 mt-1 flex-wrap">
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
+                        <CalendarIcon className="h-3 w-3" />
                         <span className="truncate">
-                          {new Date(transaction.date).toLocaleDateString(
-                            'en-ZA',
-                            {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                            }
-                          )}
+                          {formatDate(new Date(transaction.date))}
                         </span>
                       </p>
                       {(transaction.category ?? transaction.subCategory) && (
@@ -246,6 +243,7 @@ function AddTransactionsForm({
                         type="button"
                       >
                         <Edit3 className="h-3 w-3" />
+                        <span className="sr-only">Edit Transaction</span>
                       </Button>
                       <Button
                         variant="ghost"
@@ -255,6 +253,7 @@ function AddTransactionsForm({
                         type="button"
                       >
                         <Trash2 className="h-3 w-3" />
+                        <span className="sr-only">Delete Transaction</span>
                       </Button>
                     </div>
                   </div>
@@ -297,151 +296,213 @@ function AddTransactionsForm({
       </form>
 
       {/* Edit Transaction Dialog */}
-      <Dialog
-        open={isEditDialogOpen}
-        onOpenChange={(open) => {
-          // remove transaction if it is not valid
-          if (
-            !open &&
-            editingTransaction &&
-            !validateTransaction(editingTransaction)
-          ) {
-            setTransactions((prev) =>
-              prev.filter(
-                (transaction) => transaction.id !== editingTransaction.id
-              )
-            );
-          }
-
-          setIsEditDialogOpen(open);
-        }}
-      >
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
-          <form onSubmit={handleSaveEdit} className="space-y-4">
-            <DialogTitle>
-              {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
-            </DialogTitle>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleSaveEdit)}
+              className="space-y-4"
+            >
+              <DialogTitle>
+                {form.getValues('id') ? 'Edit Transaction' : 'Add Transaction'}
+              </DialogTitle>
 
-            <DialogDescription className="sr-only">
-              {editingTransaction?.id ? 'Edit Transaction' : 'Add Transaction'}
-            </DialogDescription>
+              <DialogDescription className="sr-only">
+                {form.getValues('id') ? 'Edit Transaction' : 'Add Transaction'}
+              </DialogDescription>
 
-            {editingTransaction && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    required
-                    value={editingTransaction.description}
-                    onChange={(e) => {
-                      handleUpdateEditingTransaction(
-                        'description',
-                        e.target.value
-                      );
-                    }}
-                    placeholder="Transaction description"
+                  <FormField
+                    control={form.control}
+                    name="id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Transaction ID"
+                            disabled
+                            className="hidden"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Transaction description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (R)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      required
-                      min={0.01}
-                      value={editingTransaction.amount}
-                      onChange={(e) =>
-                        handleUpdateEditingTransaction('amount', e.target.value)
-                      }
-                      placeholder="0.00"
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Amount (R)</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Date</Label>
-                    <DatePicker
-                      initialDate={new Date(editingTransaction.date)}
-                      onDateChangeAction={(date) =>
-                        handleUpdateEditingTransaction('date', date)
-                      }
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Date</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant={'outline'}
+                                  className={cn(
+                                    'pl-3 text-left font-normal',
+                                    !field.value && 'text-muted-foreground'
+                                  )}
+                                >
+                                  {field.value ? (
+                                    formatDate(field.value)
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={(date: Date | undefined) =>
+                                  field.onChange(date)
+                                }
+                                captionLayout="dropdown"
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <div className="space-y-2 flex-1">
-                    <Label htmlFor="category">Category</Label>
-                    <Select
-                      value={editingTransaction.category ?? ''}
-                      onValueChange={(value) =>
-                        handleUpdateEditingTransaction('category', value)
-                      }
-                      defaultValue={editingTransaction.category ?? ''}
-                      required
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue id="category" placeholder="e.g., Stock" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories?.map((category) => (
-                          <SelectItem key={category.id} value={category.name}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="e.g., Stock" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {categories?.map((category) => (
+                                  <SelectItem
+                                    key={category.id}
+                                    value={category.name}
+                                  >
+                                    {category.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="space-y-2 flex-1">
-                    <Label htmlFor="subCategory">Sub Category</Label>
-                    <Select
-                      value={editingTransaction.subCategory ?? ''}
-                      onValueChange={(value) =>
-                        handleUpdateEditingTransaction('subCategory', value)
-                      }
-                      defaultValue={editingTransaction.subCategory ?? ''}
-                      required
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue
-                          id="subCategory"
-                          placeholder="e.g., Fuel"
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subCategories?.map((subCategory) => (
-                          <SelectItem
-                            key={subCategory.id}
-                            value={subCategory.name}
-                          >
-                            {subCategory.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormField
+                      control={form.control}
+                      name="subCategory"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sub Category</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="e.g., Fuel" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {subCategories?.map((subCategory) => (
+                                  <SelectItem
+                                    key={subCategory.id}
+                                    value={subCategory.name}
+                                  >
+                                    {subCategory.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
               </div>
-            )}
 
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={handleCancelEdit}
-                type="button"
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                <Check className="h-3 w-3 mr-1" />
-                Save
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  <Check className="h-3 w-3 mr-1" />
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </>
