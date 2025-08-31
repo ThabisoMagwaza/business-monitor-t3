@@ -53,11 +53,35 @@ import { Calendar } from '../ui/calendar';
 
 const createTransactionSchema = z.object({
   id: z.string(),
-  description: z.string().min(1),
-  amount: z.string(),
+  description: z
+    .string({
+      error: 'Description is required',
+    })
+    .min(1, {
+      message: 'Description is required',
+    }),
+  amount: z
+    .string({
+      error: 'Amount is required',
+    })
+    .min(1, {
+      message: 'Amount is required',
+    }),
   date: z.date(),
-  category: z.string().min(1),
-  subCategory: z.string().min(1),
+  category: z
+    .string({
+      error: 'Category is required',
+    })
+    .min(1, {
+      message: 'Category is required',
+    }),
+  subCategory: z
+    .string({
+      error: 'Sub Category is required',
+    })
+    .min(1, {
+      message: 'Sub Category is required',
+    }),
 });
 
 function AddTransactionsForm({
@@ -495,9 +519,9 @@ function AddTransactionsForm({
                 >
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={!form.formState.isDirty}>
                   <Check className="h-3 w-3 mr-1" />
-                  Save
+                  {form.getValues('id') ? 'Update' : 'Add'}
                 </Button>
               </DialogFooter>
             </form>
