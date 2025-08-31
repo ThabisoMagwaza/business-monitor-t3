@@ -3,7 +3,6 @@ import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { formatCurrencyAmount } from '~/lib/helpers';
-import { useToast } from '~/app/context/ToastProvider';
 
 import AmountCard from '../AmountCard';
 
@@ -16,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
-
+import { toast } from 'sonner';
 type BusinessHealthSummaryProps = {
   name: string;
   totalIncome: number;
@@ -32,22 +31,19 @@ function BusinessHealthSummary({
 }: BusinessHealthSummaryProps) {
   const params = useSearchParams();
 
-  const { showToast } = useToast();
-
   // this is a hack to show a toast when the page is loaded or when we navigate to the page
   React.useEffect(() => {
     const title = params.get('title');
     const description = params.get('description');
     if (description && title) {
-      showToast({
-        title,
+      toast.success(title, {
         description,
       });
 
       // clean up url
       window.history.replaceState(null, '', '/');
     }
-  }, [showToast, params]);
+  }, [params]);
 
   return (
     <main className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4">

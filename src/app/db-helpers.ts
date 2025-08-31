@@ -1,7 +1,18 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '~/server/db';
-import { users, businesses, receiptScans, receipts } from '~/server/db/schema';
+import {
+  users,
+  businesses,
+  receiptScans,
+  receipts,
+  transactionCategories,
+  itemSubCategories,
+} from '~/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import type {
+  ItemSubCategory,
+  TransactionCategory,
+} from '~/lib/types/Transaction';
 
 type User = typeof users.$inferSelect;
 
@@ -59,4 +70,14 @@ export async function countPendingReceipts() {
   `);
 
   return Number(countResult.rows[0]?.pending_count) ?? 0;
+}
+
+export async function getCategories(): Promise<TransactionCategory[]> {
+  const result = await db.select().from(transactionCategories);
+  return result;
+}
+
+export async function getSubCategories(): Promise<ItemSubCategory[]> {
+  const result = await db.select().from(itemSubCategories);
+  return result;
 }
