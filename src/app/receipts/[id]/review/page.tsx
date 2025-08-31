@@ -57,7 +57,8 @@ export default async function ReceiptPage({
 
   const saveTransactions = async (
     transactions: NewTransaction[],
-    type: 'expense' | 'income'
+    type: 'expense' | 'income',
+    storeName?: string
   ) => {
     'use server';
 
@@ -75,6 +76,13 @@ export default async function ReceiptPage({
         accepted: true,
       })
       .where(eq(receiptScans.id, scan.id!));
+
+    if (storeName) {
+      await db
+        .update(receipts)
+        .set({ name: `${storeName} ${receipt.id}` })
+        .where(eq(receipts.id, receipt.id));
+    }
 
     // 2. add transactions to the database
     await db.insert(transactionsTable).values(
@@ -125,17 +133,22 @@ export default async function ReceiptPage({
           </form>
 
           <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-bold">Transactions</h2>
+            <h2 className="text-lg font-bold">
+              Transactions {scan.scanResult.storeName}
+            </h2>
           </div>
 
           <AddTransactionsForm
             type="expense"
             categories={categories}
             subCategories={subCategories}
+            storeName={scan.scanResult.storeName}
             initialTransactions={scan.scanResult.items.map((item) => ({
               id: Math.floor(Math.random() * 1000000),
               type: 'expense',
-              date: formatDate(scan.createdAt ?? new Date()),
+              date: formatDate(
+                new Date(scan.scanResult.date ?? scan.createdAt ?? new Date())
+              ),
               description: item.name,
               amount: String(item.price / 100),
               categoryId: item.categoryId,

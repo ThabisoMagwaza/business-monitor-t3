@@ -98,21 +98,29 @@ function AddTransactionsForm({
   saveTransactions,
   categories,
   subCategories,
+  storeName,
 }: {
   type: 'expense' | 'income';
   initialTransactions: NewTransaction[];
   categories: TransactionCategory[];
   subCategories: ItemSubCategory[];
+  storeName?: string;
   saveTransactions: (
     transactions: NewTransaction[],
-    type: 'expense' | 'income'
+    type: 'expense' | 'income',
+    storeName?: string
   ) => void;
 }) {
   const [transactions, setTransactions] =
     React.useState<NewTransaction[]>(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
 
-  const saveNewTransactions = saveTransactions.bind(null, transactions, type);
+  const saveNewTransactions = saveTransactions.bind(
+    null,
+    transactions,
+    type,
+    storeName
+  );
 
   const handleEdit = (id: number) => {
     const transaction = transactions.find((t) => t.id === id);

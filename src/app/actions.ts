@@ -147,6 +147,8 @@ async function run(image: string): Promise<{
 
       Please suggest a category and subCategory for each item. If you are not sure, use the category "Other" and/or the subCategory "Other".
 
+      If the date is not provided or not clear, ${new Date().toISOString()}.
+
       The JSON should be in the following format:
       {
         "storeName": "string",
