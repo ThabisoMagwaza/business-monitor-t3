@@ -8,7 +8,15 @@ import {
   CardTitle,
 } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Edit3, Trash2, Check, X, Plus, CalendarIcon } from 'lucide-react';
+import {
+  Edit3,
+  Trash2,
+  Check,
+  X,
+  Plus,
+  CalendarIcon,
+  ArrowUpFromLine,
+} from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import {
   Dialog,
@@ -20,7 +28,6 @@ import {
 import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
 import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
-import FormSubmitButton from '../FormSubmitButton/FormSubmitButton';
 
 import type { NewTransaction } from '~/app/actions';
 import type {
@@ -50,6 +57,7 @@ import { Popover, PopoverContent } from '../ui/popover';
 import { PopoverTrigger } from '../ui/popover';
 import { cn } from '~/lib/utils';
 import { Calendar } from '../ui/calendar';
+import SubmitButton from '../SubmitButton/SubmitButton';
 
 const createTransactionSchema = z.object({
   id: z.string(),
@@ -310,9 +318,7 @@ function AddTransactionsForm({
           </CardContent>
           <CardFooter>
             {transactions.length > 0 && (
-              <FormSubmitButton loadingText="Saving Transactions...">
-                Save
-              </FormSubmitButton>
+              <SubmitButton icon={<ArrowUpFromLine />}>Save</SubmitButton>
             )}
           </CardFooter>
         </Card>

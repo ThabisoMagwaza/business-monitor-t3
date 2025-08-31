@@ -15,6 +15,7 @@ import { redirect } from 'next/navigation';
 import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
 import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
+import { Upload } from 'lucide-react';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -110,7 +111,7 @@ export default async function ReceiptPage({
       {!scan.scanResult && (
         <form action={handleRescan}>
           <div className="flex justify-center">
-            <SubmitButton>Scan Receipt</SubmitButton>
+            <SubmitButton icon={<Upload />}>Scan Receipt</SubmitButton>
           </div>
         </form>
       )}
@@ -119,7 +120,7 @@ export default async function ReceiptPage({
         <>
           <form action={handleRescan}>
             <div className="flex justify-center">
-              <SubmitButton>Rescan Receipt</SubmitButton>
+              <SubmitButton icon={<Upload />}>Rescan Receipt</SubmitButton>
             </div>
           </form>
 

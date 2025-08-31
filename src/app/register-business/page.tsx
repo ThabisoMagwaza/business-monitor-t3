@@ -59,7 +59,9 @@ export default function Page() {
               </div>
 
               <div className="space-y-4 pt-4 flex justify-center">
-                <SubmitButton>Create Business</SubmitButton>
+                <SubmitButton icon={<Building2 />}>
+                  Create Business
+                </SubmitButton>
               </div>
             </form>
           </CardContent>

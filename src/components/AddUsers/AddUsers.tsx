@@ -7,6 +7,7 @@ import { addUser } from '~/app/actions';
 
 import MaxWidthWrapper from '~/components/MaxWidthWrapper';
 import SubmitButton from '../SubmitButton';
+import { UserPlus } from 'lucide-react';
 
 export type User = {
   id: string;
@@ -54,7 +55,7 @@ function AddUsers({ users }: AddUsersProps) {
             ))}
         </select>
         <div>
-          <SubmitButton loadingText="Adding User...">Add</SubmitButton>
+          <SubmitButton icon={<UserPlus />}>Add</SubmitButton>
         </div>
       </Form>
     </Wrapper>
