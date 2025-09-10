@@ -17,3 +17,5 @@
 - [ ] wrap auth stuff in common file
 
 - [ ] image optimization
+
+- [ ] users can be registered under multiple businesses

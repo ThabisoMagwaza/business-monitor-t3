@@ -1,49 +1,45 @@
 import { eq, sum } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { transactions } from '~/server/db/schema';
-import {
-  getUserInfo,
-  getBusinessInfo,
-  countPendingReceipts,
-} from './db-helpers';
+import { getBusinessInfo, countPendingReceipts } from './db-helpers';
+
+import { getUser } from '~/server/adapters/users';
 
 import BusinessHealthSummary from '~/components/BusinessHealthSummary';
 import NotRegistredUser from '~/components/NotRegistredUser';
 
 export default async function Home() {
-  const user = await getUserInfo();
+  const user = await getUser();
+
+  if (!user) {
+    return (
+      <main>
+        <NotRegistredUser />
+      </main>
+    );
+  }
 
   const pendingReceipts = await countPendingReceipts();
 
-  let summary = null;
-  let totalExpenses = null;
-  let totalIncome = null;
+  const summary = await db
+    .select({
+      type: transactions.type,
+      total: sum(transactions.amount),
+    })
+    .from(transactions)
+    .where(eq(transactions.businessId, user.businessId))
+    .groupBy(transactions.type);
 
-  let businessInfo = null;
+  const totalExpenses =
+    Number(summary.find((val) => val.type === 'expense')?.total) || 0;
 
-  if (user?.businessId) {
-    summary = await db
-      .select({
-        type: transactions.type,
-        total: sum(transactions.amount),
-      })
-      .from(transactions)
-      .where(eq(transactions.businessId, user.businessId))
-      .groupBy(transactions.type);
+  const totalIncome =
+    Number(summary.find((val) => val.type === 'income')?.total) || 0;
 
-    totalExpenses =
-      Number(summary.find((val) => val.type === 'expense')?.total) || 0;
-
-    totalIncome =
-      Number(summary.find((val) => val.type === 'income')?.total) || 0;
-
-    businessInfo = await getBusinessInfo(user.businessId);
-  }
+  const businessInfo = await getBusinessInfo(user.businessId);
 
   return (
-    <main>
-      {!user?.businessId && <NotRegistredUser />}
-
+    <main className="max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4">
       {totalIncome !== null && totalExpenses !== null && (
         <BusinessHealthSummary
           name={businessInfo?.businessName ?? 'No Business Name'}
