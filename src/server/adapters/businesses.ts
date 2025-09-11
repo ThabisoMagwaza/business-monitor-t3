@@ -3,7 +3,7 @@ import { businesses, transactions, users } from '../db/schema';
 import { and, eq, sum } from 'drizzle-orm';
 import type { BusinessContext } from '~/lib/types/business';
 
-export const verifyBusinessContext = async (
+export const getBusinessContext = async (
   userId: string,
   businessId: number
 ): Promise<BusinessContext> => {
@@ -21,6 +21,7 @@ export const verifyBusinessContext = async (
   return {
     userId: user[0].users.id,
     businessId: user[0].businesses.id,
+    businessName: user[0].businesses.name,
   };
 };
 
@@ -28,7 +29,7 @@ export const getExpenseSalesSummary = async (
   userId: string,
   businessId: number
 ) => {
-  const ctx = await verifyBusinessContext(userId, businessId);
+  const ctx = await getBusinessContext(userId, businessId);
   const summary = await db
     .select({
       type: transactions.type,

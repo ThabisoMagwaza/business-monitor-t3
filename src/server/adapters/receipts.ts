@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { receiptScans, receipts } from '~/server/db/schema';
 import type { BusinessContext } from '~/lib/types/business';
-import { verifyBusinessContext } from '~/server/adapters/businesses';
+import { getBusinessContext } from '~/server/adapters/businesses';
 
 export const getPendingReceiptsCount = async (ctx: BusinessContext) => {
   const countResult = await db.execute(sql`
@@ -28,7 +28,7 @@ export const countPendingReceipts = async (
   userId: string,
   bussinessId: number
 ) => {
-  const ctx = await verifyBusinessContext(userId, bussinessId);
+  const ctx = await getBusinessContext(userId, bussinessId);
 
   const pendingReceipts = await getPendingReceiptsCount(ctx);
   return pendingReceipts;

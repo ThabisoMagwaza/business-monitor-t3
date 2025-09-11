@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 
-import { getBusinessInfo } from './db-helpers';
-
 import { getUserAction } from './actions/users';
 
 import NotRegistredUser from '~/components/NotRegistredUser';
@@ -12,6 +10,7 @@ import PendingReceipts from '~/components/PendingReceipts/PendingReceipts';
 import { Skeleton } from '~/components/ui/skeleton';
 import Page from '~/components/Page/Page';
 import ExpenseSummary from '~/components/ExpenseSummary/ExpenseSummary';
+import { getBusinessContext } from '~/server/adapters/businesses';
 
 export default async function Home() {
   const user = await getUserAction();
@@ -24,7 +23,8 @@ export default async function Home() {
     );
   }
 
-  const businessInfo = await getBusinessInfo(user.businessId);
+  // users that are registered must be associated with a business (probably needs to change in the future)
+  const businessInfo = await getBusinessContext(user.id, user.businessId);
 
   return (
     <Page>
