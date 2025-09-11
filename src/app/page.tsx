@@ -1,22 +1,17 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { BanknoteArrowUp, Scan } from 'lucide-react';
-import { eq, sum } from 'drizzle-orm';
-import { db } from '~/server/db';
-import { transactions } from '~/server/db/schema';
+
 import { getBusinessInfo } from './db-helpers';
 
 import { getUserAction } from './actions/users';
 
 import NotRegistredUser from '~/components/NotRegistredUser';
-import { BanknoteArrowDown, FileText } from 'lucide-react';
+import { FileText, Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
-import { formatCurrencyAmount } from '~/lib/helpers';
-import AmountCard from '~/components/AmountCard';
 import PendingReceipts from '~/components/PendingReceipts/PendingReceipts';
 import { Skeleton } from '~/components/ui/skeleton';
 import Page from '~/components/Page/Page';
-import { getExpenseSalesSummary } from '~/server/adapters/businesses';
+import ExpenseSummary from '~/components/ExpenseSummary/ExpenseSummary';
 
 export default async function Home() {
   const user = await getUserAction();
@@ -28,11 +23,6 @@ export default async function Home() {
       </main>
     );
   }
-
-  const { income, expense } = await getExpenseSalesSummary(
-    user.id,
-    user.businessId
-  );
 
   const businessInfo = await getBusinessInfo(user.businessId);
 
@@ -77,24 +67,7 @@ export default async function Home() {
 
         <div className="flex flex-col gap-4">
           <h3>Details</h3>
-
-          <div className="flex flex-col gap-4">
-            <AmountCard
-              title="Income"
-              amount={formatCurrencyAmount(Number(income))}
-              variant="default"
-              icon={<BanknoteArrowUp />}
-              link="/income"
-            />
-
-            <AmountCard
-              title="Expenses"
-              amount={formatCurrencyAmount(Number(expense))}
-              variant="default"
-              icon={<BanknoteArrowDown />}
-              link="/expenses"
-            />
-          </div>
+          <ExpenseSummary userId={user.id} businessId={user.businessId} />
         </div>
       </div>
     </Page>
