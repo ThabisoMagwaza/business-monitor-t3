@@ -103,6 +103,8 @@ const createTransactionSchema = z.object({
     .min(1, {
       message: 'Sub Category is required',
     }),
+  categoryId: z.number(),
+  subCategoryId: z.number(),
 });
 
 function AddTransactionsForm({
@@ -152,7 +154,6 @@ function AddTransactionsForm({
     }
   };
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof createTransactionSchema>>({
     resolver: zodResolver(createTransactionSchema),
     defaultValues: {
@@ -162,6 +163,8 @@ function AddTransactionsForm({
       date: new Date(),
       category: '',
       subCategory: '',
+      categoryId: 0,
+      subCategoryId: 0,
     },
   });
 
@@ -548,7 +551,15 @@ function AddTransactionsForm({
                           <FormLabel>Category</FormLabel>
                           <FormControl>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const category = categories.find(
+                                  (category) => category.name === value
+                                );
+                                if (category) {
+                                  form.setValue('categoryId', category.id);
+                                }
+                              }}
                               defaultValue={field.value}
                             >
                               <SelectTrigger className="w-full">
@@ -581,7 +592,18 @@ function AddTransactionsForm({
                           <FormLabel>Sub Category</FormLabel>
                           <FormControl>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const subCategory = subCategories.find(
+                                  (subCategory) => subCategory.name === value
+                                );
+                                if (subCategory) {
+                                  form.setValue(
+                                    'subCategoryId',
+                                    subCategory.id
+                                  );
+                                }
+                              }}
                               defaultValue={field.value}
                             >
                               <SelectTrigger className="w-full">
