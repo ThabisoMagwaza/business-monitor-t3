@@ -24,7 +24,7 @@ async function ExpensesPage() {
 
   return (
     <main>
-      <TransationsPage type="expenses" transations={expenses} />
+      <TransationsPage type="expense" transations={expenses} />
     </main>
   );
 }

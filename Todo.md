@@ -1,5 +1,8 @@
 - [ ] use adapter pattern for db stuff
 
+- [ ] add categories to income
+- [ ] import icome
+
 - [ ] reports
 - [ ] add import sales functions and endpoints
 - [ ] filter transactions on page and reports
