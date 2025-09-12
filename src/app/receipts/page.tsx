@@ -55,7 +55,7 @@ export default async function ReceiptsPage(props: {
       <Suspense
         key={currentStatus}
         fallback={
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-4">
             <Skeleton className="w-full h-[90px]" />
             <Skeleton className="w-full h-[90px]" />
             <Skeleton className="w-full h-[90px]" />
