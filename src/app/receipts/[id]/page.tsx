@@ -3,7 +3,7 @@ import { receiptScans, receipts } from '~/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { redirect } from 'next/navigation';
-import type { ScanResult } from '~/lib/types/ScanResult';
+import type { ScanResult } from '~/lib/types/scanResult';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';

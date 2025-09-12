@@ -19,7 +19,7 @@ import { db } from '~/server/db';
 
 import type { User } from '~/components/AddUsers';
 import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
-import { scanResultSchema, type ScanResult } from '~/lib/types/ScanResult';
+import { scanResultSchema, type ScanResult } from '~/lib/types/scanResult';
 
 type Transaction = typeof transactions.$inferInsert;
 export type NewTransaction = Omit<

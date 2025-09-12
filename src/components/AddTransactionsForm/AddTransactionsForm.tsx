@@ -35,7 +35,7 @@ import type { NewTransaction } from '~/app/actions';
 import type {
   ItemSubCategory,
   TransactionCategory,
-} from '~/lib/types/Transaction';
+} from '~/lib/types/transactions';
 import {
   Select,
   SelectTrigger,

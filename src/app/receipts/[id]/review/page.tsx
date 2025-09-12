@@ -5,7 +5,7 @@ import {
   receipts,
   transactions as transactionsTable,
 } from '~/server/db/schema';
-import type { ScanResult } from '~/lib/types/ScanResult';
+import type { ScanResult } from '~/lib/types/scanResult';
 import AddTransactionsForm from '~/components/AddTransactionsForm';
 import { formatDate } from '~/lib/helpers';
 import Page from '~/components/Page/Page';

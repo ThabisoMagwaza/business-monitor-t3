@@ -1,6 +1,6 @@
 'use client';
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
 import type { ReceiptStatus, ReceiptStatusCounts } from '~/lib/types/receipts';
@@ -16,18 +16,23 @@ export default function ReceiptFilterTabs({
 }: ReceiptFilterTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const handleStatusChange = (status: string) => {
+  const [currentStatusClient, setCurrentStatusClient] =
+    useState<ReceiptStatus>(currentStatus);
+
+  const handleStatusChange = (status: ReceiptStatus) => {
     const params = new URLSearchParams(searchParams);
     if (status === 'all') {
       params.delete('status');
     } else {
       params.set('status', status);
     }
-    router.push(`/receipts?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`);
+    setCurrentStatusClient(status);
   };
 
-  const tabs = [
+  const tabs: { key: ReceiptStatus; label: string; count: number }[] = [
     { key: 'all', label: 'All', count: statusCounts.all },
     { key: 'pending', label: 'Pending', count: statusCounts.pending },
     { key: 'processed', label: 'Processed', count: statusCounts.processed },
@@ -43,7 +48,7 @@ export default function ReceiptFilterTabs({
           onClick={() => handleStatusChange(tab.key)}
           className={cn(
             'flex-1 text-sm font-medium transition-colors',
-            currentStatus === tab.key
+            currentStatusClient === tab.key
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
           )}
