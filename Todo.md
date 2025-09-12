@@ -3,6 +3,8 @@
 - [ ] add categories to income
 - [ ] import icome
 
+- [ ] make the app installable (PWA)
+
 - [ ] reports
 - [ ] add import sales functions and endpoints
 - [ ] filter transactions on page and reports

@@ -6,7 +6,7 @@ import './globals.css';
 import Header from '~/components/Header';
 import Breadcrumbs from '~/components/Breadcrumbs';
 import SignedOutPage from '~/components/SignedOutPage';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from '~/components/ui/sonner';
 
 const inter = Inter({
@@ -16,7 +16,15 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Business Monitor App',
   description: 'Business Monitor App',
-  icons: [{ rel: 'icon', url: '/favicon.ico' }],
+  icons: [
+    { rel: 'icon', url: '/favicon.ico' },
+    { rel: 'apple-touch-icon', url: '/icons/icon-192x192.png' },
+  ],
+  manifest: '/manifest.webmanifest',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#111827',
 };
 
 export default function RootLayout({

@@ -50,6 +50,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@types/eslint": "^8.56.2",
     "@types/node": "^20.11.20",
     "@types/react": "19.1.8",

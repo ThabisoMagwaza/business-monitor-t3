@@ -1,4 +1,5 @@
 import { getUserInfo } from '~/app/db-helpers';
+import InstallPWAButton from '../InstallPWAButton';
 import Link from 'next/link';
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Button } from '../ui/button';
@@ -31,6 +32,7 @@ async function Header() {
               </Button>
             </SignInButton>
           </SignedOut>
+          <InstallPWAButton />
           {isAdmin && <Link href="/add-users">Manage</Link>}
           <SignedIn>
             <UserButton />
