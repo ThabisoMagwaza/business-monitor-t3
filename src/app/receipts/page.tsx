@@ -12,6 +12,9 @@ import { Button } from '~/components/ui/button';
 import ReceiptFilterTabs from '~/components/ReceiptFilterTabs';
 import { receipts as receiptsDb } from '~/server/db/schema';
 import { getUserInfo } from '../db-helpers';
+import { countReceiptStatuses } from '~/server/adapters/receipts';
+import { redirect, RedirectType } from 'next/navigation';
+import { type ReceiptStatus, receiptStatusSchema } from '~/lib/types/receipts';
 
 type ReceiptScan = typeof receiptScans.$inferSelect;
 
@@ -32,11 +35,23 @@ function getTotalAmount(scanResult: ScanResult | null): number {
 export default async function ReceiptsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: ReceiptStatus }>;
 }) {
-  const currentStatus = (await searchParams).status ?? 'all';
+  const { status } = await searchParams;
+
+  const parseStatus = receiptStatusSchema.safeParse(status);
+
+  if (!parseStatus.success) {
+    return redirect('/receipts?status=all', RedirectType.replace);
+  }
+
+  const currentStatus: ReceiptStatus = parseStatus.data;
 
   const user = await getUserInfo();
+  if (!user?.id || !user?.businessId) {
+    // user not logged in
+    return redirect('/', RedirectType.replace);
+  }
 
   const receipts = await db.query.receipts.findMany({
     where: eq(receiptsDb.businessId, user?.businessId ?? 0),
@@ -51,18 +66,7 @@ export default async function ReceiptsPage({
   });
 
   // Calculate status counts
-  const statusCounts = {
-    all: receipts.length,
-    pending: 0,
-    processed: 0,
-    failed: 0,
-  };
-
-  receipts.forEach((receipt) => {
-    const latestScan = receipt.scans[0];
-    const status = getReceiptStatus(latestScan);
-    statusCounts[status as keyof typeof statusCounts]++;
-  });
+  const statusCounts = await countReceiptStatuses(user?.id, user?.businessId);
 
   // Filter receipts by status
   const filteredReceipts =

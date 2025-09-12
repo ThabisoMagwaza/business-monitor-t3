@@ -3,15 +3,11 @@ import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
+import type { ReceiptStatus, ReceiptStatusCounts } from '~/lib/types/receipts';
 
 interface ReceiptFilterTabsProps {
-  currentStatus: string;
-  statusCounts: {
-    all: number;
-    pending: number;
-    processed: number;
-    failed: number;
-  };
+  currentStatus: ReceiptStatus;
+  statusCounts: ReceiptStatusCounts;
 }
 
 export default function ReceiptFilterTabs({

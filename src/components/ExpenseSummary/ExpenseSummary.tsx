@@ -2,7 +2,7 @@ import { BanknoteArrowDown, BanknoteArrowUp } from 'lucide-react';
 import { formatCurrencyAmount } from '~/lib/helpers';
 import AmountCard from '../AmountCard';
 import * as React from 'react';
-import { getExpenseSalesSummary } from '~/server/adapters/businesses';
+import { getExpenseSalesSummary } from '~/server/adapters/transactions';
 
 async function ExpenseSummary({
   userId,
