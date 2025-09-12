@@ -11,13 +11,12 @@ import { countReceiptStatuses } from '~/server/adapters/receipts';
 import { redirect, RedirectType } from 'next/navigation';
 import { type ReceiptStatus, receiptStatusSchema } from '~/lib/types/receipts';
 import ReceiptsSummaryList from '~/components/ReceiptsSummaryList';
+import { Skeleton } from '~/components/ui/skeleton';
 
-export default async function ReceiptsPage({
-  searchParams,
-}: {
+export default async function ReceiptsPage(props: {
   searchParams: Promise<{ status?: ReceiptStatus }>;
 }) {
-  const { status } = await searchParams;
+  const { status } = await props.searchParams;
 
   const parseStatus = receiptStatusSchema.safeParse(status);
 
@@ -53,7 +52,17 @@ export default async function ReceiptsPage({
         statusCounts={statusCounts}
       />
 
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        key={currentStatus}
+        fallback={
+          <div className="flex flex-col gap-4">
+            <Skeleton className="w-full h-[90px]" />
+            <Skeleton className="w-full h-[90px]" />
+            <Skeleton className="w-full h-[90px]" />
+            <Skeleton className="w-full h-[90px]" />
+          </div>
+        }
+      >
         <ReceiptsSummaryList
           userId={user.id}
           businessId={user.businessId}
