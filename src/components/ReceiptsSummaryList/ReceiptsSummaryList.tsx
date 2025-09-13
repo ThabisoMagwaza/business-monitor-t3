@@ -54,7 +54,7 @@ async function ReceiptsSummaryList({
             >
               <Card className="hover:shadow-md transition-shadow p-0">
                 <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-4">
                     {/* Receipt Image/Icon - Left Side */}
                     <div className="h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {receipt.url ? (
@@ -77,13 +77,13 @@ async function ReceiptsSummaryList({
                         {receipt.name}
                       </h3>
                       <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                        <div className="flex items-center space-x-1">
+                        <div className="flex items-center space-x-1 ">
                           <Calendar className="w-3 h-3" />
-                          <span className="no-wrap">{date}</span>
+                          <span className="whitespace-nowrap">{date}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <FileText className="w-3 h-3" />
-                          <span className="no-wrap">
+                          <span className="whitespace-nowrap">
                             {receipt.numItems} items
                           </span>
                         </div>
