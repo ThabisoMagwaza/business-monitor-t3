@@ -1,3 +1,4 @@
+import 'server-only';
 import { type SQL, sql } from 'drizzle-orm';
 import { db } from '~/server/db';
 import { receiptScans, receipts } from '~/server/db/schema';

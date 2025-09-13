@@ -1,14 +1,20 @@
 - [ ] use adapter pattern for db stuff
 
-- [ ] add categories to income
-- [ ] import icome
-
-- [ ] make the app installable (PWA)
+- [x] make the app installable (PWA)
+- [ ] make the transaction searchable
 
 - [ ] reports
 - [ ] add import sales functions and endpoints
 - [ ] filter transactions on page and reports
-- [ ] add delete slip button
+- [ ] add delete slip button (or reject)
+
+- [ ] redising the transactions page
+- [ ] allow edit of transaction (recategorize)
+
+- [ ] import icome
+
+- [ ] add categories to income
+- [ ] add asset class categories
 
 - [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
 - [ ] improve page load speed (suspense, skeletons e.t.c)

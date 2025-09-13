@@ -28,7 +28,7 @@ export default function ReceiptFilterTabs({
     } else {
       params.set('status', status);
     }
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     setCurrentStatusClient(status);
   };
 
