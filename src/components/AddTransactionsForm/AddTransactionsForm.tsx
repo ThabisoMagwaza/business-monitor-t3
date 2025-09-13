@@ -148,6 +148,8 @@ function AddTransactionsForm({
       form.setValue('date', new Date(transaction.date));
       form.setValue('category', transaction.category ?? '');
       form.setValue('subCategory', transaction.subCategory ?? '');
+      form.setValue('categoryId', transaction.categoryId ?? 0);
+      form.setValue('subCategoryId', transaction.subCategoryId ?? 0);
       form.setValue('id', transaction.id.toString());
 
       setIsEditDialogOpen(true);
@@ -218,6 +220,8 @@ function AddTransactionsForm({
       }, 0)
       .toFixed(2);
   };
+
+  console.log({ transactions });
 
   return (
     <>
