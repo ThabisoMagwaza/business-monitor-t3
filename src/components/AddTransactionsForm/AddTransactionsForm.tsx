@@ -176,7 +176,7 @@ function AddTransactionsForm({
         {
           ...data,
           id: Math.floor(Math.random() * 1000000),
-          date: data.date.toISOString(),
+          date: data.date,
         },
         ...prev,
       ]);
@@ -189,7 +189,7 @@ function AddTransactionsForm({
             ? {
                 ...data,
                 id: Number(form.getValues('id')),
-                date: data.date.toISOString(),
+                date: data.date,
               }
             : transaction
         )
@@ -220,8 +220,6 @@ function AddTransactionsForm({
       }, 0)
       .toFixed(2);
   };
-
-  console.log({ transactions });
 
   return (
     <>
@@ -317,7 +315,7 @@ function AddTransactionsForm({
                         setTransactions((prev: NewTransaction[]) =>
                           prev.map((transaction) => ({
                             ...transaction,
-                            date: allTransactionsDate?.toISOString(),
+                            date: allTransactionsDate,
                           }))
                         );
                       }}

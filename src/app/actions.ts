@@ -32,7 +32,7 @@ export type NewTransaction = Omit<
 };
 
 export async function addTransactions(
-  incomingTransactios: NewTransaction[],
+  incomingTransactions: NewTransaction[],
   type: 'expense' | 'income'
 ) {
   const user = await getUserInfo();
@@ -41,19 +41,17 @@ export async function addTransactions(
     return;
   }
 
-  const newTransactions: Transaction[] = incomingTransactios.map(
+  const newTransactions: Transaction[] = incomingTransactions.map(
     ({ description, amount, date, subCategoryId, categoryId }) => ({
       description,
       amount: amount,
-      date: new Date(date).toISOString(),
+      date,
       type,
       businessId: user.businessId,
       subCategoryId,
       categoryId,
     })
   );
-
-  console.log({ newTransactions });
 
   await db.insert(transactions).values(newTransactions);
   revalidatePath(`/${type}`);
