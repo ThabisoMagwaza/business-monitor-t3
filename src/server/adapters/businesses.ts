@@ -5,8 +5,9 @@ import {
   businessContextSchema,
   type BusinessContext,
 } from '~/lib/types/business';
+import { unstable_cache } from 'next/cache';
 
-export const getBusinessContext = async (
+const getBusinessContextQuery = async (
   userId: string,
   businessId: number
 ): Promise<BusinessContext> => {
@@ -26,4 +27,29 @@ export const getBusinessContext = async (
     businessId: user[0].businesses.id,
     businessName: user[0].businesses.name,
   });
+};
+
+const getBusinessContextQueryCached = async (
+  userId: string,
+  businessId: number
+) => {
+  return unstable_cache(
+    async (userId: string, businessId: number): Promise<BusinessContext> => {
+      return getBusinessContextQuery(userId, businessId);
+    },
+    [`userId-${userId}-businessId-${businessId}`],
+    { tags: ['business'] }
+  );
+};
+
+export const getBusinessContext = async (
+  userId: string,
+  businessId: number
+) => {
+  const getCachedBusinessContext = await getBusinessContextQueryCached(
+    userId,
+    businessId
+  );
+  const businessContext = await getCachedBusinessContext(userId, businessId);
+  return businessContext;
 };
