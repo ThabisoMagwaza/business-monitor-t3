@@ -1,14 +1,21 @@
 'use server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
+import { RedirectType, redirect } from 'next/navigation';
 import { getUser } from '~/server/adapters/users';
 
 export const getUserAction = async () => {
-  const user = await currentUser();
+  const { userId } = await auth();
 
-  if (!user) {
-    return; // User is not logged in
+  if (!userId) {
+    throw new Error('User not logged in');
   }
 
-  const dbUser = await getUser(user.id);
+  const dbUser = await getUser(userId);
+
+  if (!dbUser) {
+    // user not registered
+    redirect('/', RedirectType.replace);
+  }
+
   return dbUser;
 };
