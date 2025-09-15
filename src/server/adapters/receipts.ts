@@ -11,6 +11,7 @@ import {
   type ScanResult,
   type ReceiptStatusCounts,
 } from '~/lib/types/receipts';
+import { unstable_cache } from 'next/cache';
 
 const latestSuccessfullScan = sql`
   SELECT DISTINCT ON (receipt_id)
@@ -34,6 +35,16 @@ const countPendingReceiptsQuery = async (ctx: BusinessContext) => {
   `);
 
   return Number(countResult.rows[0]?.pending_count) ?? 0;
+};
+
+const countPendingReceiptsQueryCached = async (ctx: BusinessContext) => {
+  return unstable_cache(
+    async (ctx: BusinessContext): Promise<number> => {
+      return countPendingReceiptsQuery(ctx);
+    },
+    [`ctx-${ctx.businessId}`],
+    { tags: ['receipts'] }
+  );
 };
 
 const countReceiptStatusesQuery = async (
@@ -145,7 +156,8 @@ export const countPendingReceipts = async (
 ) => {
   const ctx = await getBusinessContext(userId, bussinessId);
 
-  const pendingReceipts = await countPendingReceiptsQuery(ctx);
+  const getCachedPendingReceipts = await countPendingReceiptsQueryCached(ctx);
+  const pendingReceipts = await getCachedPendingReceipts(ctx);
   return pendingReceipts;
 };
 
