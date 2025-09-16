@@ -1,5 +1,3 @@
-'use client';
-import { useState } from 'react';
 import {
   Popover,
   PopoverContent,
@@ -14,17 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '~/components/ui/select';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Cell,
-  PieChart,
-  Pie,
-} from 'recharts';
+
 import Page from '~/components/Page';
+
+import DailyExpenseChart from '~/components/DailyExpenseChart/DailyExpenseChart';
+import CategoryPieChart from '~/components/CategoryPieChart/CategoryPieChart';
+import SubCategoryPieChart from '~/components/SubCategoryPieChart/SubCategoryPieChart';
+import DateRangeSelector from '~/components/DateRangeSelector/DateRangeSelector';
+import { RedirectType, redirect, useSearchParams } from 'next/navigation';
+import { getDateRangeExpenseSummary } from '~/server/adapters/transactions';
+import { getUserInfo } from '../db-helpers';
+import { getUserAction } from '../actions/users';
+import { Suspense } from 'react';
+import { type User } from '~/lib/types/user';
 
 const mockExpenseData = {
   'this-week': {
@@ -143,222 +143,44 @@ const mockExpenseData = {
   },
 };
 
-function DateFilter({
-  selectedPeriod,
-  onPeriodChange,
-  title,
-}: {
-  selectedPeriod: string;
-  onPeriodChange: (period: string) => void;
-  title: string;
-}) {
-  const [showCustom, setShowCustom] = useState(false);
+async function Charts({ period, user }: { period: string; user: User }) {
+  const currentData = mockExpenseData[period as keyof typeof mockExpenseData];
 
-  return (
-    <div className="p-4 w-full border-b border-gray-200">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-medium text-black">{title}</h2>
-        <div className="flex items-center gap-2">
-          <Select value={selectedPeriod} onValueChange={onPeriodChange}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="this-week">This Week</SelectItem>
-              <SelectItem value="last-week">Last Week</SelectItem>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="last-month">Last Month</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
-          {selectedPeriod === 'custom' && (
-            <Popover open={showCustom} onOpenChange={setShowCustom}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <CalendarIcon className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar mode="single" />
-              </PopoverContent>
-            </Popover>
-          )}
-        </div>
-      </div>
-    </div>
+  const dailyChartData = await getDateRangeExpenseSummary(
+    user.id,
+    user.businessId,
+    new Date(),
+    new Date()
   );
-}
-
-function DailyExpenseChart({
-  data,
-}: {
-  data: { day: string; amount: number }[];
-}) {
-  return (
-    <div className=" p-4 w-full">
-      <h3 className="text-sm font-medium text-black mb-3">Daily Expenses</h3>
-      <div className="h-[160px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 20, right: 0, left: 0, bottom: 5 }}
-          >
-            <XAxis
-              dataKey="day"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: 'rgba(0,0,0,0.7)' }}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12, fill: 'rgba(0,0,0,0.7)' }}
-              width={35}
-            />
-            <Bar dataKey="amount" radius={[5, 5, 0, 0]}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill="#8979ff" opacity={0.8} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-function CategoryPieChart({
-  data,
-}: {
-  data: { category: string; amount: number; color: string }[];
-}) {
-  return (
-    <div className="p-4 w-full">
-      <h3 className="text-sm font-medium text-black mb-3">Categories</h3>
-      <div className="w-full">
-        <div className="h-[180px] w-full mb-4 flex justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={80}
-                dataKey="amount"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {data.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div
-                className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
-                style={{ backgroundColor: item.color }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-black truncate">
-                  {item.category}
-                </div>
-                <div className="text-xs text-gray-600">
-                  R{item.amount.toLocaleString()}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SubCategoryPieChart({
-  data,
-}: {
-  data: { subCategory: string; amount: number; color: string }[];
-}) {
-  const subCategories = data.slice(0, 6);
-  const otherAmount = data
-    .slice(6)
-    .reduce((sum, subCategory) => sum + subCategory.amount, 0);
-
-  const chartData =
-    otherAmount > 0
-      ? [
-          ...subCategories,
-          { subCategory: 'Others', amount: otherAmount, color: '#f3f4f6' },
-        ]
-      : subCategories;
 
   return (
-    <div className="p-4 w-full">
-      <h3 className="text-sm font-medium text-black mb-3">Sub Categories</h3>
-      <div className="w-full">
-        <div className="h-[180px] w-full mb-4 flex justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={80}
-                dataKey="amount"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          {chartData.map((item, index) => (
-            <div key={index} className="flex items-center">
-              <div
-                className="w-3 h-3 rounded-sm mr-2 flex-shrink-0"
-                style={{ backgroundColor: item.color }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-black truncate">
-                  {item.subCategory}
-                </div>
-                <div className="text-xs text-gray-600">
-                  R{item.amount.toLocaleString()}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function ReportsPage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('this-week');
-  const onPeriodChange = (period: string) => setSelectedPeriod(period);
-
-  const currentData =
-    mockExpenseData[selectedPeriod as keyof typeof mockExpenseData];
-
-  return (
-    <Page>
-      <DateFilter
-        selectedPeriod={selectedPeriod}
-        onPeriodChange={onPeriodChange}
-        title="Expense Analysis"
-      />
+    <>
       <DailyExpenseChart data={currentData.daily} />
       <div className="grid grid-cols-1 gap-0">
         <CategoryPieChart data={currentData.categories} />
         <SubCategoryPieChart data={currentData.subCategories} />
       </div>
+    </>
+  );
+}
+
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    period: string;
+  }>;
+}) {
+  const [params, user] = await Promise.all([searchParams, getUserAction()]);
+
+  const period = params.period ?? 'this-week';
+
+  return (
+    <Page>
+      <DateRangeSelector title="Expense Analysis" />
+      <Suspense key={period} fallback={<div>Loading...</div>}>
+        <Charts period={period} user={user} />
+      </Suspense>
     </Page>
   );
 }

@@ -7,6 +7,7 @@ import { transactions } from '../db/schema';
 import { getBusinessContext } from './businesses';
 import { sql, sum } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
+import { DailyChartData, dailyChartDataSchema } from '~/lib/types/transactions';
 
 const getWeeklyExpenseSummaryQuery = async (
   ctx: BusinessContext,
@@ -64,7 +65,13 @@ const getDateRangeExpenseSummaryQuery = async (
     GROUP BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
     ORDER BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
   `);
-  return summary.rows;
+  const dailyChartData: DailyChartData[] = summary.rows.map((row) =>
+    dailyChartDataSchema.parse({
+      day: row.day,
+      amount: row.amount,
+    })
+  );
+  return dailyChartData;
 };
 
 export const getExpenseSalesSummary = async (
