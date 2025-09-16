@@ -41,6 +41,26 @@ const withPWA = nextPWA({
   workboxOptions: {
     skipWaiting: true,
     clientsClaim: true,
+    // Prevent navigation fallback loops for Clerk auth param and manifest
+    navigateFallbackDenylist: [
+      /__clerk_db_jwt=/,
+      /manifest\.webmanifest$/,
+      /_next\//,
+      /api\//,
+    ],
+    ignoreURLParametersMatching: [/__clerk_db_jwt/],
+    runtimeCaching: [
+      {
+        // Do not cache Clerk auth handshake navigations
+        urlPattern: /\/?__clerk_db_jwt=.*/,
+        handler: 'NetworkOnly',
+      },
+      {
+        // Always fetch fresh manifest
+        urlPattern: /manifest\.webmanifest$/,
+        handler: 'NetworkOnly',
+      },
+    ],
   },
 });
 
