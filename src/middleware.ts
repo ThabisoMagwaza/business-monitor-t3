@@ -1,7 +1,23 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-export default clerkMiddleware({
-  publicRoutes: ['/offline', '/manifest.webmanifest'],
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/offline',
+  '/manifest.webmanifest',
+]);
+
+export default clerkMiddleware(async (auth, request) => {
+  const { userId } = await auth();
+  if (!userId && !isPublicRoute(request)) {
+    await auth.protect();
+  }
+
+  if (request.nextUrl.pathname === '/' && userId) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/overview';
+    return NextResponse.rewrite(url);
+  }
 });
 
 export const config = {

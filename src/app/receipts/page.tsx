@@ -6,17 +6,21 @@ import Link from 'next/link';
 import { Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import ReceiptFilterTabs from '~/components/ReceiptFilterTabs';
-import { getUserInfo } from '../db-helpers';
 import { countReceiptStatuses } from '~/server/adapters/receipts';
-import { redirect, RedirectType } from 'next/navigation';
 import { type ReceiptStatus, receiptStatusSchema } from '~/lib/types/receipts';
 import ReceiptsSummaryList from '~/components/ReceiptsSummaryList';
 import { Skeleton } from '~/components/ui/skeleton';
+import { getUserAction } from '../actions/users';
 
 export default async function ReceiptsPage(props: {
   searchParams: Promise<{ status?: ReceiptStatus }>;
 }) {
-  const { status } = await props.searchParams;
+  const [params, user] = await Promise.all([
+    props.searchParams,
+    getUserAction(),
+  ]);
+
+  const { status } = params;
 
   const parseStatus = receiptStatusSchema.safeParse(status);
 
@@ -24,13 +28,7 @@ export default async function ReceiptsPage(props: {
     ? parseStatus.data
     : 'all';
 
-  const user = await getUserInfo();
-  if (!user?.id || !user?.businessId) {
-    // user not logged in
-    return redirect('/', RedirectType.replace);
-  }
-
-  const statusCounts = await countReceiptStatuses(user?.id, user?.businessId);
+  const statusCounts = await countReceiptStatuses(user.id, user.businessId);
 
   return (
     <Page>

@@ -14,7 +14,7 @@ export const getUserAction = async () => {
 
   if (!dbUser) {
     // user not registered
-    redirect('/', RedirectType.replace);
+    redirect('/not-registered', RedirectType.replace);
   }
 
   return dbUser;

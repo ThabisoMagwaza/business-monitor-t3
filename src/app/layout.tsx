@@ -1,11 +1,10 @@
-import { ClerkProvider, SignedIn, SignedOut } from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/nextjs';
 import { Inter } from 'next/font/google';
 import StyledComponentsRegistry from '~/lib/registry';
 import './globals.css';
 
 import Header from '~/components/Header';
 import Breadcrumbs from '~/components/Breadcrumbs';
-import SignedOutPage from '~/components/SignedOutPage';
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from '~/components/ui/sonner';
 
@@ -40,13 +39,8 @@ export default function RootLayout({
         >
           <StyledComponentsRegistry>
             <Header />
-            <SignedOut>
-              <SignedOutPage />
-            </SignedOut>
-            <SignedIn>
-              <Breadcrumbs />
-              {children}
-            </SignedIn>
+            <Breadcrumbs />
+            {children}
           </StyledComponentsRegistry>
           <Toaster />
         </body>
