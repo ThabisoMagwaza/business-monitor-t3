@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { getUserAction } from '../actions/users';
 
-import { FileText, Scan } from 'lucide-react';
+import { BarChart3, FileText, Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import PendingReceipts from '~/components/PendingReceipts/PendingReceipts';
 import { Skeleton } from '~/components/ui/skeleton';
@@ -54,6 +54,16 @@ export default async function Home() {
               </Link>
             </Button>
           </div>
+        </div>
+        <div className="flex flex-col gap-4">
+          <h3>Financial Accounting Reports</h3>
+
+          <Button asChild variant="outline" className="flex-1">
+            <Link prefetch href="/reports">
+              <BarChart3 className="mr-2" />
+              Management Report
+            </Link>
+          </Button>
         </div>
 
         <div className="flex flex-col gap-4">

@@ -14,6 +14,8 @@ import {
   getDailyExpenseSummary,
   getSubCategoryTotalsExpense,
 } from '~/server/adapters/transactions';
+import { Skeleton } from '~/components/ui/skeleton';
+import { endOfWeek, startOfWeek } from 'date-fns';
 
 async function Charts({
   startDate,
@@ -74,14 +76,24 @@ export default async function ReportsPage({
 }) {
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
-  const startDate = params.startDate ?? new Date().toISOString();
-  const endDate = params.endDate ?? new Date().toISOString();
+  const now = new Date();
+  const startDate = params.startDate ?? startOfWeek(now);
+  const endDate = params.endDate ?? endOfWeek(now);
   const format = params.format ?? 'days-in-week';
 
   return (
     <Page>
       <DateRangeSelector title="Expense Analysis" />
-      <Suspense key={startDate + endDate} fallback={<div>Loading...</div>}>
+      <Suspense
+        key={startDate + endDate + format}
+        fallback={
+          <div className="flex flex-col gap-4 mt-4">
+            <Skeleton className="w-full h-[300px]" />
+            <Skeleton className="w-full h-[300px]" />
+            <Skeleton className="w-full h-[300px]" />
+          </div>
+        }
+      >
         <Charts
           startDate={startDate}
           endDate={endDate}
