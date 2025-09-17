@@ -11,7 +11,7 @@ function Page({
     <main className={'flex-1'}>
       <div
         className={cn(
-          'max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4 flex-1 h-full',
+          'max-w-[calc(1000px+1rem)] mx-auto px-4 pb-4 flex-1 h-full flex flex-col',
           className
         )}
       >

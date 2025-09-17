@@ -16,6 +16,7 @@ import {
 } from '~/server/adapters/transactions';
 import { Skeleton } from '~/components/ui/skeleton';
 import { endOfWeek, startOfWeek } from 'date-fns';
+import { FileText } from 'lucide-react';
 
 async function Charts({
   startDate,
@@ -56,11 +57,23 @@ async function Charts({
 
   return (
     <>
-      <DailyExpenseChart data={barChartData} />
-      <div className="grid grid-cols-1 gap-0">
-        <CategoryPieChart data={categoryPieChartData} />
-        <SubCategoryPieChart data={subCategoryPieChartData} />
-      </div>
+      {barChartData.length > 0 && (
+        <>
+          <DailyExpenseChart data={barChartData} />
+
+          <div className="grid grid-cols-1 gap-0">
+            <CategoryPieChart data={categoryPieChartData} />
+            <SubCategoryPieChart data={subCategoryPieChartData} />
+          </div>
+        </>
+      )}
+
+      {barChartData.length === 0 && (
+        <div className="flex flex-col gap-4 mt-4 items-center justify-center flex-1">
+          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p>No data available for the selected date range</p>
+        </div>
+      )}
     </>
   );
 }
