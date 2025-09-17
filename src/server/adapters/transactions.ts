@@ -1,18 +1,27 @@
 import 'server-only';
 import { type BusinessContext } from '~/lib/types/business';
 import { db } from '../db';
-import { transactions } from '../db/schema';
+import {
+  itemSubCategories,
+  transactionCategories,
+  transactions,
+} from '../db/schema';
 
 import { getBusinessContext } from './businesses';
 import { sql, sum } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
 import {
-  type DailyChartData,
-  dailyChartDataSchema,
+  type ExpenseCategoryPieChartData,
+  type ExpenseBarChartData,
+  type ExpenseSubCategoryPieChartData,
+  expenseChartDataSchema,
+  categoryPieChartDataSchema,
+  subCategoryPieChartDataSchema,
 } from '~/lib/types/transactions';
 import { type DateFormat } from '~/lib/types/receipts';
+import { generateRandomColor } from '~/lib/utils';
 
-const getWeeklyExpenseSummaryQuery = async (
+const getDailySummaryPerWeekQuery = async (
   ctx: BusinessContext,
   startDate: Date,
   endDate: Date
@@ -48,8 +57,8 @@ const getWeeklyExpenseSummaryQuery = async (
       GROUP BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg')
       ORDER BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg');
   `);
-  const dailyChartData: DailyChartData[] = summary.rows.map((row) =>
-    dailyChartDataSchema.parse({
+  const dailyChartData: ExpenseBarChartData[] = summary.rows.map((row) =>
+    expenseChartDataSchema.parse({
       day: row.day,
       amount: row.amount,
       fullDay: row.day,
@@ -58,7 +67,7 @@ const getWeeklyExpenseSummaryQuery = async (
   return dailyChartData;
 };
 
-const getDateRangeExpenseSummaryQuery = async (
+const getDailySummaryPerDayQuery = async (
   ctx: BusinessContext,
   startDate: Date,
   endDate: Date
@@ -76,14 +85,72 @@ const getDateRangeExpenseSummaryQuery = async (
     GROUP BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
     ORDER BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
   `);
-  const dailyChartData: DailyChartData[] = summary.rows.map((row) =>
-    dailyChartDataSchema.parse({
+  const dailyChartData: ExpenseBarChartData[] = summary.rows.map((row) =>
+    expenseChartDataSchema.parse({
       day: row.day,
       amount: row.amount,
       fullDay: row.day,
     })
   );
   return dailyChartData;
+};
+
+const getCategoryTotalsQuery = async (
+  ctx: BusinessContext,
+  startDate: Date,
+  endDate: Date
+) => {
+  const startDateString = startDate.toISOString();
+  const endDateString = endDate.toISOString();
+  const summary = await db.execute(sql`
+    SELECT c.name,
+      SUM(t.amount) as amount
+    FROM ${transactions} t
+    JOIN ${transactionCategories} c
+      ON c.id = t.category_id
+    WHERE t.business_id = ${ctx.businessId}
+      AND t.date >= ${startDateString}
+      AND t.date < ${endDateString}
+    GROUP BY c.name
+  `);
+  const categoryTotals: ExpenseCategoryPieChartData[] = summary.rows.map(
+    (row) =>
+      categoryPieChartDataSchema.parse({
+        category: row.name,
+        amount: row.amount,
+        color: generateRandomColor(),
+      })
+  );
+  return categoryTotals;
+};
+
+const getSubCategoryTotalsQuery = async (
+  ctx: BusinessContext,
+  startDate: Date,
+  endDate: Date
+) => {
+  const startDateString = startDate.toISOString();
+  const endDateString = endDate.toISOString();
+  const summary = await db.execute(sql`
+    SELECT sc.name,
+      SUM(t.amount) as amount
+    FROM ${transactions} t
+    JOIN ${itemSubCategories} sc
+      ON sc.id = t.sub_category_id
+    WHERE t.business_id = ${ctx.businessId}
+      AND t.date >= ${startDateString}
+      AND t.date < ${endDateString}
+    GROUP BY sc.name
+  `);
+  const subCategoryTotals: ExpenseSubCategoryPieChartData[] = summary.rows.map(
+    (row) =>
+      subCategoryPieChartDataSchema.parse({
+        subCategory: row.name,
+        amount: row.amount,
+        color: generateRandomColor(),
+      })
+  );
+  return subCategoryTotals;
 };
 
 export const getExpenseSalesSummary = async (
@@ -118,11 +185,11 @@ export const getWeeklyExpenseSummary = async (
   endDate: Date
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getWeeklyExpenseSummaryQuery(ctx, startDate, endDate);
+  const summary = await getDailySummaryPerWeekQuery(ctx, startDate, endDate);
   return summary;
 };
 
-export const getDateRangeExpenseSummary = async (
+export const getDailyExpenseSummary = async (
   userId: string,
   businessId: number,
   startDate: Date,
@@ -131,12 +198,34 @@ export const getDateRangeExpenseSummary = async (
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
 
-  let summary: DailyChartData[];
+  let summary: ExpenseBarChartData[];
   if (format === 'days-in-week') {
-    summary = await getWeeklyExpenseSummaryQuery(ctx, startDate, endDate);
+    summary = await getDailySummaryPerWeekQuery(ctx, startDate, endDate);
   } else {
-    summary = await getDateRangeExpenseSummaryQuery(ctx, startDate, endDate);
+    summary = await getDailySummaryPerDayQuery(ctx, startDate, endDate);
   }
 
+  return summary;
+};
+
+export const getCategoryTotalsExpense = async (
+  userId: string,
+  businessId: number,
+  startDate: Date,
+  endDate: Date
+) => {
+  const ctx = await getBusinessContext(userId, businessId);
+  const summary = await getCategoryTotalsQuery(ctx, startDate, endDate);
+  return summary;
+};
+
+export const getSubCategoryTotalsExpense = async (
+  userId: string,
+  businessId: number,
+  startDate: Date,
+  endDate: Date
+) => {
+  const ctx = await getBusinessContext(userId, businessId);
+  const summary = await getSubCategoryTotalsQuery(ctx, startDate, endDate);
   return summary;
 };

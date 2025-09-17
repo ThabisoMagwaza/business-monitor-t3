@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
@@ -11,22 +12,68 @@ import {
 } from '../ui/select';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '../ui/button';
-import { useState } from 'react';
+import {
+  startOfWeek,
+  endOfWeek,
+  endOfMonth,
+  startOfMonth,
+  subWeeks,
+  subMonths,
+} from 'date-fns';
+import type { DateFormat, Period } from '~/lib/types/receipts';
+
+const Periods = ['this-week', 'last-week', 'this-month', 'last-month'] as const;
+
+function calculatePeriodDates(period: Period) {
+  const now = new Date();
+  let startDate: Date;
+  let endDate: Date;
+  let format: DateFormat;
+
+  switch (period) {
+    case 'this-week':
+      startDate = startOfWeek(now);
+      endDate = endOfWeek(now);
+      format = 'days-in-week';
+      break;
+    case 'last-week':
+      startDate = subWeeks(startOfWeek(now), 1);
+      endDate = subWeeks(endOfWeek(now), 1);
+      format = 'days-in-week';
+      break;
+    case 'this-month':
+      startDate = startOfMonth(now);
+      endDate = endOfMonth(now);
+      format = 'days-in-month';
+      break;
+    case 'last-month':
+      startDate = subMonths(startOfMonth(now), 1);
+      endDate = subMonths(endOfMonth(now), 1);
+      format = 'days-in-month';
+      break;
+    default:
+      startDate = startOfWeek(now);
+      endDate = endOfWeek(now);
+      format = 'days-in-week';
+      break;
+  }
+
+  return { startDate, endDate, format };
+}
 
 function DateRangeSelector({ title }: { title: string }) {
   const searchParams = useSearchParams();
-  const period = searchParams.get('period') ?? 'this-week';
-
-  const [periodClient, setPeriodClient] = useState(period);
+  const [periodClient, setPeriodClient] = useState<Period>('this-week');
 
   const router = useRouter();
   const pathname = usePathname();
 
-  // const [showCustom, setShowCustom] = useState(false);
-
-  const onPeriodChange = (period: string) => {
+  const onPeriodChange = (period: Period) => {
     const params = new URLSearchParams(searchParams);
-    params.set('period', period);
+    const { startDate, endDate, format } = calculatePeriodDates(period);
+    params.set('startDate', startDate.toISOString()?.split('T')[0] ?? '');
+    params.set('endDate', endDate.toISOString()?.split('T')[0] ?? '');
+    params.set('format', format);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     setPeriodClient(period);
   };
@@ -41,10 +88,11 @@ function DateRangeSelector({ title }: { title: string }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="this-week">This Week</SelectItem>
-              <SelectItem value="last-week">Last Week</SelectItem>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="last-month">Last Month</SelectItem>
+              {Periods.map((period: Period) => (
+                <SelectItem key={period} value={period}>
+                  {period.charAt(0).toUpperCase() + period.slice(1)}
+                </SelectItem>
+              ))}
               {/* <SelectItem value="custom">Custom</SelectItem> */}
             </SelectContent>
           </Select>

@@ -20,11 +20,16 @@ import CategoryPieChart from '~/components/CategoryPieChart/CategoryPieChart';
 import SubCategoryPieChart from '~/components/SubCategoryPieChart/SubCategoryPieChart';
 import DateRangeSelector from '~/components/DateRangeSelector/DateRangeSelector';
 import { RedirectType, redirect, useSearchParams } from 'next/navigation';
-import { getDateRangeExpenseSummary } from '~/server/adapters/transactions';
+import {
+  getCategoryTotalsExpense,
+  getDailyExpenseSummary,
+  getSubCategoryTotalsExpense,
+} from '~/server/adapters/transactions';
 import { getUserInfo } from '../db-helpers';
 import { getUserAction } from '../actions/users';
 import { Suspense } from 'react';
 import { type User } from '~/lib/types/user';
+import { DateFormat } from '~/lib/types/receipts';
 
 const mockExpenseData = {
   'this-week': {
@@ -143,22 +148,46 @@ const mockExpenseData = {
   },
 };
 
-async function Charts({ period, user }: { period: string; user: User }) {
-  const currentData = mockExpenseData[period as keyof typeof mockExpenseData];
+async function Charts({
+  startDate,
+  endDate,
+  format,
+  user,
+}: {
+  startDate: string;
+  endDate: string;
+  format: DateFormat;
+  user: User;
+}) {
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(endDate);
 
-  const dailyChartData = await getDateRangeExpenseSummary(
+  const barChartData = await getDailyExpenseSummary(
     user.id,
     user.businessId,
-    new Date(),
-    new Date()
+    startDateObj,
+    endDateObj,
+    format
+  );
+  const categoryPieChartData = await getCategoryTotalsExpense(
+    user.id,
+    user.businessId,
+    startDateObj,
+    endDateObj
+  );
+  const subCategoryPieChartData = await getSubCategoryTotalsExpense(
+    user.id,
+    user.businessId,
+    startDateObj,
+    endDateObj
   );
 
   return (
     <>
-      <DailyExpenseChart data={currentData.daily} />
+      <DailyExpenseChart data={barChartData} />
       <div className="grid grid-cols-1 gap-0">
-        <CategoryPieChart data={currentData.categories} />
-        <SubCategoryPieChart data={currentData.subCategories} />
+        <CategoryPieChart data={categoryPieChartData} />
+        <SubCategoryPieChart data={subCategoryPieChartData} />
       </div>
     </>
   );
@@ -168,18 +197,27 @@ export default async function ReportsPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    period: string;
+    startDate: string;
+    endDate: string;
+    format: DateFormat;
   }>;
 }) {
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
-  const period = params.period ?? 'this-week';
+  const startDate = params.startDate ?? new Date().toISOString();
+  const endDate = params.endDate ?? new Date().toISOString();
+  const format = params.format ?? 'days-in-week';
 
   return (
     <Page>
       <DateRangeSelector title="Expense Analysis" />
-      <Suspense key={period} fallback={<div>Loading...</div>}>
-        <Charts period={period} user={user} />
+      <Suspense key={startDate + endDate} fallback={<div>Loading...</div>}>
+        <Charts
+          startDate={startDate}
+          endDate={endDate}
+          user={user}
+          format={format}
+        />
       </Suspense>
     </Page>
   );
