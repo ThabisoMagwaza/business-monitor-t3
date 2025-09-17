@@ -33,6 +33,7 @@ export const periodSchema = z.enum([
   'last-week',
   'this-month',
   'last-month',
+  'custom',
 ]);
 export type Period = z.infer<typeof periodSchema>;
 
