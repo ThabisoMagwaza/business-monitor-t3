@@ -1,5 +1,4 @@
 import 'server-only';
-import { addDays } from 'date-fns';
 import { type BusinessContext } from '~/lib/types/business';
 import { db } from '../db';
 import { transactions } from '../db/schema';
@@ -7,14 +6,19 @@ import { transactions } from '../db/schema';
 import { getBusinessContext } from './businesses';
 import { sql, sum } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
-import { DailyChartData, dailyChartDataSchema } from '~/lib/types/transactions';
+import {
+  type DailyChartData,
+  dailyChartDataSchema,
+} from '~/lib/types/transactions';
+import { type DateFormat } from '~/lib/types/receipts';
 
 const getWeeklyExpenseSummaryQuery = async (
   ctx: BusinessContext,
-  weekStartDate: Date
+  startDate: Date,
+  endDate: Date
 ) => {
-  const weekStartDateString = weekStartDate.toISOString();
-  const weekEndDateString = addDays(weekStartDate, 7).toISOString();
+  const startDateString = startDate.toISOString();
+  const endDateString = endDate.toISOString();
   const summary = await db.execute(sql`
     SELECT
       CASE
@@ -39,12 +43,19 @@ const getWeeklyExpenseSummaryQuery = async (
       FROM ${transactions} t
       WHERE t.business_id = ${ctx.businessId}
         AND type = 'expense'
-        AND date >= ${weekStartDateString}
-        AND date < ${weekEndDateString}
+        AND date >= ${startDateString}
+        AND date < ${endDateString}
       GROUP BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg')
       ORDER BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg');
   `);
-  return summary.rows;
+  const dailyChartData: DailyChartData[] = summary.rows.map((row) =>
+    dailyChartDataSchema.parse({
+      day: row.day,
+      amount: row.amount,
+      fullDay: row.day,
+    })
+  );
+  return dailyChartData;
 };
 
 const getDateRangeExpenseSummaryQuery = async (
@@ -69,6 +80,7 @@ const getDateRangeExpenseSummaryQuery = async (
     dailyChartDataSchema.parse({
       day: row.day,
       amount: row.amount,
+      fullDay: row.day,
     })
   );
   return dailyChartData;
@@ -102,10 +114,11 @@ export const getExpenseSalesSummary = async (
 export const getWeeklyExpenseSummary = async (
   userId: string,
   businessId: number,
-  weekStartDate: Date
+  startDate: Date,
+  endDate: Date
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getWeeklyExpenseSummaryQuery(ctx, weekStartDate);
+  const summary = await getWeeklyExpenseSummaryQuery(ctx, startDate, endDate);
   return summary;
 };
 
@@ -113,13 +126,17 @@ export const getDateRangeExpenseSummary = async (
   userId: string,
   businessId: number,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  format: DateFormat
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getDateRangeExpenseSummaryQuery(
-    ctx,
-    startDate,
-    endDate
-  );
+
+  let summary: DailyChartData[];
+  if (format === 'days-in-week') {
+    summary = await getWeeklyExpenseSummaryQuery(ctx, startDate, endDate);
+  } else {
+    summary = await getDateRangeExpenseSummaryQuery(ctx, startDate, endDate);
+  }
+
   return summary;
 };

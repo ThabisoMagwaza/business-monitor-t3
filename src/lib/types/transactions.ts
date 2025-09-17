@@ -16,7 +16,8 @@ export type ItemSubCategory = InferSelectModel<typeof itemSubCategories>;
 
 export const dailyChartDataSchema = z.object({
   day: z.string(),
-  amount: z.number(),
+  amount: z.coerce.number(),
+  fullDay: z.string(),
 });
 
 export type DailyChartData = z.infer<typeof dailyChartDataSchema>;

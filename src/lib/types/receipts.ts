@@ -27,3 +27,14 @@ export const scanResultSchema = z.object({
 });
 
 export type ScanResult = z.infer<typeof scanResultSchema>;
+
+export const periodSchema = z.enum([
+  'this-week',
+  'last-week',
+  'this-month',
+  'last-month',
+]);
+export type Period = z.infer<typeof periodSchema>;
+
+export const dateFormatSchema = z.enum(['days-in-week', 'days-in-month']);
+export type DateFormat = z.infer<typeof dateFormatSchema>;
