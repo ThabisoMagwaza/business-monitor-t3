@@ -1,13 +1,13 @@
 import 'server-only';
 import { type BusinessContext } from '~/lib/types/business';
-import { db } from '../db';
+import { db } from '~/server/db';
 import {
   itemSubCategories,
   transactionCategories,
   transactions,
-} from '../db/schema';
+} from '~/server/db/schema';
 
-import { getBusinessContext } from './businesses';
+import { getBusinessContext } from '~/server/adapters/businesses';
 import { sql, sum } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
 import {
@@ -17,7 +17,7 @@ import {
   expenseChartDataSchema,
   categoryPieChartDataSchema,
   subCategoryPieChartDataSchema,
-} from '~/lib/types/transactions';
+} from '~/lib/types/transactions/queries';
 import { type DateFormat } from '~/lib/types/receipts';
 import { generateRandomColor } from '~/lib/utils';
 

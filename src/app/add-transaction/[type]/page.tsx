@@ -1,6 +1,10 @@
-import { addTransactions, type NewTransaction } from '~/app/actions';
 import AddTransactionsForm from '~/components/AddTransactionsForm/AddTransactionsForm';
 import { getCategories, getSubCategories } from '~/app/db-helpers';
+import { getUserAction } from '~/app/actions/users';
+import { addTransactions } from '~/server/adapters/transactions/mutations';
+import { type AddTransaction } from '~/lib/types/transactions/mutations';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 type AddTransactionParams = {
   type: 'expense' | 'income';
@@ -13,16 +17,18 @@ export default async function Page({
 }) {
   const { type } = await params;
 
+  const user = await getUserAction();
+
   const categories = await getCategories();
   const subCategories = await getSubCategories();
 
-  const saveTransactions = async (
-    transactions: NewTransaction[],
-    type: 'expense' | 'income'
-  ) => {
+  async function saveTransactions(transactions: AddTransaction[]) {
     'use server';
-    await addTransactions(transactions, type);
-  };
+    await addTransactions(user.id, user.businessId, transactions);
+    const page = type === 'income' ? 'income' : 'expenses';
+    revalidatePath(`/${page}`);
+    redirect(`/${page}`);
+  }
 
   return (
     <main className="flex-1">

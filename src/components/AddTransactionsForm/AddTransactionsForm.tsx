@@ -31,11 +31,6 @@ import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
 import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
 
-import type { NewTransaction } from '~/app/actions';
-import type {
-  ItemSubCategory,
-  TransactionCategory,
-} from '~/lib/types/transactions';
 import {
   Select,
   SelectTrigger,
@@ -71,6 +66,9 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
 } from '../ui/alert-dialog';
+import { type AddTransaction } from '~/lib/types/transactions/mutations';
+import { type TransactionCategory } from '~/lib/types/transactionCategories/queries';
+import { type TransactionSubCategory } from '~/lib/types/transactionSubCategories/queries';
 
 const createTransactionSchema = z.object({
   id: z.string(),
@@ -116,18 +114,28 @@ function AddTransactionsForm({
   storeName,
 }: {
   type: 'expense' | 'income';
-  initialTransactions: NewTransaction[];
+  initialTransactions: AddTransaction[];
   categories: TransactionCategory[];
-  subCategories: ItemSubCategory[];
+  subCategories: TransactionSubCategory[];
   storeName?: string;
   saveTransactions: (
-    transactions: NewTransaction[],
-    type: 'expense' | 'income',
+    transactions: AddTransaction[],
     storeName?: string
   ) => void;
 }) {
-  const [transactions, setTransactions] =
-    React.useState<NewTransaction[]>(initialTransactions);
+  const [transactions, setTransactions] = React.useState(() =>
+    initialTransactions.map((transaction) => ({
+      id: String(Math.floor(Math.random() * 1000000)),
+      date: transaction.date,
+      description: transaction.description,
+      amount: transaction.amount,
+      type,
+      category: transaction.category,
+      subCategory: transaction.subCategory,
+      categoryId: transaction.categoryId,
+      subCategoryId: transaction.subCategoryId,
+    }))
+  );
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [allTransactionsDate, setAllTransactionsDate] = React.useState(
     new Date(initialTransactions[0]?.date ?? new Date())
@@ -136,20 +144,19 @@ function AddTransactionsForm({
   const saveNewTransactions = saveTransactions.bind(
     null,
     transactions,
-    type,
     storeName
   );
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     const transaction = transactions.find((t) => t.id === id);
     if (transaction) {
       form.setValue('description', transaction.description);
-      form.setValue('amount', transaction.amount);
+      form.setValue('amount', transaction.amount.toString());
       form.setValue('date', new Date(transaction.date));
       form.setValue('category', transaction.category ?? '');
       form.setValue('subCategory', transaction.subCategory ?? '');
-      form.setValue('categoryId', transaction.categoryId ?? 0);
-      form.setValue('subCategoryId', transaction.subCategoryId ?? 0);
+      form.setValue('categoryId', transaction.categoryId);
+      form.setValue('subCategoryId', transaction.subCategoryId);
       form.setValue('id', transaction.id.toString());
 
       setIsEditDialogOpen(true);
@@ -171,30 +178,45 @@ function AddTransactionsForm({
   });
 
   const handleSaveEdit = (data: z.infer<typeof createTransactionSchema>) => {
-    if (!form.getValues('id')) {
-      setTransactions((prev: NewTransaction[]) => [
+    const id = form.getValues('id');
+
+    if (!id) {
+      setTransactions((prev) => [
         {
-          ...data,
-          id: Math.floor(Math.random() * 1000000),
+          id: String(Math.floor(Math.random() * 1000000)),
           date: data.date,
+          description: data.description,
+          amount: Number(data.amount),
+          type: type,
+          category: data.category,
+          subCategory: data.subCategory,
+          categoryId: data.categoryId,
+          subCategoryId: data.subCategoryId,
         },
         ...prev,
       ]);
     }
 
-    if (form.getValues('id')) {
-      setTransactions((prev: NewTransaction[]) =>
+    if (id) {
+      setTransactions((prev) =>
         prev.map((transaction) =>
-          transaction.id === Number(form.getValues('id'))
+          transaction.id === id
             ? {
-                ...data,
-                id: Number(form.getValues('id')),
+                id: id,
                 date: data.date,
+                description: data.description,
+                type: type,
+                amount: Number(data.amount),
+                category: data.category,
+                subCategory: data.subCategory,
+                categoryId: data.categoryId,
+                subCategoryId: data.subCategoryId,
               }
             : transaction
         )
       );
     }
+
     form.reset();
     setIsEditDialogOpen(false);
   };
@@ -203,8 +225,8 @@ function AddTransactionsForm({
     setIsEditDialogOpen(false);
   };
 
-  const handleDeleteTransaction = (id: number) => {
-    setTransactions((prev: NewTransaction[]) => {
+  const handleDeleteTransaction = (id: string) => {
+    setTransactions((prev) => {
       if (!prev) {
         return [];
       }
@@ -216,7 +238,7 @@ function AddTransactionsForm({
   const calculateTotal = () => {
     return transactions
       ?.reduce((sum, transaction) => {
-        return sum + parseFloat(transaction.amount || '0');
+        return sum + parseFloat(transaction.amount.toString() || '0');
       }, 0)
       .toFixed(2);
   };
@@ -312,7 +334,7 @@ function AddTransactionsForm({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => {
-                        setTransactions((prev: NewTransaction[]) =>
+                        setTransactions((prev) =>
                           prev.map((transaction) => ({
                             ...transaction,
                             date: allTransactionsDate,

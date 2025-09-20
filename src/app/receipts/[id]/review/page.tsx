@@ -5,17 +5,17 @@ import {
   receipts,
   transactions as transactionsTable,
 } from '~/server/db/schema';
-import type { ScanResult } from '~/lib/types/scanResult';
+import type { ScanResult } from '~/lib/types/receipts';
 import AddTransactionsForm from '~/components/AddTransactionsForm';
-import { formatDate } from '~/lib/helpers';
 import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
-import { rescanReceipt, type NewTransaction } from '~/app/actions';
+import { rescanReceipt } from '~/app/actions';
 import { redirect } from 'next/navigation';
 import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
 import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
 import { ListIcon, StoreIcon, Upload } from 'lucide-react';
+import { type AddTransaction } from '~/lib/types/transactions/mutations';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -56,8 +56,7 @@ export default async function ReceiptPage({
   }
 
   const saveTransactions = async (
-    transactions: NewTransaction[],
-    type: 'expense' | 'income',
+    transactions: AddTransaction[],
     storeName?: string
   ) => {
     'use server';
@@ -87,8 +86,14 @@ export default async function ReceiptPage({
     // 2. add transactions to the database
     await db.insert(transactionsTable).values(
       transactions.map((transaction) => ({
-        ...transaction,
-        type,
+        description: transaction.description,
+        amount: String(transaction.amount * 100),
+        type: transaction.type,
+        date: transaction.date,
+        categoryId: transaction.categoryId,
+        subCategoryId: transaction.subCategoryId,
+        category: transaction.category,
+        subCategory: transaction.subCategory,
         businessId: user.businessId,
         receiptId: receipt.id,
       }))
@@ -154,17 +159,16 @@ export default async function ReceiptPage({
             subCategories={subCategories}
             storeName={scan.scanResult.storeName}
             initialTransactions={scan.scanResult.items.map((item) => ({
-              id: Math.floor(Math.random() * 1000000),
-              type: 'expense',
-              date: formatDate(
-                new Date(scan.scanResult.date ?? scan.createdAt ?? new Date())
-              ),
+              date: scan.scanResult.date
+                ? new Date(scan.scanResult.date)
+                : new Date(),
               description: item.name,
-              amount: String(item.price / 100),
+              amount: item.price,
               categoryId: item.categoryId,
               subCategoryId: item.subCategoryId,
               category: item.category,
               subCategory: item.subCategory,
+              type: 'expense',
             }))}
             saveTransactions={saveTransactions}
           />
