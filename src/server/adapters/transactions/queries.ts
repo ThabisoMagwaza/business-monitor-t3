@@ -60,7 +60,7 @@ const getDailySummaryPerWeekQuery = async (
   const dailyChartData: ExpenseBarChartData[] = summary.rows.map((row) =>
     expenseChartDataSchema.parse({
       day: row.day,
-      amount: row.amount,
+      amount: Number(row.amount) / 100,
       fullDay: row.day,
     })
   );
@@ -88,7 +88,7 @@ const getDailySummaryPerDayQuery = async (
   const dailyChartData: ExpenseBarChartData[] = summary.rows.map((row) =>
     expenseChartDataSchema.parse({
       day: row.day,
-      amount: row.amount,
+      amount: Number(row.amount) / 100,
       fullDay: row.day,
     })
   );
@@ -117,7 +117,7 @@ const getCategoryTotalsQuery = async (
     (row) =>
       categoryPieChartDataSchema.parse({
         category: row.name,
-        amount: row.amount,
+        amount: Number(row.amount) / 100,
         color: generateRandomColor(),
       })
   );
@@ -146,7 +146,7 @@ const getSubCategoryTotalsQuery = async (
     (row) =>
       subCategoryPieChartDataSchema.parse({
         subCategory: row.name,
-        amount: row.amount,
+        amount: Number(row.amount) / 100,
         color: generateRandomColor(),
       })
   );
@@ -169,7 +169,7 @@ export const getExpenseSalesSummary = async (
 
   const totals = summary.reduce(
     (acc, curr) => {
-      acc[curr.type] = Number(curr.total) || 0;
+      acc[curr.type] = Number(curr.total) / 100 || 0;
       return acc;
     },
     { income: 0, expense: 0 }
