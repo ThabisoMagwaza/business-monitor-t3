@@ -51,7 +51,7 @@ export default async function ReceiptPage({
   const processingTimeStr = `${(receipt.processTime / 1000).toFixed(1)}s`;
 
   return (
-    <Page>
+    <Page className="flex flex-col gap-4">
       {/* Header */}
       <div className="text-center space-y-2 mt-2">
         <h1 className="text-xl font-semibold tracking-tight text-gray-900">
