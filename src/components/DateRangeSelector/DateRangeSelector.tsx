@@ -20,7 +20,7 @@ import {
   subWeeks,
   subMonths,
 } from 'date-fns';
-import type { DateFormat, Period } from '~/lib/types/receipts';
+import type { DateFormat, Period } from '~/lib/types/receipts/queries';
 import { type DateRange } from 'react-day-picker';
 
 const Periods = [

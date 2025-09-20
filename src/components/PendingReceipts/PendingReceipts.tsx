@@ -1,6 +1,6 @@
 import { ChevronRight, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { countPendingReceipts } from '~/server/adapters/receipts';
+import { countPendingReceipts } from '~/server/adapters/receipts/queries';
 
 async function PendingReceipts({
   userId,

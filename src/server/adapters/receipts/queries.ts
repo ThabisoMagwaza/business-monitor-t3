@@ -10,7 +10,7 @@ import {
   receiptStatusSchema,
   type ScanResult,
   type ReceiptStatusCounts,
-} from '~/lib/types/receipts';
+} from '~/lib/types/receipts/queries';
 import { unstable_cache } from 'next/cache';
 
 const latestSuccessfullScan = sql`
@@ -148,6 +148,91 @@ const getReceiptsListQuery = async (
         0,
     };
   });
+};
+
+export const getReceiptQuery = async (
+  ctx: BusinessContext,
+  receiptId: number
+) => {
+  const result = await db.execute(sql`
+    SELECT  r.id, 
+            r.name, 
+            r.url, 
+            r.created_at,
+            scans.id as scan_id,
+            scans.process_time, 
+            scans.model, 
+            scans.provider, 
+            scans.scan_result, 
+            scans.accepted,
+            scans.created_at
+    FROM ${receipts} r
+    LEFT JOIN (
+        SELECT DISTINCT ON (receipt_id)
+          id,
+          receipt_id,
+          process_time,
+          scan_result,
+          model,
+          provider,
+          accepted,
+          created_at
+        FROM ${receiptScans}
+        WHERE status = 'success'
+        ORDER BY receipt_id, created_at DESC
+    ) scans
+    ON r.id = scans.receipt_id
+    WHERE r.id = ${receiptId} AND r.business_id = ${ctx.businessId}
+  `);
+
+  const row = result.rows[0] as {
+    id: number;
+    name: string;
+    url: string;
+    created_at: string;
+    scan_id: number;
+    scan_result: string;
+    process_time: number;
+    model: string;
+    provider: string;
+    accepted: boolean;
+    scan_created_at: string;
+  };
+
+  let scanResult = null;
+  if (row.scan_result) {
+    scanResult = JSON.parse(row.scan_result) as ScanResult;
+    scanResult.items = scanResult.items.map((item) => ({
+      ...item,
+      price: item.price / 100,
+    }));
+  }
+
+  return {
+    id: row.id,
+    name: row.name,
+    url: row.url,
+    createdAt: row.created_at,
+    totalAmount:
+      scanResult?.items.reduce((sum, item) => sum + item.price, 0) ?? 0,
+    processTime: row.process_time,
+    model: row.model,
+    provider: row.provider,
+    scanId: row.scan_id,
+    scanResult: scanResult,
+    accepted: row.accepted,
+    scanCreatedAt: row.scan_created_at,
+  };
+};
+
+export const getReceipt = async (
+  userId: string,
+  bussinessId: number,
+  receiptId: number
+) => {
+  const ctx = await getBusinessContext(userId, bussinessId);
+  const receipt = await getReceiptQuery(ctx, receiptId);
+  return receipt;
 };
 
 export const countPendingReceipts = async (

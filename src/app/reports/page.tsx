@@ -3,7 +3,7 @@ import Page from '~/components/Page';
 
 import { getUserAction } from '../actions/users';
 import { type User } from '~/lib/types/user';
-import { type DateFormat } from '~/lib/types/receipts';
+import { type DateFormat } from '~/lib/types/receipts/queries';
 
 import DailyExpenseChart from '~/components/DailyExpenseChart/DailyExpenseChart';
 import CategoryPieChart from '~/components/CategoryPieChart/CategoryPieChart';
@@ -13,7 +13,7 @@ import {
   getCategoryTotalsExpense,
   getDailyExpenseSummary,
   getSubCategoryTotalsExpense,
-} from '~/server/adapters/transactions';
+} from '~/server/adapters/transactions/queries';
 import { Skeleton } from '~/components/ui/skeleton';
 import { endOfWeek, startOfWeek } from 'date-fns';
 import { FileText } from 'lucide-react';

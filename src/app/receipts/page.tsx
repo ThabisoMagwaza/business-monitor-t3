@@ -6,8 +6,11 @@ import Link from 'next/link';
 import { Scan } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import ReceiptFilterTabs from '~/components/ReceiptFilterTabs';
-import { countReceiptStatuses } from '~/server/adapters/receipts';
-import { type ReceiptStatus, receiptStatusSchema } from '~/lib/types/receipts';
+import { countReceiptStatuses } from '~/server/adapters/receipts/queries';
+import {
+  type ReceiptStatus,
+  receiptStatusSchema,
+} from '~/lib/types/receipts/queries';
 import ReceiptsSummaryList from '~/components/ReceiptsSummaryList';
 import { Skeleton } from '~/components/ui/skeleton';
 import { getUserAction } from '../actions/users';

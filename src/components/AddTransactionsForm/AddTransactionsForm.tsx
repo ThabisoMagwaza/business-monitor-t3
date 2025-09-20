@@ -112,15 +112,20 @@ function AddTransactionsForm({
   categories,
   subCategories,
   storeName,
+  scanId,
 }: {
   type: 'expense' | 'income';
   initialTransactions: AddTransaction[];
   categories: TransactionCategory[];
   subCategories: TransactionSubCategory[];
   storeName?: string;
+  scanId?: number;
   saveTransactions: (
     transactions: AddTransaction[],
-    storeName?: string
+    scanDetails: {
+      storeName?: string;
+      scanId?: number;
+    }
   ) => void;
 }) {
   const [transactions, setTransactions] = React.useState(() =>
@@ -141,11 +146,10 @@ function AddTransactionsForm({
     new Date(initialTransactions[0]?.date ?? new Date())
   );
 
-  const saveNewTransactions = saveTransactions.bind(
-    null,
-    transactions,
-    storeName
-  );
+  const saveNewTransactions = saveTransactions.bind(null, transactions, {
+    storeName,
+    scanId,
+  });
 
   const handleEdit = (id: string) => {
     const transaction = transactions.find((t) => t.id === id);

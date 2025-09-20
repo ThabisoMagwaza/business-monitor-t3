@@ -18,7 +18,7 @@ import {
   categoryPieChartDataSchema,
   subCategoryPieChartDataSchema,
 } from '~/lib/types/transactions/queries';
-import { type DateFormat } from '~/lib/types/receipts';
+import { type DateFormat } from '~/lib/types/receipts/queries';
 import { generateRandomColor } from '~/lib/utils';
 
 const getDailySummaryPerWeekQuery = async (

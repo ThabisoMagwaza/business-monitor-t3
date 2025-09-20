@@ -13,7 +13,10 @@ import { db } from '~/server/db';
 
 import type { User } from '~/components/AddUsers';
 import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
-import { scanResultSchema, type ScanResult } from '~/lib/types/receipts';
+import {
+  scanResultSchema,
+  type ScanResult,
+} from '~/lib/types/receipts/queries';
 
 export async function addBusiness(data: FormData) {
   const businessName = data.get('name')?.toString();

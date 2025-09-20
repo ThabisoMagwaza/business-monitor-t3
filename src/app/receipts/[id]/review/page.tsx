@@ -1,11 +1,10 @@
-import { desc, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '~/server/db';
 import {
   receiptScans,
   receipts,
   transactions as transactionsTable,
 } from '~/server/db/schema';
-import type { ScanResult } from '~/lib/types/receipts';
 import AddTransactionsForm from '~/components/AddTransactionsForm';
 import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
@@ -16,6 +15,8 @@ import { revalidatePath } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
 import { ListIcon, StoreIcon, Upload } from 'lucide-react';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
+import { getUserAction } from '~/app/actions/users';
+import { getReceipt } from '~/server/adapters/receipts/queries';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -27,37 +28,23 @@ export default async function ReceiptPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const user = await getUserAction();
+
   const categories = await getCategories();
   const subCategories = await getSubCategories();
 
-  // 1. get the receipt and scan
-  const receipt = await db.query.receipts.findFirst({
-    where: eq(receipts.id, Number(id)),
-    with: {
-      scans: {
-        orderBy: [desc(receiptScans.createdAt)],
-        where: eq(receiptScans.status, 'success'),
-        limit: 1,
-      },
-    },
-  });
+  const receipt = await getReceipt(user.id, user.businessId, Number(id));
 
-  if (!receipt) {
-    return <div>Receipt not found</div>;
-  }
-
-  const scan = {
-    ...receipt.scans[0],
-    scanResult: receipt.scans[0]?.scanResult as ScanResult,
-  };
-
-  if (scan.accepted) {
+  if (receipt.accepted) {
     redirect(`/receipts/${id}`);
   }
 
   const saveTransactions = async (
     transactions: AddTransaction[],
-    storeName?: string
+    scanDetails: {
+      storeName?: string;
+      scanId?: number;
+    }
   ) => {
     'use server';
 
@@ -69,21 +56,23 @@ export default async function ReceiptPage({
     }
 
     // 2. mark scan as accepted
-    await db
-      .update(receiptScans)
-      .set({
-        accepted: true,
-      })
-      .where(eq(receiptScans.id, scan.id!));
+    if (scanDetails.scanId) {
+      await db
+        .update(receiptScans)
+        .set({
+          accepted: true,
+        })
+        .where(eq(receiptScans.id, scanDetails.scanId));
+    }
 
-    if (storeName) {
+    if (scanDetails.storeName) {
       await db
         .update(receipts)
-        .set({ name: `${storeName} ${receipt.id}` })
+        .set({ name: `${scanDetails.storeName} ${receipt.id}` })
         .where(eq(receipts.id, receipt.id));
     }
 
-    // 2. add transactions to the database
+    // 3. add transactions to the database
     await db.insert(transactionsTable).values(
       transactions.map((transaction) => ({
         description: transaction.description,
@@ -121,7 +110,7 @@ export default async function ReceiptPage({
         <ReceiptPreview previewSrc={receipt.url} canUpload={false} />
       </form>
 
-      {!scan.scanResult && (
+      {!receipt.scanResult && (
         <form action={handleRescan}>
           <div className="flex justify-center">
             <SubmitButton icon={<Upload />}>Scan Receipt</SubmitButton>
@@ -129,7 +118,7 @@ export default async function ReceiptPage({
         </form>
       )}
 
-      {scan.scanResult && scan.scanResult?.items.length > 0 && (
+      {receipt.scanResult && receipt.scanResult?.items.length > 0 && (
         <>
           <form action={handleRescan}>
             <div className="flex justify-center">
@@ -139,10 +128,10 @@ export default async function ReceiptPage({
 
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-bold">
-              {scan.scanResult.storeName ? (
+              {receipt.scanResult.storeName ? (
                 <span className="flex items-center gap-2">
                   <StoreIcon className="h-5 w-5" />
-                  {scan.scanResult.storeName}
+                  {receipt.scanResult.storeName}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
@@ -157,10 +146,11 @@ export default async function ReceiptPage({
             type="expense"
             categories={categories}
             subCategories={subCategories}
-            storeName={scan.scanResult.storeName}
-            initialTransactions={scan.scanResult.items.map((item) => ({
-              date: scan.scanResult.date
-                ? new Date(scan.scanResult.date)
+            scanId={receipt.scanId}
+            storeName={receipt.scanResult.storeName}
+            initialTransactions={receipt.scanResult.items.map((item) => ({
+              date: receipt.scanResult?.date
+                ? new Date(receipt.scanResult.date)
                 : new Date(),
               description: item.name,
               amount: item.price,

@@ -3,7 +3,10 @@ import { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '../ui/button';
 import { cn } from '~/lib/utils';
-import type { ReceiptStatus, ReceiptStatusCounts } from '~/lib/types/receipts';
+import type {
+  ReceiptStatus,
+  ReceiptStatusCounts,
+} from '~/lib/types/receipts/queries';
 
 interface ReceiptFilterTabsProps {
   currentStatus: ReceiptStatus;

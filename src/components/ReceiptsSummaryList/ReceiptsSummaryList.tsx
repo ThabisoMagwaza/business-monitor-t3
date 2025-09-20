@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { FileText } from 'lucide-react';
 import Image from 'next/image';
 import { Calendar } from 'lucide-react';
-import { type ReceiptStatus } from '~/lib/types/receipts';
-import { getReceiptsList } from '~/server/adapters/receipts';
+import { type ReceiptStatus } from '~/lib/types/receipts/queries';
+import { getReceiptsList } from '~/server/adapters/receipts/queries';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 
