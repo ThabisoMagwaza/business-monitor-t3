@@ -2,6 +2,7 @@ import { transactions as transactionsTable } from '~/server/db/schema';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
 import { db } from '~/server/db';
 import { getBusinessContext } from '../businesses';
+import Decimal from 'decimal.js';
 
 export const addTransactions = async (
   userId: string,
@@ -19,7 +20,7 @@ export const addTransactions = async (
       subCategoryId: transaction.subCategoryId,
       category: transaction.category,
       subCategory: transaction.subCategory,
-      amount: String(transaction.amount * 100),
+      amount: String(new Decimal(transaction.amount).mul(100).toString()),
       businessId: ctx.businessId,
     }))
   );

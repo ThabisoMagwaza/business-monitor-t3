@@ -17,6 +17,7 @@ import { ListIcon, StoreIcon, Upload } from 'lucide-react';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
 import { getUserAction } from '~/app/actions/users';
 import { getReceipt } from '~/server/adapters/receipts/queries';
+import Decimal from 'decimal.js';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -76,7 +77,7 @@ export default async function ReceiptPage({
     await db.insert(transactionsTable).values(
       transactions.map((transaction) => ({
         description: transaction.description,
-        amount: String(transaction.amount * 100),
+        amount: String(new Decimal(transaction.amount).mul(100).toString()),
         type: transaction.type,
         date: transaction.date,
         categoryId: transaction.categoryId,
