@@ -433,9 +433,9 @@ function TransactionsCardList({
   return (
     <>
       <div className="flex flex-col gap-4 mt-2">
-        {transactions.map((item, index) => (
+        {transactions.map((item) => (
           <TransactionCard
-            key={index}
+            key={item.id}
             transaction={item}
             categories={categories}
             subCategories={subCategories}
