@@ -1,40 +1,29 @@
 import * as React from 'react';
-import { sql } from 'drizzle-orm';
-import { db } from '~/server/db';
-import { transactions } from '~/server/db/schema';
-import { getUserInfo } from '../db-helpers';
 
-import TransationsPage from '~/components/TransationsPage';
-import { redirect } from 'next/navigation';
-import TransactionsSkeleton from '~/components/TransactionsSkeleton';
+import Page from '~/components/Page/Page';
+import TransactionsCardList from '~/components/TransactionsCardList/TransactionsCardList';
+import { getUserAction } from '../actions/users';
+import { getTransactions } from '~/server/adapters/transactions/queries';
+import { getTransactionCategories } from '~/server/adapters/transactionCategories/queries';
+import { getTransactionSubCategories } from '~/server/adapters/transactionSubCategories/queries';
 
 async function IncomePage() {
-  const user = await getUserInfo();
+  const user = await getUserAction();
 
-  if (!user?.businessId) {
-    redirect('/');
-  }
-
-  const sales = await db
-    .select()
-    .from(transactions)
-    .where(
-      sql`${transactions.type} = 'income' AND ${transactions.businessId} = ${user.businessId}`
-    );
+  const income = await getTransactions(user.id, user.businessId, 'income');
+  const categories = await getTransactionCategories();
+  const subCategories = await getTransactionSubCategories();
 
   return (
-    <main>
-      <TransationsPage transations={sales} type="income" />
-    </main>
+    <Page>
+      <h1 className="text-2xl font-bold text-center">Income</h1>
+      <TransactionsCardList
+        transactions={income}
+        categories={categories}
+        subCategories={subCategories}
+      />
+    </Page>
   );
 }
 
-function Page() {
-  return (
-    <React.Suspense fallback={<TransactionsSkeleton count={10} />}>
-      <IncomePage />
-    </React.Suspense>
-  );
-}
-
-export default Page;
+export default IncomePage;

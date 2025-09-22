@@ -4,5 +4,7 @@ import { transactionCategorySchema } from '~/lib/types/transactionCategories/que
 
 export const getTransactionCategories = async () => {
   const categories = await db.select().from(transactionCategories);
-  return transactionCategorySchema.parse(categories);
+  return categories.map((category) =>
+    transactionCategorySchema.parse(category)
+  );
 };

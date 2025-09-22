@@ -150,6 +150,7 @@ export default async function ReceiptPage({
             scanId={receipt.scanId}
             storeName={receipt.scanResult.storeName}
             initialTransactions={receipt.scanResult.items.map((item) => ({
+              id: String(Math.floor(Math.random() * 1000000)),
               date: receipt.scanResult?.date
                 ? new Date(receipt.scanResult.date)
                 : new Date(),

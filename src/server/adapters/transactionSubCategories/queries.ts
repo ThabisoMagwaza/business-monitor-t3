@@ -4,5 +4,7 @@ import { transactionSubCategorySchema } from '~/lib/types/transactionSubCategori
 
 export const getTransactionSubCategories = async () => {
   const subCategories = await db.select().from(itemSubCategories);
-  return transactionSubCategorySchema.parse(subCategories);
+  return subCategories.map((subCategory) =>
+    transactionSubCategorySchema.parse(subCategory)
+  );
 };

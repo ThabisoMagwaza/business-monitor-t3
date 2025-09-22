@@ -1,5 +1,22 @@
 import { z } from 'zod';
 
+export const transactionSchema = z.object({
+  id: z.number(),
+  description: z.string(),
+  amount: z.number(),
+  type: z.enum(['expense', 'income']),
+  createdAt: z.date(),
+  date: z.date(),
+  categoryId: z.number(),
+  subCategoryId: z.number(),
+  category: z.string(),
+  subCategory: z.string(),
+  businessId: z.number(),
+  receiptId: z.number().nullable(),
+});
+
+export type Transaction = z.infer<typeof transactionSchema>;
+
 export const expenseChartDataSchema = z.object({
   day: z.string(),
   amount: z.coerce.number(),

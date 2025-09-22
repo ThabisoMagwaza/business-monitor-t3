@@ -17,6 +17,7 @@ import {
   expenseChartDataSchema,
   categoryPieChartDataSchema,
   subCategoryPieChartDataSchema,
+  transactionSchema,
 } from '~/lib/types/transactions/queries';
 import { type DateFormat } from '~/lib/types/receipts/queries';
 import { generateRandomColor } from '~/lib/utils';
@@ -153,6 +154,46 @@ const getSubCategoryTotalsQuery = async (
   return subCategoryTotals;
 };
 
+const getTransactionsQuery = async (
+  ctx: BusinessContext,
+  type: 'expense' | 'income'
+) => {
+  const result = await db.execute(sql`
+    SELECT t.id,
+          t.date,
+          t.created_at, 
+          t.description, 
+          t.type, t.amount, 
+          t.receipt_id, 
+          t.category_id, 
+          c.name as "category",
+          t.sub_category_id,
+          sc.name
+      FROM ${transactions} t
+      JOIN ${transactionCategories} c ON c.id = t.category_id
+      JOIN ${itemSubCategories} sc ON sc.id = t.sub_category_id
+    WHERE t.business_id = ${ctx.businessId}
+    AND t.type = ${type}
+    ORDER BY t.date DESC;
+  `);
+  return result.rows.map((row) =>
+    transactionSchema.parse({
+      id: row.id,
+      date: new Date(row.date as string),
+      createdAt: new Date(row.created_at as string),
+      description: row.description,
+      type: row.type,
+      amount: Number(row.amount) / 100,
+      receiptId: row.receipt_id,
+      categoryId: row.category_id,
+      subCategoryId: row.sub_category_id,
+      category: row.category,
+      subCategory: row.name,
+      businessId: ctx.businessId,
+    })
+  );
+};
+
 export const getExpenseSalesSummary = async (
   userId: string,
   businessId: number
@@ -227,5 +268,15 @@ export const getSubCategoryTotalsExpense = async (
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
   const summary = await getSubCategoryTotalsQuery(ctx, startDate, endDate);
+  return summary;
+};
+
+export const getTransactions = async (
+  userId: string,
+  businessId: number,
+  type: 'expense' | 'income'
+) => {
+  const ctx = await getBusinessContext(userId, businessId);
+  const summary = await getTransactionsQuery(ctx, type);
   return summary;
 };

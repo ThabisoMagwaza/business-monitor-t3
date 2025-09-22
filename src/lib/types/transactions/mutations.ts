@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const addTransactionSchema = z.object({
+  id: z.string(),
   description: z.string(),
   type: z.enum(['expense', 'income']),
   amount: z.number(),

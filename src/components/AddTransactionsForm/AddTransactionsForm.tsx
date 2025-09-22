@@ -128,19 +128,7 @@ function AddTransactionsForm({
     }
   ) => void;
 }) {
-  const [transactions, setTransactions] = React.useState(() =>
-    initialTransactions.map((transaction) => ({
-      id: String(Math.floor(Math.random() * 1000000)),
-      date: transaction.date,
-      description: transaction.description,
-      amount: transaction.amount,
-      type,
-      category: transaction.category,
-      subCategory: transaction.subCategory,
-      categoryId: transaction.categoryId,
-      subCategoryId: transaction.subCategoryId,
-    }))
-  );
+  const [transactions, setTransactions] = React.useState(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [allTransactionsDate, setAllTransactionsDate] = React.useState(
     new Date(initialTransactions[0]?.date ?? new Date())

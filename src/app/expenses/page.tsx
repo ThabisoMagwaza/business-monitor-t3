@@ -1,40 +1,26 @@
 import * as React from 'react';
-import { db } from '~/server/db';
-
-import TransationsPage from '~/components/TransationsPage';
-import { transactions } from '~/server/db/schema';
-import { getUserInfo } from '../db-helpers';
-
-import { sql } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
-import TransactionsSkeleton from '~/components/TransactionsSkeleton';
-
+import Page from '~/components/Page/Page';
+import { getUserAction } from '../actions/users';
+import { getTransactions } from '~/server/adapters/transactions/queries';
+import TransactionsCardList from '~/components/TransactionsCardList/TransactionsCardList';
+import { getTransactionCategories } from '~/server/adapters/transactionCategories/queries';
+import { getTransactionSubCategories } from '~/server/adapters/transactionSubCategories/queries';
 async function ExpensesPage() {
-  const user = await getUserInfo();
-  if (!user?.businessId) {
-    redirect('/');
-  }
+  const user = await getUserAction();
 
-  const expenses = await db
-    .select()
-    .from(transactions)
-    .where(
-      sql`${transactions.type} = 'expense' AND ${transactions.businessId} = ${user.businessId}`
-    );
-
+  const expenses = await getTransactions(user.id, user.businessId, 'expense');
+  const categories = await getTransactionCategories();
+  const subCategories = await getTransactionSubCategories();
   return (
-    <main>
-      <TransationsPage type="expense" transations={expenses} />
-    </main>
+    <Page>
+      <h1 className="text-2xl font-bold text-center">Expenses</h1>
+      <TransactionsCardList
+        transactions={expenses}
+        categories={categories}
+        subCategories={subCategories}
+      />
+    </Page>
   );
 }
 
-function Page() {
-  return (
-    <React.Suspense fallback={<TransactionsSkeleton count={10} />}>
-      <ExpensesPage />
-    </React.Suspense>
-  );
-}
-
-export default Page;
+export default ExpensesPage;
