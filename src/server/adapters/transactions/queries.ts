@@ -24,6 +24,7 @@ import { generateRandomColor } from '~/lib/utils';
 
 const getDailySummaryPerWeekQuery = async (
   ctx: BusinessContext,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
@@ -32,32 +33,33 @@ const getDailySummaryPerWeekQuery = async (
   const summary = await db.execute(sql`
     SELECT
       CASE
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 1 THEN 'Monday'
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 2 THEN 'Tuedsay'
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 3 THEN 'Wednesday'
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 4 THEN 'Thursday'
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 5 THEN 'Friday'
-        WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 6 THEN 'Saturday'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 0 THEN 'Sunday'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 1 THEN 'Monday'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 2 THEN 'Tuedsay'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 3 THEN 'Wednesday'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 4 THEN 'Thursday'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 5 THEN 'Friday'
+        WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 6 THEN 'Saturday'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 7 THEN 'Sunday'
         END as fullday,
         CASE
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 1 THEN 'M'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 2 THEN 'T'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 3 THEN 'W'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 4 THEN 'T'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 5 THEN 'F'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 6 THEN 'S'
-          WHEN EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 0 THEN 'S'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 1 THEN 'Mon'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 2 THEN 'Tu'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 3 THEN 'Wed'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 4 THEN 'Thu'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 5 THEN 'Fri'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 6 THEN 'Sat'
+          WHEN EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg') = 7 THEN 'Sun'
         END as day,
         SUM(amount) as amount
       FROM ${transactions} t
       WHERE t.business_id = ${ctx.businessId}
-        AND type = 'expense'
+        AND t.type = ${type}
         AND date >= ${startDateString}
         AND date < ${endDateString}
-      GROUP BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg')
-      ORDER BY EXTRACT(DOW FROM date AT TIME ZONE 'Africa/Johannesburg');
+      GROUP BY EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg')
+      ORDER BY EXTRACT(ISODOW FROM date AT TIME ZONE 'Africa/Johannesburg');
   `);
+
   const dailyChartData: ExpenseBarChartData[] = summary.rows.map((row) =>
     expenseChartDataSchema.parse({
       day: row.day,
@@ -70,6 +72,7 @@ const getDailySummaryPerWeekQuery = async (
 
 const getDailySummaryPerDayQuery = async (
   ctx: BusinessContext,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
@@ -80,9 +83,9 @@ const getDailySummaryPerDayQuery = async (
       SUM(amount) as amount
     FROM ${transactions} t
     WHERE t.business_id = ${ctx.businessId}
-      AND type = 'expense'
+      AND t.type = ${type}
       AND date >= ${startDateString}
-      AND date < ${endDateString}
+      AND date < ${endDateString} 
     GROUP BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
     ORDER BY EXTRACT(day FROM t.date AT TIME ZONE 'Africa/Johannesburg')
   `);
@@ -98,6 +101,7 @@ const getDailySummaryPerDayQuery = async (
 
 const getCategoryTotalsQuery = async (
   ctx: BusinessContext,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
@@ -110,6 +114,7 @@ const getCategoryTotalsQuery = async (
     JOIN ${transactionCategories} c
       ON c.id = t.category_id
     WHERE t.business_id = ${ctx.businessId}
+      AND t.type = ${type}
       AND t.date >= ${startDateString}
       AND t.date < ${endDateString}
     GROUP BY c.name
@@ -127,6 +132,7 @@ const getCategoryTotalsQuery = async (
 
 const getSubCategoryTotalsQuery = async (
   ctx: BusinessContext,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
@@ -139,6 +145,7 @@ const getSubCategoryTotalsQuery = async (
     JOIN ${itemSubCategories} sc
       ON sc.id = t.sub_category_id
     WHERE t.business_id = ${ctx.businessId}
+      AND t.type = ${type}
       AND t.date >= ${startDateString}
       AND t.date < ${endDateString}
     GROUP BY sc.name
@@ -222,17 +229,24 @@ export const getExpenseSalesSummary = async (
 export const getWeeklyExpenseSummary = async (
   userId: string,
   businessId: number,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getDailySummaryPerWeekQuery(ctx, startDate, endDate);
+  const summary = await getDailySummaryPerWeekQuery(
+    ctx,
+    type,
+    startDate,
+    endDate
+  );
   return summary;
 };
 
 export const getDailyExpenseSummary = async (
   userId: string,
   businessId: number,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date,
   format: DateFormat
@@ -241,9 +255,9 @@ export const getDailyExpenseSummary = async (
 
   let summary: ExpenseBarChartData[];
   if (format === 'days-in-week') {
-    summary = await getDailySummaryPerWeekQuery(ctx, startDate, endDate);
+    summary = await getDailySummaryPerWeekQuery(ctx, type, startDate, endDate);
   } else {
-    summary = await getDailySummaryPerDayQuery(ctx, startDate, endDate);
+    summary = await getDailySummaryPerDayQuery(ctx, type, startDate, endDate);
   }
 
   return summary;
@@ -252,22 +266,29 @@ export const getDailyExpenseSummary = async (
 export const getCategoryTotalsExpense = async (
   userId: string,
   businessId: number,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getCategoryTotalsQuery(ctx, startDate, endDate);
+  const summary = await getCategoryTotalsQuery(ctx, type, startDate, endDate);
   return summary;
 };
 
 export const getSubCategoryTotalsExpense = async (
   userId: string,
   businessId: number,
+  type: 'expense' | 'income',
   startDate: Date,
   endDate: Date
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getSubCategoryTotalsQuery(ctx, startDate, endDate);
+  const summary = await getSubCategoryTotalsQuery(
+    ctx,
+    type,
+    startDate,
+    endDate
+  );
   return summary;
 };
 

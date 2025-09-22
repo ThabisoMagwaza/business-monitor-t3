@@ -13,12 +13,12 @@ import {
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
-  startOfWeek,
-  endOfWeek,
   endOfMonth,
   startOfMonth,
   subWeeks,
   subMonths,
+  startOfISOWeek,
+  endOfISOWeek,
 } from 'date-fns';
 import type { DateFormat, Period } from '~/lib/types/receipts/queries';
 import { type DateRange } from 'react-day-picker';
@@ -39,13 +39,13 @@ function calculatePeriodDates(period: Period) {
 
   switch (period) {
     case 'this-week':
-      startDate = startOfWeek(now);
-      endDate = endOfWeek(now);
+      startDate = startOfISOWeek(now);
+      endDate = endOfISOWeek(now);
       format = 'days-in-week';
       break;
     case 'last-week':
-      startDate = subWeeks(startOfWeek(now), 1);
-      endDate = subWeeks(endOfWeek(now), 1);
+      startDate = subWeeks(startOfISOWeek(now), 1);
+      endDate = subWeeks(endOfISOWeek(now), 1);
       format = 'days-in-week';
       break;
     case 'this-month':
@@ -59,8 +59,8 @@ function calculatePeriodDates(period: Period) {
       format = 'days-in-month';
       break;
     default:
-      startDate = startOfWeek(now);
-      endDate = endOfWeek(now);
+      startDate = startOfISOWeek(now);
+      endDate = endOfISOWeek(now);
       format = 'days-in-week';
       break;
   }

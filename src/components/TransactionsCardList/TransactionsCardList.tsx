@@ -134,7 +134,7 @@ function TransactionCard({
           <CardContent className="p-4">
             <div className="flex gap-4">
               <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <h3 className="font-medium text-gray-900 truncate max-w-3/4">
+                <h3 className="text-start font-medium text-gray-900 truncate max-w-3/4">
                   {transaction.description}
                 </h3>
                 <div className="flex items-start gap-2 mt-1 flex-wrap">

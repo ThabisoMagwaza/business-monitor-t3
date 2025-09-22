@@ -15,7 +15,7 @@ import {
   getSubCategoryTotalsExpense,
 } from '~/server/adapters/transactions/queries';
 import { Skeleton } from '~/components/ui/skeleton';
-import { endOfWeek, startOfWeek } from 'date-fns';
+import { endOfISOWeek, startOfISOWeek } from 'date-fns';
 import { FileText } from 'lucide-react';
 
 async function Charts({
@@ -23,11 +23,13 @@ async function Charts({
   endDate,
   format,
   user,
+  type,
 }: {
   startDate: string;
   endDate: string;
   format: DateFormat;
   user: User;
+  type: 'expense' | 'income';
 }) {
   const startDateObj = new Date(startDate);
   const endDateObj = new Date(endDate);
@@ -37,6 +39,7 @@ async function Charts({
       getDailyExpenseSummary(
         user.id,
         user.businessId,
+        type,
         startDateObj,
         endDateObj,
         format
@@ -44,12 +47,14 @@ async function Charts({
       getCategoryTotalsExpense(
         user.id,
         user.businessId,
+        type,
         startDateObj,
         endDateObj
       ),
       getSubCategoryTotalsExpense(
         user.id,
         user.businessId,
+        type,
         startDateObj,
         endDateObj
       ),
@@ -90,8 +95,8 @@ export default async function ReportsPage({
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
   const now = new Date();
-  const startDate = params.startDate ?? startOfWeek(now);
-  const endDate = params.endDate ?? endOfWeek(now);
+  const startDate = params.startDate ?? startOfISOWeek(now);
+  const endDate = params.endDate ?? endOfISOWeek(now);
   const format = params.format ?? 'days-in-week';
 
   return (
@@ -112,6 +117,7 @@ export default async function ReportsPage({
           endDate={endDate}
           user={user}
           format={format}
+          type="expense"
         />
       </Suspense>
     </Page>
