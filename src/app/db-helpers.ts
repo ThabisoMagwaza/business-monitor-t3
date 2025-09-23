@@ -12,7 +12,7 @@ import { eq, sql } from 'drizzle-orm';
 import type {
   ItemSubCategory,
   TransactionCategory,
-} from '~/lib/types/Transaction';
+} from '~/lib/types/transactions';
 
 type User = typeof users.$inferSelect;
 

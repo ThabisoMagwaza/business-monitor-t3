@@ -9,7 +9,6 @@ import {
   varchar,
   numeric,
   pgEnum,
-  date,
   integer,
   boolean,
   jsonb,
@@ -35,7 +34,7 @@ export const transactions = createTable('transactions', {
   description: varchar('description', { length: 256 }).notNull(),
   amount: numeric('amount').notNull(),
   type: transactionTypeEnum('type').notNull(),
-  date: date('date').notNull(),
+  date: timestamp('date', { withTimezone: true }).notNull(),
   categoryId: integer('category_id').references(() => transactionCategories.id),
   storeName: varchar('store_name', { length: 256 }),
   subCategoryId: integer('sub_category_id').references(
