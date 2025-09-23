@@ -1,5 +1,6 @@
 - [ ] pagination
 - [ ] make the transaction searchable
+- [ ] refactor edit transaction
 
 - [x] make transactions edittable
 - [x] reports
@@ -10,24 +11,24 @@
 
 - [ ] add categories for assets, liabilies, equity (income)
 
-- [ ] redising the transactions page
-- [ ] allow edit of transaction (recategorize)
+- [x] redising the transactions page
+- [x] allow edit of transaction (recategorize)
 
 - [ ] import icome
 
 - [ ] add categories to income
 - [ ] add asset class categories
 
-- [ ] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
-- [ ] improve page load speed (suspense, skeletons e.t.c)
+- [x] polish UI for receipt scanning (navigation slow, breadcrums, form validations, fix errors)
+- [x] improve page load speed (suspense, skeletons e.t.c)
 
 - [ ] seameless continuous review
 - [ ] error handling
 
-- [ ] add receipt popup to transaction
+- [x] add receipt popup to transaction
 
 - [ ] create manage page - solved by background process?
-- [ ] wrap auth stuff in common file
+- [x] wrap auth stuff in common file
 
 - [ ] image optimization
 
