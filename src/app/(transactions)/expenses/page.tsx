@@ -1,10 +1,11 @@
 import * as React from 'react';
 import Page from '~/components/Page/Page';
-import { getUserAction } from '../actions/users';
+import { getUserAction } from '../../actions/users';
 import { getTransactions } from '~/server/adapters/transactions/queries';
 import TransactionsCardList from '~/components/TransactionsCardList/TransactionsCardList';
 import { getTransactionCategories } from '~/server/adapters/transactionCategories/queries';
 import { getTransactionSubCategories } from '~/server/adapters/transactionSubCategories/queries';
+
 async function ExpensesPage() {
   const user = await getUserAction();
 

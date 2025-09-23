@@ -87,6 +87,7 @@ function TransactionCard({
   subCategories: TransactionSubCategory[];
 }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+
   const router = useRouter();
 
   const form = useForm<z.infer<typeof editTransactionSchema>>({
@@ -129,7 +130,19 @@ function TransactionCard({
 
   return (
     <>
-      <button onClick={() => setIsEditDialogOpen(true)}>
+      <button
+        onClick={() => {
+          form.setValue('id', transaction.id.toString());
+          form.setValue('description', transaction.description);
+          form.setValue('amount', transaction.amount.toString());
+          form.setValue('date', transaction.date);
+          form.setValue('category', transaction.category);
+          form.setValue('subCategory', transaction.subCategory);
+          form.setValue('categoryId', transaction.categoryId);
+          form.setValue('subCategoryId', transaction.subCategoryId);
+          setIsEditDialogOpen(true);
+        }}
+      >
         <Card className="hover:shadow-md transition-shadow p-0">
           <CardContent className="p-4">
             <div className="flex gap-4">

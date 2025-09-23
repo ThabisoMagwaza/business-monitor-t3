@@ -51,5 +51,5 @@ export const updateTransaction = async (
         eq(transactionsTable.businessId, ctx.businessId)
       )
     );
-  return result;
+  return;
 };

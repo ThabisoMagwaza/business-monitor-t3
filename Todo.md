@@ -1,9 +1,8 @@
-- [ ] reports
-- [ ] fix date addition bug for manual transactions
-
-- [x] use adapter pattern for db stuff
-- [x] make the app installable (PWA)
+- [ ] pagination
 - [ ] make the transaction searchable
+
+- [x] make transactions edittable
+- [x] reports
 
 - [ ] add import sales functions and endpoints
 - [ ] filter transactions on page and reports
