@@ -15,7 +15,7 @@ import {
   getSubCategoryTotalsExpense,
 } from '~/server/adapters/transactions/queries';
 import { Skeleton } from '~/components/ui/skeleton';
-import { endOfISOWeek, startOfISOWeek } from 'date-fns';
+import { endOfISOWeek, startOfISOWeek, subHours } from 'date-fns';
 import { FileText } from 'lucide-react';
 
 async function Charts({
@@ -95,8 +95,8 @@ export default async function ReportsPage({
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
   const now = new Date();
-  const startDate = params.startDate ?? startOfISOWeek(now);
-  const endDate = params.endDate ?? endOfISOWeek(now);
+  const startDate = params.startDate ?? subHours(startOfISOWeek(now), 2);
+  const endDate = params.endDate ?? subHours(endOfISOWeek(now), 2);
   const format = params.format ?? 'days-in-week';
 
   return (
