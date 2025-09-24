@@ -8,14 +8,23 @@ import { getTransactionSubCategories } from '~/server/adapters/transactionSubCat
 
 async function ExpensesPage() {
   const user = await getUserAction();
+  const initialPage = 1;
+  const initialLimit = 10;
 
-  const expenses = await getTransactions(user.id, user.businessId, 'expense');
+  const expenses = await getTransactions(
+    user.id,
+    user.businessId,
+    'expense',
+    initialPage,
+    initialLimit
+  );
   const categories = await getTransactionCategories();
   const subCategories = await getTransactionSubCategories();
   return (
     <Page>
       <h1 className="text-2xl font-bold text-center">Expenses</h1>
       <TransactionsCardList
+        type="expense"
         transactions={expenses}
         categories={categories}
         subCategories={subCategories}
