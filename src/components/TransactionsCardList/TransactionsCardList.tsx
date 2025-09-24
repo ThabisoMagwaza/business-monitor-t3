@@ -435,18 +435,40 @@ function TransactionCard({
 }
 
 function TransactionsCardList({
+  type,
   transactions,
   categories,
   subCategories,
 }: {
+  type: 'expense' | 'income';
   transactions: Transaction[];
   categories: TransactionCategory[];
   subCategories: TransactionSubCategory[];
 }) {
+  const [page, setPage] = React.useState(1);
+  const [moreTransactions, setMoreTransactions] = React.useState<Transaction[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (page === 1) return;
+    async function fetchTransactions() {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/transactions?page=${page}&type=${type}`
+      );
+      const data = await response.json();
+      setMoreTransactions(data.transactions);
+      setIsLoading(false);
+    }
+    fetchTransactions();
+  }, [page]);
+
   return (
     <>
       <div className="flex flex-col gap-4 mt-2">
-        {transactions.map((item) => (
+        {[...transactions, ...moreTransactions].map((item) => (
           <TransactionCard
             key={item.id}
             transaction={item}
@@ -454,6 +476,18 @@ function TransactionsCardList({
             subCategories={subCategories}
           />
         ))}
+
+        <Button
+          onClick={() => setPage(page + 1)}
+          asChild
+          variant="outline"
+          className="self-center"
+        >
+          <Badge variant="outline">
+            {isLoading && <Loader className="h-3 w-3 mr-1 animate-spin" />}
+            Load More
+          </Badge>
+        </Button>
       </div>
     </>
   );

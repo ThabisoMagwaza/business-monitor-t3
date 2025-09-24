@@ -163,7 +163,9 @@ const getSubCategoryTotalsQuery = async (
 
 const getTransactionsQuery = async (
   ctx: BusinessContext,
-  type: 'expense' | 'income'
+  type: 'expense' | 'income',
+  page: number = 1,
+  limit: number = 10
 ) => {
   const result = await db.execute(sql`
     SELECT t.id,
@@ -181,7 +183,9 @@ const getTransactionsQuery = async (
       JOIN ${itemSubCategories} sc ON sc.id = t.sub_category_id
     WHERE t.business_id = ${ctx.businessId}
     AND t.type = ${type}
-    ORDER BY t.date DESC;
+    ORDER BY t.date DESC
+    LIMIT ${limit}
+    OFFSET ${(page - 1) * limit};
   `);
   return result.rows.map((row) =>
     transactionSchema.parse({
@@ -295,9 +299,11 @@ export const getSubCategoryTotalsExpense = async (
 export const getTransactions = async (
   userId: string,
   businessId: number,
-  type: 'expense' | 'income'
+  type: 'expense' | 'income',
+  page: number = 1,
+  limit: number = 10
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
-  const summary = await getTransactionsQuery(ctx, type);
+  const summary = await getTransactionsQuery(ctx, type, page, limit);
   return summary;
 };

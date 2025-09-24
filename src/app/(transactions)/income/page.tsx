@@ -18,6 +18,7 @@ async function IncomePage() {
     <Page>
       <h1 className="text-2xl font-bold text-center">Income</h1>
       <TransactionsCardList
+        type="income"
         transactions={income}
         categories={categories}
         subCategories={subCategories}
