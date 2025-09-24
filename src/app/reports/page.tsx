@@ -97,9 +97,11 @@ export default async function ReportsPage({
   // Get current time in GMT+2 timezone
   const now = new Date();
   const startDate =
-    params.startDate ?? startOfISOWeek(now).toISOString().split('T')[0];
+    params.startDate ??
+    new Intl.DateTimeFormat('en-ZA').format(startOfISOWeek(now));
   const endDate =
-    params.endDate ?? endOfISOWeek(now).toISOString().split('T')[0];
+    params.endDate ??
+    new Intl.DateTimeFormat('en-ZA').format(endOfISOWeek(now));
   const format = params.format ?? 'days-in-week';
 
   console.log({
