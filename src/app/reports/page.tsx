@@ -99,6 +99,12 @@ export default async function ReportsPage({
   const endDate = params.endDate ?? endOfISOWeek(now);
   const format = params.format ?? 'days-in-week';
 
+  console.log({
+    startDate,
+    endDate,
+    format,
+  });
+
   return (
     <Page>
       <DateRangeSelector title="Expense Analysis" />
