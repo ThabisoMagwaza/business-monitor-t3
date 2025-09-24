@@ -96,10 +96,16 @@ export default async function ReportsPage({
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
   // Get current time in GMT+2 timezone
-  const now = getCurrentDateInGMT2();
+  const now = new Date();
   const startDate = params.startDate ?? startOfISOWeek(now);
   const endDate = params.endDate ?? endOfISOWeek(now);
   const format = params.format ?? 'days-in-week';
+
+  console.log({
+    startDate,
+    endDate,
+    format,
+  });
 
   return (
     <Page>
