@@ -94,7 +94,6 @@ export default async function ReportsPage({
 }) {
   const [params, user] = await Promise.all([searchParams, getUserAction()]);
 
-  // Get current time in GMT+2 timezone
   const now = new Date();
   const startDate = params.startDate ?? subHours(startOfISOWeek(now), 2);
   const endDate = params.endDate ?? subHours(endOfISOWeek(now), 2);

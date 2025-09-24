@@ -20,7 +20,6 @@ import {
   startOfISOWeek,
   endOfISOWeek,
 } from 'date-fns';
-import { getCurrentDateInGMT2 } from '~/lib/date-utils';
 import type { DateFormat, Period } from '~/lib/types/receipts/queries';
 import { type DateRange } from 'react-day-picker';
 
@@ -33,8 +32,7 @@ const Periods = [
 ] as const;
 
 function calculatePeriodDates(period: Period) {
-  // Get current time in GMT+2 timezone
-  const now = getCurrentDateInGMT2();
+  const now = new Date();
   let startDate: Date;
   let endDate: Date;
   let format: DateFormat;
