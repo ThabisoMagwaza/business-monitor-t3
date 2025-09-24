@@ -59,7 +59,7 @@ export default async function Home() {
           <h3>Financial Accounting Reports</h3>
 
           <Button asChild variant="outline" className="flex-1">
-            <Link prefetch href="/reports">
+            <Link href="/reports">
               <BarChart3 className="mr-2" />
               Management Report
             </Link>
