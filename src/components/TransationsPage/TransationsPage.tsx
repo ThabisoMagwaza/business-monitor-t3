@@ -13,7 +13,7 @@ export type Transaction = {
 };
 
 type TransactionPageProps = {
-  type: 'income' | 'expenses';
+  type: 'income' | 'expense';
   transations: Transaction[];
 };
 

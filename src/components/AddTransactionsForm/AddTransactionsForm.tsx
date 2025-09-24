@@ -31,11 +31,6 @@ import { Separator } from '~/components/ui/separator';
 import { Badge } from '~/components/ui/badge';
 import { formatCurrencyAmount, formatDate } from '~/lib/helpers';
 
-import type { NewTransaction } from '~/app/actions';
-import type {
-  ItemSubCategory,
-  TransactionCategory,
-} from '~/lib/types/Transaction';
 import {
   Select,
   SelectTrigger,
@@ -71,6 +66,9 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
 } from '../ui/alert-dialog';
+import { type AddTransaction } from '~/lib/types/transactions/mutations';
+import { type TransactionCategory } from '~/lib/types/transactionCategories/queries';
+import { type TransactionSubCategory } from '~/lib/types/transactionSubCategories/queries';
 
 const createTransactionSchema = z.object({
   id: z.string(),
@@ -103,6 +101,8 @@ const createTransactionSchema = z.object({
     .min(1, {
       message: 'Sub Category is required',
     }),
+  categoryId: z.number(),
+  subCategoryId: z.number(),
 });
 
 function AddTransactionsForm({
@@ -112,47 +112,49 @@ function AddTransactionsForm({
   categories,
   subCategories,
   storeName,
+  scanId,
 }: {
   type: 'expense' | 'income';
-  initialTransactions: NewTransaction[];
+  initialTransactions: AddTransaction[];
   categories: TransactionCategory[];
-  subCategories: ItemSubCategory[];
+  subCategories: TransactionSubCategory[];
   storeName?: string;
+  scanId?: number;
   saveTransactions: (
-    transactions: NewTransaction[],
-    type: 'expense' | 'income',
-    storeName?: string
+    transactions: AddTransaction[],
+    scanDetails: {
+      storeName?: string;
+      scanId?: number;
+    }
   ) => void;
 }) {
-  const [transactions, setTransactions] =
-    React.useState<NewTransaction[]>(initialTransactions);
+  const [transactions, setTransactions] = React.useState(initialTransactions);
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [allTransactionsDate, setAllTransactionsDate] = React.useState(
     new Date(initialTransactions[0]?.date ?? new Date())
   );
 
-  const saveNewTransactions = saveTransactions.bind(
-    null,
-    transactions,
-    type,
-    storeName
-  );
+  const saveNewTransactions = saveTransactions.bind(null, transactions, {
+    storeName,
+    scanId,
+  });
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     const transaction = transactions.find((t) => t.id === id);
     if (transaction) {
       form.setValue('description', transaction.description);
-      form.setValue('amount', transaction.amount);
+      form.setValue('amount', transaction.amount.toString());
       form.setValue('date', new Date(transaction.date));
       form.setValue('category', transaction.category ?? '');
       form.setValue('subCategory', transaction.subCategory ?? '');
+      form.setValue('categoryId', transaction.categoryId);
+      form.setValue('subCategoryId', transaction.subCategoryId);
       form.setValue('id', transaction.id.toString());
 
       setIsEditDialogOpen(true);
     }
   };
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof createTransactionSchema>>({
     resolver: zodResolver(createTransactionSchema),
     defaultValues: {
@@ -162,34 +164,51 @@ function AddTransactionsForm({
       date: new Date(),
       category: '',
       subCategory: '',
+      categoryId: 0,
+      subCategoryId: 0,
     },
   });
 
   const handleSaveEdit = (data: z.infer<typeof createTransactionSchema>) => {
-    if (!form.getValues('id')) {
-      setTransactions((prev: NewTransaction[]) => [
+    const id = form.getValues('id');
+
+    if (!id) {
+      setTransactions((prev) => [
         {
-          ...data,
-          id: Math.floor(Math.random() * 1000000),
-          date: data.date.toISOString(),
+          id: String(Math.floor(Math.random() * 1000000)),
+          date: data.date,
+          description: data.description,
+          amount: Number(data.amount),
+          type: type,
+          category: data.category,
+          subCategory: data.subCategory,
+          categoryId: data.categoryId,
+          subCategoryId: data.subCategoryId,
         },
         ...prev,
       ]);
     }
 
-    if (form.getValues('id')) {
-      setTransactions((prev: NewTransaction[]) =>
+    if (id) {
+      setTransactions((prev) =>
         prev.map((transaction) =>
-          transaction.id === Number(form.getValues('id'))
+          transaction.id === id
             ? {
-                ...data,
-                id: Number(form.getValues('id')),
-                date: data.date.toISOString(),
+                id: id,
+                date: data.date,
+                description: data.description,
+                type: type,
+                amount: Number(data.amount),
+                category: data.category,
+                subCategory: data.subCategory,
+                categoryId: data.categoryId,
+                subCategoryId: data.subCategoryId,
               }
             : transaction
         )
       );
     }
+
     form.reset();
     setIsEditDialogOpen(false);
   };
@@ -198,8 +217,8 @@ function AddTransactionsForm({
     setIsEditDialogOpen(false);
   };
 
-  const handleDeleteTransaction = (id: number) => {
-    setTransactions((prev: NewTransaction[]) => {
+  const handleDeleteTransaction = (id: string) => {
+    setTransactions((prev) => {
       if (!prev) {
         return [];
       }
@@ -211,7 +230,7 @@ function AddTransactionsForm({
   const calculateTotal = () => {
     return transactions
       ?.reduce((sum, transaction) => {
-        return sum + parseFloat(transaction.amount || '0');
+        return sum + parseFloat(transaction.amount.toString() || '0');
       }, 0)
       .toFixed(2);
   };
@@ -307,10 +326,10 @@ function AddTransactionsForm({
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => {
-                        setTransactions((prev: NewTransaction[]) =>
+                        setTransactions((prev) =>
                           prev.map((transaction) => ({
                             ...transaction,
-                            date: allTransactionsDate?.toISOString(),
+                            date: allTransactionsDate,
                           }))
                         );
                       }}
@@ -548,7 +567,15 @@ function AddTransactionsForm({
                           <FormLabel>Category</FormLabel>
                           <FormControl>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const category = categories.find(
+                                  (category) => category.name === value
+                                );
+                                if (category) {
+                                  form.setValue('categoryId', category.id);
+                                }
+                              }}
                               defaultValue={field.value}
                             >
                               <SelectTrigger className="w-full">
@@ -581,7 +608,18 @@ function AddTransactionsForm({
                           <FormLabel>Sub Category</FormLabel>
                           <FormControl>
                             <Select
-                              onValueChange={field.onChange}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                const subCategory = subCategories.find(
+                                  (subCategory) => subCategory.name === value
+                                );
+                                if (subCategory) {
+                                  form.setValue(
+                                    'subCategoryId',
+                                    subCategory.id
+                                  );
+                                }
+                              }}
                               defaultValue={field.value}
                             >
                               <SelectTrigger className="w-full">

@@ -1,13 +1,7 @@
 'use server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-import {
-  transactions,
-  businesses,
-  users,
-  receipts,
-  receiptScans,
-} from '~/server/db/schema';
+import { businesses, users, receipts, receiptScans } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -19,49 +13,10 @@ import { db } from '~/server/db';
 
 import type { User } from '~/components/AddUsers';
 import { uploadImageToCloud } from '~/lib/image-storage/image-storage';
-import { scanResultSchema, type ScanResult } from '~/lib/types/ScanResult';
-
-type Transaction = typeof transactions.$inferInsert;
-export type NewTransaction = Omit<
-  Transaction,
-  'type' | 'businessId' | 'createdAt'
-> & {
-  id: number;
-  category?: string;
-  subCategory?: string;
-};
-
-export async function addTransactions(
-  incomingTransactios: NewTransaction[],
-  type: 'expense' | 'income'
-) {
-  const user = await getUserInfo();
-
-  if (!user?.businessId) {
-    return;
-  }
-
-  const newTransactions: Transaction[] = incomingTransactios.map(
-    ({ description, amount, date, subCategoryId, categoryId }) => ({
-      description,
-      amount: amount,
-      date: new Date(date).toISOString(),
-      type,
-      businessId: user.businessId,
-      subCategoryId,
-      categoryId,
-    })
-  );
-
-  await db.insert(transactions).values(newTransactions);
-  revalidatePath(`/${type}`);
-  revalidatePath(`/`);
-  redirect(
-    `/?title=Transactions Added!&description=Added ${String(
-      incomingTransactios.length
-    )} new transactions`
-  );
-}
+import {
+  scanResultSchema,
+  type ScanResult,
+} from '~/lib/types/receipts/queries';
 
 export async function addBusiness(data: FormData) {
   const businessName = data.get('name')?.toString();
