@@ -11,7 +11,7 @@ import ReceiptPreview from '~/components/ReceiptPreview';
 import { rescanReceipt } from '~/app/actions';
 import { redirect } from 'next/navigation';
 import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
 import { ListIcon, StoreIcon, Upload } from 'lucide-react';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
@@ -90,6 +90,8 @@ export default async function ReceiptPage({
     );
 
     // 3. redirect to the receipt page
+    revalidateTag('receipts');
+    revalidatePath('/');
     redirect(`/receipts/${id}`);
   };
 
