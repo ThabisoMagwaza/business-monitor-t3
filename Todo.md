@@ -1,6 +1,9 @@
+- [ ] setup eslint plugins
+
 - [ ] pagination
+- [ ] infiniteScroll with reactQuery
 - [ ] make the transaction searchable
-- [ ] refactor edit transaction
+- [x] refactor edit transaction
 
 - [x] make transactions edittable
 - [x] reports

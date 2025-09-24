@@ -1,5 +1,6 @@
 'use client';
-import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { formatCurrencyAmount } from '~/lib/helpers';
@@ -40,7 +41,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { updateTransactionAction } from '~/app/actions/transactions';
-import { useRouter } from 'next/navigation';
 
 const editTransactionSchema = z.object({
   id: z.string(),
@@ -86,7 +86,7 @@ function TransactionCard({
   categories: TransactionCategory[];
   subCategories: TransactionSubCategory[];
 }) {
-  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const router = useRouter();
 
@@ -445,25 +445,20 @@ function TransactionsCardList({
   categories: TransactionCategory[];
   subCategories: TransactionSubCategory[];
 }) {
-  const [page, setPage] = React.useState(1);
-  const [moreTransactions, setMoreTransactions] = React.useState<Transaction[]>(
-    []
-  );
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [page, setPage] = useState(1);
+  const [moreTransactions, setMoreTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  React.useEffect(() => {
-    if (page === 1) return;
-    async function fetchTransactions() {
-      setIsLoading(true);
-      const response = await fetch(
-        `/api/transactions?page=${page}&type=${type}`
-      );
-      const data = await response.json();
-      setMoreTransactions(data.transactions);
-      setIsLoading(false);
-    }
-    fetchTransactions();
-  }, [page]);
+  async function loadMore() {
+    setIsLoading(true);
+    const response = await fetch(
+      `/api/transactions?page=${page + 1}&type=${type}`
+    );
+    const data = await response.json();
+    setPage((prevPage) => prevPage + 1);
+    setMoreTransactions([...moreTransactions, ...data.transactions]);
+    setIsLoading(false);
+  }
 
   return (
     <>
@@ -477,17 +472,10 @@ function TransactionsCardList({
           />
         ))}
 
-        <Button
-          onClick={() => setPage(page + 1)}
-          asChild
-          variant="outline"
-          className="self-center"
-        >
-          <Badge variant="outline">
-            {isLoading && <Loader className="h-3 w-3 mr-1 animate-spin" />}
-            Load More
-          </Badge>
-        </Button>
+        <Badge variant="outline" className="self-center" onClick={loadMore}>
+          {isLoading && <Loader className="h-3 w-3 mr-1 animate-spin" />}
+          Loading More
+        </Badge>
       </div>
     </>
   );
