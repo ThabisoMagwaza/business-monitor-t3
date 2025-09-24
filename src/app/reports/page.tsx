@@ -15,7 +15,7 @@ import {
   getSubCategoryTotalsExpense,
 } from '~/server/adapters/transactions/queries';
 import { Skeleton } from '~/components/ui/skeleton';
-import { endOfISOWeek, startOfISOWeek } from 'date-fns';
+import { endOfWeek, startOfWeek } from 'date-fns';
 import { getCurrentDateInGMT2 } from '~/lib/date-utils';
 import { FileText } from 'lucide-react';
 
@@ -97,8 +97,8 @@ export default async function ReportsPage({
 
   // Get current time in GMT+2 timezone
   const now = new Date();
-  const startDate = params.startDate ?? startOfISOWeek(now);
-  const endDate = params.endDate ?? endOfISOWeek(now);
+  const startDate = params.startDate ?? startOfWeek(now);
+  const endDate = params.endDate ?? endOfWeek(now);
   const format = params.format ?? 'days-in-week';
 
   console.log({
