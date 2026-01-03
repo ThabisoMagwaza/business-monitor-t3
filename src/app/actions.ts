@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { businesses, users, receipts, receiptScans } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { revalidatePath } from 'next/cache';
+import { revalidateTag } from 'next/cache';
 
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
@@ -181,6 +181,8 @@ export async function saveReceipt(receipt: File) {
     throw new Error('Error creating receipt');
   }
 
+  revalidateTag(`pending-receipts-count-businessId-${user.businessId}`);
+
   return {
     id: receiptId,
     name: receipt.name,
@@ -309,7 +311,7 @@ export async function rescanReceipt(receiptId: number, imageUrl: string) {
     })
     .where(eq(receiptScans.id, scanId));
 
-  revalidatePath(`/receipts/${receiptId}/review`);
+  // 6. redirect
   redirect(`/receipts/${receiptId}/review`);
 }
 
