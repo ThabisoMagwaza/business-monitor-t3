@@ -97,7 +97,7 @@ const getReceiptsListQuery = async (
 ) => {
   const statusFiltes: Record<ReceiptStatus, SQL<unknown>> = {
     all: sql``,
-    pending: sql`AND scans.accepted IS NULL OR scans.accepted IS FALSE`,
+    pending: sql`AND (scans.accepted IS NULL OR scans.accepted IS FALSE)`,
     processed: sql`AND scans.accepted IS TRUE`,
   };
 
