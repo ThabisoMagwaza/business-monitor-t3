@@ -42,8 +42,8 @@ const countPendingReceiptsQueryCached = async (ctx: BusinessContext) => {
     async (ctx: BusinessContext): Promise<number> => {
       return countPendingReceiptsQuery(ctx);
     },
-    [`ctx-${ctx.businessId}`],
-    { tags: ['receipts'] }
+    [`businessId-${ctx.businessId}`],
+    { tags: [`pending-receipts-count-businessId-${ctx.businessId}`] }
   );
 };
 
