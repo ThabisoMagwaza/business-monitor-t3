@@ -13,7 +13,8 @@ export async function GET(request: Request) {
     user.id,
     user.businessId,
     type,
-    page
+    page,
+    limit
   );
   return NextResponse.json({ transactions }, { status: 200 });
 }

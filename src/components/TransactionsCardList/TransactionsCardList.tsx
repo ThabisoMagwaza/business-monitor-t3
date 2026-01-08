@@ -454,7 +454,9 @@ function TransactionsCardList({
     const response = await fetch(
       `/api/transactions?page=${page + 1}&type=${type}`
     );
-    const data = await response.json();
+    const data = (await response.json()) as {
+      transactions: Transaction[];
+    };
     setPage((prevPage) => prevPage + 1);
     setMoreTransactions([...moreTransactions, ...data.transactions]);
     setIsLoading(false);

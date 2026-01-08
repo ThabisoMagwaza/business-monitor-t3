@@ -1,3 +1,5 @@
+import Decimal from 'decimal.js';
+
 import { eq } from 'drizzle-orm';
 import { db } from '~/server/db';
 import {
@@ -10,14 +12,15 @@ import Page from '~/components/Page/Page';
 import ReceiptPreview from '~/components/ReceiptPreview';
 import { rescanReceipt } from '~/app/actions';
 import { redirect } from 'next/navigation';
-import { getCategories, getSubCategories, getUserInfo } from '~/app/db-helpers';
+import { getUserInfo } from '~/app/db-helpers';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import SubmitButton from '~/components/SubmitButton';
 import { ListIcon, StoreIcon, Upload } from 'lucide-react';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
 import { getUserAction } from '~/app/actions/users';
 import { getReceipt } from '~/server/adapters/receipts/queries';
-import Decimal from 'decimal.js';
+import { getTransactionCategories } from '~/server/adapters/transactionCategories/queries';
+import { getTransactionSubCategories } from '~/server/adapters/transactionSubCategories/queries';
 
 // The AI takes time to respond
 // Extend the timeout for the form action from 10s to 60s
@@ -31,8 +34,8 @@ export default async function ReceiptPage({
   const { id } = await params;
   const user = await getUserAction();
 
-  const categories = await getCategories();
-  const subCategories = await getSubCategories();
+  const categories = await getTransactionCategories();
+  const subCategories = await getTransactionSubCategories();
 
   const receipt = await getReceipt(user.id, user.businessId, Number(id));
 
