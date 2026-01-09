@@ -2,6 +2,7 @@
 - [ ] oauth with yoco
 
 - [ ] setup eslint plugins
+- [x] fix cache bug
 
 - [ ] pagination
 - [ ] infiniteScroll with reactQuery
@@ -22,7 +23,6 @@
 - [ ] error handling
 
 - [ ] create manage page - solved by background process?
-
 - [ ] image optimization
 
 - [ ] users can be registered under multiple businesses

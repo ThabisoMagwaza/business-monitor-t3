@@ -93,7 +93,7 @@ export default async function ReceiptPage({
     );
 
     // 3. redirect to the receipt page
-    revalidateTag('receipts');
+    revalidateTag(`pending-receipts-count-businessId-${user.businessId}`);
     revalidatePath('/');
     redirect(`/receipts/${id}`);
   };
