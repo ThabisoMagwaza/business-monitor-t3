@@ -1,11 +1,12 @@
 import { getIntegrationSetting } from '../integrationSettings/queries';
 import type { OrdersResponse } from '~/components/SalesBanner/types';
-import { startOfToday, endOfToday } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 import type { HourlySalesData } from '~/components/DailySalesChart/DailySalesChart';
 
 export async function getHourlySalesData(
   userId: string,
-  businessId: number
+  businessId: number,
+  selectedDate?: Date
 ): Promise<HourlySalesData[]> {
   const yocoApiKey = await getIntegrationSetting(
     userId,
@@ -17,8 +18,12 @@ export async function getHourlySalesData(
     return [];
   }
 
+  const date = selectedDate ?? new Date();
+  const startOfSelectedDay = startOfDay(date);
+  const endOfSelectedDay = endOfDay(date);
+
   const response = await fetch(
-    `https://api.yoco.com/v1/orders?created_at__gte=${startOfToday().toISOString()}&created_at__lte=${endOfToday().toISOString()}&limit=100`,
+    `https://api.yoco.com/v1/orders?created_at__gte=${startOfSelectedDay.toISOString()}&created_at__lte=${endOfSelectedDay.toISOString()}&limit=100`,
     {
       headers: {
         Authorization: `Bearer ${yocoApiKey.value}`,

@@ -17,9 +17,19 @@ export type HourlySalesData = {
 
 function DailySalesChart({
   data,
+  selectedDate,
 }: {
   data: HourlySalesData[];
+  selectedDate?: Date;
 }) {
+  const dateLabel = selectedDate
+    ? new Intl.DateTimeFormat('en-ZA', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(selectedDate)
+    : 'Today';
   // Get all unique product names (excluding 'hour')
   const productNames = new Set<string>();
   data.forEach((entry) => {
@@ -56,7 +66,7 @@ function DailySalesChart({
   return (
     <div className="p-4 w-full">
       <h3 className="text-sm font-medium text-black mb-3">
-        Sales by Hour Today
+        Sales by Hour - {dateLabel}
       </h3>
       <div className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
