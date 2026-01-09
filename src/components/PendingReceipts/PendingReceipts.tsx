@@ -18,13 +18,13 @@ async function PendingReceipts({
   return (
     <div className="flex flex-col gap-4">
       <Link href="/receipts?status=pending" prefetch className="block">
-        <div className="flex items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-yellow-900 shadow-sm transition hover:bg-yellow-100">
-          <FileText className="mr-2 h-5 w-5 text-yellow-600" />
-          <span className="font-medium">
-            You have {pendingReceipts} receipt
-            {pendingReceipts > 1 ? 's' : ''} waiting for review
+        <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-4 py-2.5 text-blue-900 transition hover:bg-blue-100">
+          <FileText className="h-4 w-4 shrink-0 text-blue-600" />
+          <span className="text-sm font-medium">
+            {pendingReceipts} receipt
+            {pendingReceipts > 1 ? 's' : ''} pending review
           </span>
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3.5 w-3.5 shrink-0 text-blue-600" />
         </div>
       </Link>
     </div>
