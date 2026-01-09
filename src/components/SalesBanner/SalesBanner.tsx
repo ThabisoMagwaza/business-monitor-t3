@@ -32,9 +32,9 @@ async function SalesBanner({
 
   const data = (await response.json()) as OrdersResponse;
 
-  // Filter orders with approved payments
-  const approvedOrders = data.data.filter((order) =>
-    order.payments.some((payment) => payment.status === 'approved')
+  // Filter orders with completed status
+  const completedOrders = data.data.filter(
+    (order) => order.status === 'completed'
   );
 
   // Aggregate unique products sold
@@ -45,7 +45,7 @@ async function SalesBanner({
     { displayName: string; quantity: number }
   >();
 
-  for (const order of approvedOrders) {
+  for (const order of completedOrders) {
     for (const lineItem of order.line_items) {
       const itemName = lineItem.name.toLowerCase();
       const quantity = parseFloat(lineItem.quantity) ?? 0;
