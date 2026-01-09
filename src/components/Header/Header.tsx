@@ -2,7 +2,7 @@ import { getUserInfo } from '~/app/db-helpers';
 import Link from 'next/link';
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { Button } from '../ui/button';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, SettingsIcon } from 'lucide-react';
 
 async function Header() {
   const user = await getUserInfo();
@@ -31,7 +31,11 @@ async function Header() {
               </Button>
             </SignInButton>
           </SignedOut>
-          {isAdmin && <Link href="/add-users">Manage</Link>}
+          {isAdmin && (
+            <Link href="/manage">
+              <SettingsIcon />
+            </Link>
+          )}
           <SignedIn>
             <UserButton />
           </SignedIn>
