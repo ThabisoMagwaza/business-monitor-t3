@@ -26,10 +26,6 @@ export default async function Home() {
 
       <div className="flex flex-col gap-4">
         <Suspense fallback={<Skeleton className="w-full h-[74px]" />}>
-          <PendingReceipts userId={user.id} businessId={user.businessId} />
-        </Suspense>
-
-        <Suspense fallback={<Skeleton className="w-full h-[74px]" />}>
           <SalesBanner userId={user.id} businessId={user.businessId} />
         </Suspense>
 
@@ -73,6 +69,9 @@ export default async function Home() {
 
         <div className="flex flex-col gap-4">
           <h3>Details</h3>
+          <Suspense fallback={<Skeleton className="w-full h-[74px]" />}>
+            <PendingReceipts userId={user.id} businessId={user.businessId} />
+          </Suspense>
           <ExpenseSummary userId={user.id} businessId={user.businessId} />
         </div>
       </div>
