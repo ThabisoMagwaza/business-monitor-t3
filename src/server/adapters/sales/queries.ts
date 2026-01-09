@@ -33,13 +33,18 @@ export async function getHourlySalesData(
 
   const data = (await response.json()) as OrdersResponse;
 
+  // Filter orders with approved payments
+  const approvedOrders = data.data.filter((order) =>
+    order.payments.some((payment) => payment.status === 'approved')
+  );
+
   // Map: hour -> product (normalized key) -> { displayName, quantity }
   const hourlyData = new Map<
     number,
     Map<string, { displayName: string; quantity: number }>
   >();
 
-  for (const order of data.data) {
+  for (const order of approvedOrders) {
     const orderDate = new Date(order.created_at);
     const hour = orderDate.getHours();
 

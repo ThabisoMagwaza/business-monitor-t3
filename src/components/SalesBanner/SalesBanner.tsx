@@ -32,6 +32,11 @@ async function SalesBanner({
 
   const data = (await response.json()) as OrdersResponse;
 
+  // Filter orders with approved payments
+  const approvedOrders = data.data.filter((order) =>
+    order.payments.some((payment) => payment.status === 'approved')
+  );
+
   // Aggregate unique products sold
   const CHICKEN_TARGET = 30;
   // Map: lowercase key -> { displayName, quantity }
@@ -40,7 +45,7 @@ async function SalesBanner({
     { displayName: string; quantity: number }
   >();
 
-  for (const order of data.data) {
+  for (const order of approvedOrders) {
     for (const lineItem of order.line_items) {
       const itemName = lineItem.name.toLowerCase();
       const quantity = parseFloat(lineItem.quantity) ?? 0;
