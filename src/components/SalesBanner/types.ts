@@ -81,4 +81,5 @@ export type ProcessingFee = {
 
 export type OrdersResponse = {
   data: Order[];
+  next_cursor: string | null;
 };

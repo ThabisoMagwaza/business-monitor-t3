@@ -2,6 +2,7 @@ import { ChevronRight, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { getIntegrationSetting } from '~/server/adapters/integrationSettings/queries';
 import type { OrdersResponse } from './types';
+import { startOfToday, endOfToday } from 'date-fns';
 
 async function SalesBanner({
   userId,
@@ -20,11 +21,14 @@ async function SalesBanner({
     return null;
   }
 
-  const response = await fetch('https://api.yoco.com/v1/orders', {
-    headers: {
-      Authorization: `Bearer ${yocoApiKey.value}`,
-    },
-  });
+  const response = await fetch(
+    `https://api.yoco.com/v1/orders?created_at__gte=${startOfToday().toISOString()}&created_at__lte=${endOfToday().toISOString()}&limit=100`,
+    {
+      headers: {
+        Authorization: `Bearer ${yocoApiKey.value}`,
+      },
+    }
+  );
 
   const data = (await response.json()) as OrdersResponse;
   console.log(data);
