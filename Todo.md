@@ -1,3 +1,6 @@
+- [ ] bulk background scanning
+- [ ] oauth with yoco
+
 - [ ] setup eslint plugins
 - [x] fix cache bug
 

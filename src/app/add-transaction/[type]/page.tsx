@@ -1,6 +1,7 @@
 import AddTransactionsForm from '~/components/AddTransactionsForm/AddTransactionsForm';
-import { getCategories, getSubCategories } from '~/app/db-helpers';
 import { getUserAction } from '~/app/actions/users';
+import { getTransactionCategories } from '~/server/adapters/transactionCategories/queries';
+import { getTransactionSubCategories } from '~/server/adapters/transactionSubCategories/queries';
 import { addTransactions } from '~/server/adapters/transactions/mutations';
 import { type AddTransaction } from '~/lib/types/transactions/mutations';
 import { revalidatePath } from 'next/cache';
@@ -19,8 +20,8 @@ export default async function Page({
 
   const user = await getUserAction();
 
-  const categories = await getCategories();
-  const subCategories = await getSubCategories();
+  const categories = await getTransactionCategories();
+  const subCategories = await getTransactionSubCategories();
 
   async function saveTransactions(transactions: AddTransaction[]) {
     'use server';

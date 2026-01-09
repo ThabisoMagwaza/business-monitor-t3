@@ -10,6 +10,7 @@ import { Skeleton } from '~/components/ui/skeleton';
 import Page from '~/components/Page/Page';
 import ExpenseSummary from '~/components/ExpenseSummary/ExpenseSummary';
 import { getBusinessContext } from '~/server/adapters/businesses';
+import SalesBanner from '~/components/SalesBanner/SalesBanner';
 
 export default async function Home() {
   const user = await getUserAction();
@@ -25,7 +26,7 @@ export default async function Home() {
 
       <div className="flex flex-col gap-4">
         <Suspense fallback={<Skeleton className="w-full h-[74px]" />}>
-          <PendingReceipts userId={user.id} businessId={user.businessId} />
+          <SalesBanner userId={user.id} businessId={user.businessId} />
         </Suspense>
 
         <div className="flex flex-col gap-4">
@@ -68,6 +69,9 @@ export default async function Home() {
 
         <div className="flex flex-col gap-4">
           <h3>Details</h3>
+          <Suspense fallback={<Skeleton className="w-full h-[74px]" />}>
+            <PendingReceipts userId={user.id} businessId={user.businessId} />
+          </Suspense>
           <ExpenseSummary userId={user.id} businessId={user.businessId} />
         </div>
       </div>

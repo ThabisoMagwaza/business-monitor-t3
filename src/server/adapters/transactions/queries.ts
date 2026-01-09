@@ -164,8 +164,8 @@ const getSubCategoryTotalsQuery = async (
 const getTransactionsQuery = async (
   ctx: BusinessContext,
   type: 'expense' | 'income',
-  page: number = 1,
-  limit: number = 10
+  page = 1,
+  limit = 10
 ) => {
   const result = await db.execute(sql`
     SELECT t.id,
@@ -300,8 +300,8 @@ export const getTransactions = async (
   userId: string,
   businessId: number,
   type: 'expense' | 'income',
-  page: number = 1,
-  limit: number = 10
+  page = 1,
+  limit = 10
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
   const summary = await getTransactionsQuery(ctx, type, page, limit);

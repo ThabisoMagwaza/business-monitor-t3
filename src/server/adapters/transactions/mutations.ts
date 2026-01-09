@@ -35,7 +35,7 @@ export const updateTransaction = async (
 ) => {
   const ctx = await getBusinessContext(userId, businessId);
 
-  const result = await db
+  await db
     .update(transactionsTable)
     .set({
       description: transaction.description,
