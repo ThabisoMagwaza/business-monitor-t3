@@ -68,6 +68,18 @@ export const businesses = createTable('businesses', {
   name: varchar('name', { length: 256 }).notNull(),
 });
 
+export const integrationSettings = createTable('integration_settings', {
+  id: serial('id').primaryKey(),
+  key: varchar('key', { length: 256 }).notNull(),
+  value: varchar('value', { length: 256 }).notNull(),
+  createdAt: timestamp('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  businessId: integer('business_id')
+    .notNull()
+    .references(() => businesses.id),
+});
+
 export const users = createTable('users', {
   id: varchar('id', { length: 256 }).notNull().primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),

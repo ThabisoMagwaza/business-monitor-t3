@@ -14,7 +14,7 @@ export const env = createEnv({
     GEMINI_API_KEY: z.string(),
     BLOB_READ_WRITE_TOKEN: z.string(),
     BLOB_URL: z.string().url(),
-    YOCO_API_KEY: z.string(),
+    ENCRYPTION_SECRET: z.string(),
   },
 
   /**
@@ -36,7 +36,7 @@ export const env = createEnv({
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
     BLOB_URL: process.env.BLOB_URL,
-    YOCO_API_KEY: process.env.YOCO_API_KEY,
+    ENCRYPTION_SECRET: process.env.ENCRYPTION_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
