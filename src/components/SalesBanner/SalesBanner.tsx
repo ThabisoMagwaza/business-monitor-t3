@@ -31,7 +31,29 @@ async function SalesBanner({
   );
 
   const data = (await response.json()) as OrdersResponse;
-  console.log(data);
+
+  // Calculate total chickens sold today
+  const CHICKEN_TARGET = 30;
+  let totalChickens = 0;
+
+  for (const order of data.data) {
+    for (const lineItem of order.line_items) {
+      const itemName = lineItem.name.toLowerCase();
+      const quantity = parseFloat(lineItem.quantity) || 0;
+
+      if (itemName.includes('chicken')) {
+        if (itemName.includes('half')) {
+          // Half Chicken = 0.5 chickens
+          totalChickens += quantity * 0.5;
+        } else {
+          // Full chicken = 1 chicken
+          totalChickens += quantity;
+        }
+      }
+    }
+  }
+
+  const chickensSold = Math.round(totalChickens * 10) / 10; // Round to 1 decimal place
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,8 +61,7 @@ async function SalesBanner({
         <div className="flex items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-yellow-900 shadow-sm transition hover:bg-yellow-100">
           <FileText className="mr-2 h-5 w-5 text-yellow-600" />
           <span className="font-medium">
-            You have {data.data.length} order
-            {data.data.length > 1 ? 's' : ''}
+            {chickensSold} / {CHICKEN_TARGET} chickens sold today
           </span>
           <ChevronRight className="h-4 w-4" />
         </div>
