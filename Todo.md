@@ -1,23 +1,24 @@
+- [x] show "no sales" banner
+- [x] fix sales date filter bug
+
+- [ ] implement new caching strategy
+- [ ] implement new permission logic (one user multiple accounts)
+
+- [ ] implement new data model
+- [ ] migrate data to new data model
+- [ ] implement new business monitor process (import, stock count e.t.c)
+
 - [ ] bulk background scanning
-- [ ] oauth with yoco
 
 - [ ] setup eslint plugins
-- [x] fix cache bug
 
 - [ ] pagination
 - [ ] infiniteScroll with reactQuery
-- [ ] make the transaction searchable
 
 - [ ] add import sales functions and endpoints
-- [ ] filter transactions on page and reports
 - [ ] add delete slip button (or reject)
 
-- [ ] add categories for assets, liabilies, equity (income)
-
 - [ ] import icome
-
-- [ ] add categories to income
-- [ ] add asset class categories
 
 - [ ] seameless continuous review
 - [ ] error handling

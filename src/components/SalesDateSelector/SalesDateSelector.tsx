@@ -6,6 +6,7 @@ import { Calendar } from '../ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { formatDate } from '~/lib/helpers';
+import { formatISO } from 'date-fns';
 
 function SalesDateSelector({ initialDate }: { initialDate: Date }) {
   const searchParams = useSearchParams();
@@ -16,12 +17,12 @@ function SalesDateSelector({ initialDate }: { initialDate: Date }) {
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (!selectedDate) return;
-    
+
     setDate(selectedDate);
     setOpen(false);
-    
+
     const params = new URLSearchParams(searchParams);
-    params.set('date', selectedDate.toISOString().split('T')[0] ?? '');
+    params.set('date', formatISO(selectedDate).split('T')[0] ?? '');
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -49,4 +50,3 @@ function SalesDateSelector({ initialDate }: { initialDate: Date }) {
 }
 
 export default SalesDateSelector;
-
