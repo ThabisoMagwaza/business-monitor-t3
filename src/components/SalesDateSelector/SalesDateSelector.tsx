@@ -17,6 +17,7 @@ import {
   endOfMonth,
   subWeeks,
   subMonths,
+  formatISO,
 } from 'date-fns';
 import type { SalesPeriod, SalesDateFormat } from '~/lib/types/sales/queries';
 import { type DateRange } from 'react-day-picker';
@@ -146,8 +147,8 @@ function SalesDateSelector({
     const { startDate, endDate, format } = calculatePeriodDates(period);
 
     params.set('period', period);
-    params.set('startDate', startDate.toISOString().split('T')[0] ?? '');
-    params.set('endDate', endDate.toISOString().split('T')[0] ?? '');
+    params.set('startDate', formatISO(startDate) ?? '');
+    params.set('endDate', formatISO(endDate) ?? '');
     params.set('format', format);
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -167,8 +168,8 @@ function SalesDateSelector({
 
     const params = new URLSearchParams(searchParams);
     params.set('period', 'custom');
-    params.set('startDate', dateRange.from.toISOString().split('T')[0] ?? '');
-    params.set('endDate', dateRange.to.toISOString().split('T')[0] ?? '');
+    params.set('startDate', formatISO(dateRange.from) ?? '');
+    params.set('endDate', formatISO(dateRange.to) ?? '');
     params.set('format', 'days-in-month');
 
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
