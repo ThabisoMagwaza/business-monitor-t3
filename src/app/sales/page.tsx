@@ -6,32 +6,96 @@ import Page from '~/components/Page/Page';
 import SalesDateSelector from '~/components/SalesDateSelector/SalesDateSelector';
 import { Skeleton } from '~/components/ui/skeleton';
 import { FileText } from 'lucide-react';
+import type { SalesPeriod, SalesDateFormat } from '~/lib/types/sales/queries';
+import {
+  startOfToday,
+  endOfToday,
+  startOfYesterday,
+  endOfYesterday,
+  startOfISOWeek,
+  endOfISOWeek,
+  startOfMonth,
+  endOfMonth,
+  subWeeks,
+  subMonths,
+} from 'date-fns';
+
+function calculatePeriodDates(period: SalesPeriod) {
+  const now = new Date();
+  let startDate: Date;
+  let endDate: Date;
+  let format: SalesDateFormat;
+
+  switch (period) {
+    case 'today':
+      startDate = startOfToday();
+      endDate = endOfToday();
+      format = 'hours';
+      break;
+    case 'yesterday':
+      startDate = startOfYesterday();
+      endDate = endOfYesterday();
+      format = 'hours';
+      break;
+    case 'this-week':
+      startDate = startOfISOWeek(now);
+      endDate = endOfISOWeek(now);
+      format = 'days-in-week';
+      break;
+    case 'last-week':
+      startDate = subWeeks(startOfISOWeek(now), 1);
+      endDate = subWeeks(endOfISOWeek(now), 1);
+      format = 'days-in-week';
+      break;
+    case 'this-month':
+      startDate = startOfMonth(now);
+      endDate = endOfMonth(now);
+      format = 'days-in-month';
+      break;
+    case 'last-month':
+      startDate = subMonths(startOfMonth(now), 1);
+      endDate = subMonths(endOfMonth(now), 1);
+      format = 'days-in-month';
+      break;
+    default:
+      startDate = startOfToday();
+      endDate = endOfToday();
+      format = 'hours';
+      break;
+  }
+
+  return { startDate, endDate, format };
+}
 
 async function SalesChart({
   userId,
   businessId,
-  selectedDate,
+  startDate,
+  endDate,
+  format,
 }: {
   userId: string;
   businessId: number;
-  selectedDate: Date;
+  startDate: Date;
+  endDate: Date;
+  format: SalesDateFormat;
 }) {
-  const hourlySalesData = await getHourlySalesData(
+  const salesData = await getHourlySalesData(
     userId,
     businessId,
-    selectedDate
+    startDate,
+    endDate,
+    format
   );
 
-  if (hourlySalesData.length > 0) {
-    return (
-      <DailySalesChart data={hourlySalesData} selectedDate={selectedDate} />
-    );
+  if (salesData.length > 0) {
+    return <DailySalesChart data={salesData} format={format} />;
   }
 
   return (
     <div className="flex flex-col gap-4 mt-4 items-center justify-center flex-1 py-12">
       <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-      <p className="text-gray-600">No sales data available for this date</p>
+      <p className="text-gray-600">No sales data available for this period</p>
     </div>
   );
 }
@@ -39,18 +103,40 @@ async function SalesChart({
 export default async function SalesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{
+    period?: string;
+    startDate?: string;
+    endDate?: string;
+    format?: string;
+  }>;
 }) {
   const user = await getUserAction();
   const params = await searchParams;
 
-  const selectedDate = params.date ? new Date(params.date) : new Date();
+  const period = (params.period as SalesPeriod) ?? 'today';
+  const format = (params.format as SalesDateFormat) ?? 'hours';
+
+  let startDate: Date;
+  let endDate: Date;
+
+  if (params.startDate && params.endDate) {
+    startDate = new Date(params.startDate);
+    endDate = new Date(params.endDate);
+  } else {
+    const dates = calculatePeriodDates(period);
+    startDate = dates.startDate;
+    endDate = dates.endDate;
+  }
 
   return (
     <Page>
-      <SalesDateSelector initialDate={selectedDate} />
+      <SalesDateSelector
+        initialPeriod={period}
+        initialStartDate={startDate}
+        initialEndDate={endDate}
+      />
       <Suspense
-        key={selectedDate.toISOString()}
+        key={`${startDate.toISOString()}-${endDate.toISOString()}-${format}`}
         fallback={
           <div className="flex flex-col gap-4 mt-4">
             <Skeleton className="w-full h-[300px]" />
@@ -60,7 +146,9 @@ export default async function SalesPage({
         <SalesChart
           userId={user.id}
           businessId={user.businessId}
-          selectedDate={selectedDate}
+          startDate={startDate}
+          endDate={endDate}
+          format={format}
         />
       </Suspense>
     </Page>
