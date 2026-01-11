@@ -11,30 +11,34 @@ import {
 } from 'recharts';
 
 export type HourlySalesData = {
-  hour: number;
-  [productName: string]: number | string;
+  hour?: number;
+  day?: number | string;
+  [productName: string]: number | string | undefined;
 };
 
 function DailySalesChart({
   data,
-  selectedDate,
+  format,
 }: {
   data: HourlySalesData[];
-  selectedDate?: Date;
+  format?: 'hours' | 'days-in-week' | 'days-in-month';
 }) {
-  const dateLabel = selectedDate
-    ? new Intl.DateTimeFormat('en-ZA', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(selectedDate)
-    : 'Today';
-  // Get all unique product names (excluding 'hour')
+  const formatType = format ?? 'hours';
+
+  // Determine the data key and title
+  const dataKey = formatType === 'hours' ? 'hour' : 'day';
+  const title =
+    formatType === 'hours'
+      ? 'Sales by Hour'
+      : formatType === 'days-in-week'
+      ? 'Sales by Day'
+      : 'Sales by Day';
+
+  // Get all unique product names (excluding time keys)
   const productNames = new Set<string>();
   data.forEach((entry) => {
     Object.keys(entry).forEach((key) => {
-      if (key !== 'hour') {
+      if (key !== 'hour' && key !== 'day') {
         productNames.add(key);
       }
     });
@@ -44,7 +48,7 @@ function DailySalesChart({
   const productTotals = new Map<string, number>();
   data.forEach((entry) => {
     Object.keys(entry).forEach((key) => {
-      if (key !== 'hour') {
+      if (key !== 'hour' && key !== 'day') {
         const currentTotal = productTotals.get(key) ?? 0;
         productTotals.set(key, currentTotal + (Number(entry[key]) ?? 0));
       }
@@ -96,9 +100,7 @@ function DailySalesChart({
 
   return (
     <div className="p-4 w-full">
-      <h3 className="text-sm font-medium text-black mb-3">
-        Sales by Hour - {dateLabel}
-      </h3>
+      <h3 className="text-sm font-medium text-black mb-3">{title}</h3>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
@@ -169,7 +171,7 @@ function DailySalesChart({
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
-              dataKey="hour"
+              dataKey={dataKey}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: 'rgba(0,0,0,0.7)' }}
