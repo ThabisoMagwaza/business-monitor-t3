@@ -74,7 +74,7 @@ async function SalesBanner({
   }
 
   // Format product summary
-  const productEntries = Array.from(productMap.entries())
+  let productEntries = Array.from(productMap.entries())
     .map(([, { displayName, quantity }]) => {
       if (displayName === 'chicken') {
         const roundedQuantity = Math.round(quantity * 10) / 10;
@@ -86,7 +86,7 @@ async function SalesBanner({
     .join(', ');
 
   if (productEntries.length === 0) {
-    return null;
+    productEntries = 'No sales today';
   }
 
   return (
