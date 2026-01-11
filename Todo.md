@@ -1,5 +1,6 @@
 - [x] show "no sales" banner
 - [x] fix sales date filter bug
+- [ ] add weekly, daily and monthly
 
 - [ ] implement new caching strategy
 - [ ] implement new permission logic (one user multiple accounts)
