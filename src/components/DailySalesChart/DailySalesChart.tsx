@@ -96,7 +96,18 @@ function DailySalesChart({
     0
   );
   const chickenTotal = productTotals.get('Chicken') ?? 0;
-  const CHICKEN_TARGET = 30;
+  
+  // Calculate target based on format type
+  // 30 is the daily target
+  let CHICKEN_TARGET: number;
+  if (formatType === 'hours') {
+    CHICKEN_TARGET = 30; // Daily target
+  } else if (formatType === 'days-in-week') {
+    CHICKEN_TARGET = 30 * 7; // Weekly target (210)
+  } else {
+    // days-in-month - 30 * number of days in month
+    CHICKEN_TARGET = 30 * data.length; // Monthly target
+  }
 
   return (
     <div className="p-4 w-full">
