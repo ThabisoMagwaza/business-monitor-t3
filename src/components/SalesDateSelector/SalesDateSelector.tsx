@@ -178,10 +178,10 @@ function SalesDateSelector({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-wrap gap-3">
-      <h2 className="text-base font-medium text-black">Sales</h2>
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b border-gray-200">
+      <h2 className="text-base font-medium text-black shrink-0">Sales</h2>
+      <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex space-x-1 bg-muted p-1 rounded-lg shrink-0">
           {PERIODS.filter((p) => p !== 'custom').map((period) => (
             <Button
               key={period}
@@ -189,7 +189,7 @@ function SalesDateSelector({
               size="sm"
               onClick={() => handlePeriodChange(period)}
               className={cn(
-                'text-sm font-medium transition-colors whitespace-nowrap',
+                'text-sm font-medium transition-colors whitespace-nowrap shrink-0',
                 selectedPeriod === period
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
@@ -204,7 +204,7 @@ function SalesDateSelector({
             <Button
               variant={selectedPeriod === 'custom' ? 'default' : 'outline'}
               size="sm"
-              className="gap-2 whitespace-nowrap"
+              className="gap-2 whitespace-nowrap shrink-0"
               onClick={() => {
                 if (selectedPeriod !== 'custom') {
                   handlePeriodChange('custom');
